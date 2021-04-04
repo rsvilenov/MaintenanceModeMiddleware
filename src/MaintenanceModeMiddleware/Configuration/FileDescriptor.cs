@@ -5,7 +5,7 @@ namespace MaintenanceModeMiddleware.Configuration
 {
     internal class FileDescriptor
     {
-        internal FileDescriptor(string fullPath)
+        public FileDescriptor(string fullPath)
         {
             if (string.IsNullOrEmpty(fullPath))
             {
@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration
             FilePath = fullPath;
         }
 
-        internal FileDescriptor(string relativePath, PathBaseDirectory baseDir)
+        public FileDescriptor(string relativePath, PathBaseDirectory baseDir)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -36,7 +36,7 @@ namespace MaintenanceModeMiddleware.Configuration
             BaseDir = baseDir;
         }
 
-        internal string FilePath { get; set; }
-        internal PathBaseDirectory? BaseDir { get; }
+        public string FilePath { get; set; }
+        public PathBaseDirectory? BaseDir { get; }
     }
 }
