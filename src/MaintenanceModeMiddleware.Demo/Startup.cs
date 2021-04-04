@@ -30,15 +30,20 @@ namespace MaintenanceModeMiddleware.TestApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseInMemoryDatabase("InMemoryDb");
+            });
+
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(
+            //        Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
-            services.AddMaintenance(new FileStateStore(new File("maintenanceState.json", 
-                PathBaseDirectory.ContentRootPath)));
+            services.AddMaintenance();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,10 +71,9 @@ namespace MaintenanceModeMiddleware.TestApp
             app.UseMaintenance(options =>
             {
                 options.BypassAuthenticatedUsers = true;
-                options.BypassUserNames.Add("rosen.svilenov@gmail.com");
-                options.ResponseFile = new File("maintenance.html",
-                    PathBaseDirectory.WebRootPath);
-
+                options.BypassUser("rosen.svilenov@gmail.com");
+                //options.UseResponseFile("maintenance.html",
+                //    PathBaseDirectory.WebRootPath);
             });
 
             app.UseEndpoints(endpoints =>

@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Data;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Data;
 using MaintenanceModeMiddleware.StateStore;
 using System;
 
@@ -12,10 +13,14 @@ namespace MaintenanceModeMiddleware
         private readonly MaintenanceState _state;
 
         public MaintenanceControlService(IServiceProvider svcProvider, 
-            IStateStore stateStore = null)
+            Action<ServiceOptionsBuilder> optionBuilderDelegate)
         {
             _svcProvider = svcProvider;
-            _stateStore = stateStore;
+
+            ServiceOptionsBuilder optionsBuilder = new ServiceOptionsBuilder();
+            optionBuilderDelegate?.Invoke(optionsBuilder);
+            _stateStore = optionsBuilder.GetStateStore();
+
             _state = new MaintenanceState();
         }
 
@@ -50,7 +55,7 @@ namespace MaintenanceModeMiddleware
             _state.EndsOn = endsOn;
 
             // store the state
-            _stateStore.SetState(_state);
+            _stateStore?.SetState(_state);
         }
 
         void ICanRestoreState.RestoreState()

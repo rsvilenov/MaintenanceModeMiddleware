@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware
@@ -14,20 +15,21 @@ namespace MaintenanceModeMiddleware
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSev;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly Options _options;
+        private readonly MiddlewareOptionsBuilder _options;
         private readonly MaintenanceResponse _response;
 
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
             IWebHostEnvironment webHostEnvironment,
-            Action<Options> options)
+            Action<MiddlewareOptionsBuilder> options)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
 
-            _options = new Options();
+            _options = new MiddlewareOptionsBuilder();
             options?.Invoke(_options);
+            _options.FillEmptyOptionsWithDefault();
 
             VerifyOptions();
 
@@ -45,46 +47,58 @@ namespace MaintenanceModeMiddleware
 
         private MaintenanceResponse GetMaintenanceResponse()
         {
-            if (_options.Response != null)
+            MaintenanceResponse response;
+
+            if (_options.UseDefaultResponse)
             {
-                return _options.Response;
+                Stream resStream = GetType()
+                    .Assembly
+                    .GetManifestResourceStream($"{nameof(MaintenanceModeMiddleware)}.Resources.DefaultResponse.html");
+                if (resStream == null)
+                {
+                    throw new InvalidOperationException("The default response resource could not be found.");
+                }
+
+                using var resSr = new StreamReader(resStream, Encoding.UTF8);
+                response = new MaintenanceResponse
+                {
+                    ContentBytes = resSr.CurrentEncoding.GetBytes(resSr.ReadToEnd()),
+                    ContentEncoding = resSr.CurrentEncoding,
+                    ContentType = ContentType.Html
+                };
+            }
+            else if (_options.Response != null)
+            {
+                response = _options.Response;
+            }
+            else
+            {
+                string absPath = GetAbsolutePathOfResponseFile();
+                using StreamReader sr = new StreamReader(absPath, detectEncodingFromByteOrderMarks: true);
+
+                response = new MaintenanceResponse
+                {
+                    ContentBytes = sr.CurrentEncoding.GetBytes(sr.ReadToEnd()),
+                    ContentEncoding = sr.CurrentEncoding,
+                    ContentType = absPath.EndsWith(".txt")
+                        ? ContentType.Text : ContentType.Html
+                };
             }
 
-            string absPath = GetAbsolutePathOfResponseFile();
-            using StreamReader sr = new StreamReader(absPath, detectEncodingFromByteOrderMarks: true);
-
-            return new MaintenanceResponse
-            {
-                ContentBytes = sr.CurrentEncoding.GetBytes(sr.ReadToEnd()),
-                ContentEncoding = sr.CurrentEncoding,
-                ContentType = absPath.EndsWith(".txt") 
-                    ? "text/plain" : "text/html"
-            };
+            return response;
         }
 
         private void VerifyOptions()
         {
-            if (_options.Response == null)
+            if (!_options.UseDefaultResponse
+                && _options.Response == null 
+                && _options.ResponseFile != null)
             {
-                if (_options.ResponseFile.FilePath == null)
+                string absPath = GetAbsolutePathOfResponseFile();
+
+                if (!System.IO.File.Exists(absPath))
                 {
-                    throw new ArgumentNullException($"No value for {nameof(_options.Response)}, nor for {nameof(_options.ResponseFile)} was specified.");
-                }
-
-                if (_options.ResponseFile.FilePath != null)
-                {
-                    string absPath = GetAbsolutePathOfResponseFile();
-
-                    if (!System.IO.File.Exists(absPath))
-                    {
-                        throw new ArgumentException($"Could not find file {_options.ResponseFile.FilePath}, specified for option {nameof(_options.ResponseFile)}. Expected absolute path: {absPath}.");
-                    }
-
-                    string fileExtension = Path.GetExtension(absPath);
-                    if (!new string[] { ".txt", ".html" }.Contains(fileExtension))
-                    {
-                        throw new ArgumentException($"The file, specified in {absPath} must be either .txt or .html.");
-                    }
+                    throw new ArgumentException($"Could not find file {_options.ResponseFile.FilePath}, specified for option {nameof(_options.ResponseFile)}. Expected absolute path: {absPath}.");
                 }
             }
         }
@@ -110,16 +124,16 @@ namespace MaintenanceModeMiddleware
                 goto nextDelegate;
             }
 
-            if (_options.BypassUrlPaths.Any(pathString =>
+            if (_options.UrlPathsToBypass.Any(urlPath =>
                 context.Request.Path.StartsWithSegments(
-                    pathString, _options.PathStringComparison)))
+                    urlPath.String, urlPath.Comparison)))
             {
                 goto nextDelegate;
             }
 
-            if (_options.BypassFileExtensions.Any(ext =>
+            if (_options.FileExtensionsToBypass.Any(ext =>
                 context.Request.Path.Value.EndsWith(
-                    $".{ext}", _options.PathStringComparison)))
+                    $".{ext}", StringComparison.OrdinalIgnoreCase)))
             {
                 goto nextDelegate;
             }
@@ -130,13 +144,13 @@ namespace MaintenanceModeMiddleware
                 goto nextDelegate;
             }
 
-            if (_options.BypassUserNames.Any(userName =>
+            if (_options.UserNamesToBypass.Any(userName =>
                 userName == context.User.Identity.Name))
             {
                 goto nextDelegate;
             }
 
-            if (_options.BypassUserRoles.Any(role =>
+            if (_options.UserRolesToBypass.Any(role =>
                 context.User.IsInRole(role)))
             {
                 goto nextDelegate;
@@ -144,11 +158,13 @@ namespace MaintenanceModeMiddleware
 
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
             context.Response.Headers.Add("Retry-After", _options.Code503RetryAfter.ToString());
-            context.Response.ContentType = _response.ContentType;
+            context.Response.ContentType = _response.GetContentTypeString();
+
             await context
                 .Response
                 .WriteAsync(_response.ContentEncoding.GetString(_response.ContentBytes),
                     _response.ContentEncoding);
+
             return;
 
 

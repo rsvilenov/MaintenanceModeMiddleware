@@ -3,9 +3,9 @@ using System.IO;
 
 namespace MaintenanceModeMiddleware.Configuration
 {
-    public class File
+    internal class FileDescriptor
     {
-        public File(string fullPath)
+        internal FileDescriptor(string fullPath)
         {
             if (string.IsNullOrEmpty(fullPath))
             {
@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration
             FilePath = fullPath;
         }
 
-        public File(string relativePath, PathBaseDirectory baseDir)
+        internal FileDescriptor(string relativePath, PathBaseDirectory baseDir)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -36,7 +36,7 @@ namespace MaintenanceModeMiddleware.Configuration
             BaseDir = baseDir;
         }
 
-        public string FilePath { get; set; }
-        public PathBaseDirectory? BaseDir { get; }
+        internal string FilePath { get; set; }
+        internal PathBaseDirectory? BaseDir { get; }
     }
 }

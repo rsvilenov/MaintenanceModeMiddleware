@@ -7,9 +7,9 @@ using IO = System.IO;
 
 namespace MaintenanceModeMiddleware.StateStore
 {
-    public class FileStateStore : IStateStore, IServiceConsumer
+    internal class FileStateStore : IStateStore, IServiceConsumer
     {
-        public FileStateStore(File file)
+        internal FileStateStore(FileDescriptor file)
         {
             File = file;
         }
@@ -40,7 +40,7 @@ namespace MaintenanceModeMiddleware.StateStore
             IO.File.WriteAllText(filePath, serialized);
         }
 
-        internal File File { get; }
+        internal FileDescriptor File { get; }
 
         private string GetFileFullPath()
         {

@@ -1,11 +1,22 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration
 {
-    public class MaintenanceResponse
+    internal class MaintenanceResponse
     {
-        public string ContentType { get; set; } = "text/plain";
-        public Encoding ContentEncoding { get; set; } = Encoding.UTF8;
-        public byte[] ContentBytes { get; set; } = Encoding.UTF8.GetBytes("The site is down for maintenance.");
+        public ContentType ContentType { get; set; }
+        public Encoding ContentEncoding { get; set; }
+        public byte[] ContentBytes { get; set; }
+
+        public string GetContentTypeString()
+        {
+            return ContentType switch
+            {
+                ContentType.Html => "text/html",
+                ContentType.Text => "text/plain",
+                _ => throw new InvalidOperationException("Content type could not be translated."),
+            };
+        }
     }
 }
