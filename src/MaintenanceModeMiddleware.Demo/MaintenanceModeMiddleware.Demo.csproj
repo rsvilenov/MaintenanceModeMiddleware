@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>aspnet-MaintenanceModeMiddleware.TestApp-9C524D3B-AF93-4ABF-8A4A-C4F3FC3A0E5B</UserSecretsId>
+    <UserSecretsId>aspnet-MaintenanceModeMiddleware.Demo-9C524D3B-AF93-4ABF-8A4A-C4F3FC3A0E5B</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
