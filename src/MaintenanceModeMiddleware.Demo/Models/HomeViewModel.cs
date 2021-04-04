@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace MaintenanceModeMiddleware.TestApp.Models
 {
@@ -8,5 +7,6 @@ namespace MaintenanceModeMiddleware.TestApp.Models
         public bool IsMaintenanceOn { get; set; }
 
         public DateTime? EndsOn { get; set; }
+        public bool IsEndsOnSpecified { get; set; }
     }
 }

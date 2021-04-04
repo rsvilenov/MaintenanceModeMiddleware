@@ -1,32 +1,67 @@
-﻿@model HomeViewModel 
+﻿@model HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    @if (Model.IsMaintenanceOn)
-    {
-        <div class="alert alert-danger">
-        <strong>Maintenance mode is on.</strong>
-        @if (Model.EndsOn != null)
-        {
-            <p>It will automatically end on @Model.EndsOn</p>
-        }
+    <div class="row">
+        <div class="col-12">
+            @if (Model.IsMaintenanceOn)
+            {
+                <div class="alert alert-success">
+                    <strong>Maintenance mode is on.</strong>
+                    @if (Model.IsEndsOnSpecified)
+                    {
+                        <p>It will automatically end on @Model.EndsOn</p>
+                    }
+                </div>
+            }
         </div>
-    }
+    </div>
+    <div class="row">
+        <div class="col-12">
 
-    @using (Html.BeginForm("MaintenanceMode", "Home", FormMethod.Post))
-    {
-        @Html.HiddenFor(m => m.IsMaintenanceOn)
-        <input type="datetime-local" asp-for="EndsOn" />
-        @if (Model.IsMaintenanceOn)
-        {
-            <button class="btn btn-primary" type="submit">Leave maintenance mode</button>
+            <div class="alert alert-primary">
+                @using (Html.BeginForm("MaintenanceMode", "Home", FormMethod.Post))
+                {
+                    @Html.HiddenFor(m => m.IsMaintenanceOn)
+
+
+                    @if (Model.IsMaintenanceOn)
+                    {
+                        <button class="btn btn-primary" type="submit">Leave maintenance mode</button>
+                    }
+                    else
+                    {   <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="IsEndsOnSpecified" id="cbTimedLeave">
+                            <label class="form-check-label" for="cbTimedLeave">
+                                Automatically leave maintenance after a specified time period
+                            </label>
+                        </div>
+                        <div class="form-group mt-3" id="timePicker" style="display: none;">
+                            <label for="endsOn">Automatically leave maintenance mode on</label>
+                            <input type="datetime-local" asp-for="EndsOn" id="endsOn" class="form-control" />
+                            <small class="text-muted">Preloaded: 5 minutes from now.</small>
+                        </div>
+
+                        <button class="btn btn-primary mt-5" type="submit">Enter maintenance mode</button>
+                    }
+                }
+            </div>
+
+        </div>
+
+    </div>
+
+@section Scripts
+{
+<script>
+    $('#cbTimedLeave').change(function () {
+        if ($(this).prop('checked')) {
+            $('#timePicker').show();
         }
-        else
-        {
-            <button class="btn btn-danger" type="submit">Enter maintenance mode</button>
+        else {
+            $('#timePicker').hide();
         }
-    }
-</div>
+    });
+</script>
+}

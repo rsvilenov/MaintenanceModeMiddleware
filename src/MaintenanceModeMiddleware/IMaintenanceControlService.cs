@@ -7,6 +7,7 @@ namespace MaintenanceModeMiddleware
         void EnterMaintanence(DateTime? endsOn = null);
         void LeaveMaintanence();
         bool IsMaintenanceModeOn { get; }
+        public DateTime? EndsOn { get; }
     }
 
     internal interface ICanRestoreState

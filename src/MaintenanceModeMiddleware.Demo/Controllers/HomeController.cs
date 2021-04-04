@@ -1,22 +1,15 @@
 ﻿using MaintenanceModeMiddleware.TestApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.TestApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IMaintenanceControlService _maintenanceCtrlSvc;
-        public HomeController(ILogger<HomeController> logger, 
-            IMaintenanceControlService maintenanceCtrlSvc)
+        public HomeController(IMaintenanceControlService maintenanceCtrlSvc)
         {
-            _logger = logger;
             _maintenanceCtrlSvc = maintenanceCtrlSvc;
         }
 
@@ -25,7 +18,11 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             return View(new HomeViewModel
             {
                 IsMaintenanceOn = _maintenanceCtrlSvc.IsMaintenanceModeOn,
-                EndsOn = DateTime.Now.AddMinutes(5)
+                IsEndsOnSpecified = _maintenanceCtrlSvc.EndsOn != null,
+
+                EndsOn = _maintenanceCtrlSvc.EndsOn != null 
+                    ? _maintenanceCtrlSvc.EndsOn 
+                    : DateTime.Now.AddMinutes(5)
             });
         }
 
@@ -38,15 +35,10 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintanence(vm.EndsOn);
+                _maintenanceCtrlSvc.EnterMaintanence(vm.IsEndsOnSpecified ? vm.EndsOn : null);
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

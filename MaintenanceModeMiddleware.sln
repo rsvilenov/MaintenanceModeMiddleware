@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaintenanceModeMiddleware.Demo", "src\MaintenanceModeMiddleware.Demo\MaintenanceModeMiddleware.Demo.csproj", "{91C663CF-577C-4FC7-AE3B-FD74861F833A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaintenanceModeMiddleware.Demo", "src\MaintenanceModeMiddleware.Demo\MaintenanceModeMiddleware.Demo.csproj", "{91C663CF-577C-4FC7-AE3B-FD74861F833A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaintenanceModeMiddleware", "src\MaintenanceModeMiddleware\MaintenanceModeMiddleware.csproj", "{A92CAD89-6152-4786-B147-46BB3FDC48EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaintenanceModeMiddleware", "src\MaintenanceModeMiddleware\MaintenanceModeMiddleware.csproj", "{A92CAD89-6152-4786-B147-46BB3FDC48EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaintenanceModeMiddleware.Tests", "MaintenanceModeMiddleware.Tests\MaintenanceModeMiddleware.Tests.csproj", "{C649F17F-EBB0-40B0-9153-6F8F1AD52694}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A92CAD89-6152-4786-B147-46BB3FDC48EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A92CAD89-6152-4786-B147-46BB3FDC48EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A92CAD89-6152-4786-B147-46BB3FDC48EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C649F17F-EBB0-40B0-9153-6F8F1AD52694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C649F17F-EBB0-40B0-9153-6F8F1AD52694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C649F17F-EBB0-40B0-9153-6F8F1AD52694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C649F17F-EBB0-40B0-9153-6F8F1AD52694}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
