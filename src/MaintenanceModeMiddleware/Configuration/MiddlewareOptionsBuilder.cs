@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MaintenanceModeMiddleware.Configuration.Options;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,13 @@ namespace MaintenanceModeMiddleware.Configuration
 {
     public class MiddlewareOptionsBuilder
     {
-        private const int CODE_503_RETRY_AFTER = 5300;
+        internal OptionCollection Options { get; }
+
+        internal MiddlewareOptionsBuilder()
+        {
+            Options = new OptionCollection();
+        }
+
         public MiddlewareOptionsBuilder UseResponseFile(string relativePath, PathBaseDirectory baseDir)
         {
             if (string.IsNullOrEmpty(relativePath))
@@ -17,13 +24,17 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
+            AssertResponseNotSpecified();
+
             string fileExtension = Path.GetExtension(relativePath);
             if (!new string[] { ".txt", ".html" }.Contains(fileExtension))
             {
                 throw new ArgumentException($"The file, specified in {relativePath} must be either .txt or .html.");
             }
 
-            ResponseFile = new FileDescriptor(relativePath, baseDir);
+            FileDescriptor responseFile = new FileDescriptor(relativePath, baseDir);
+            Options.Add(new ResponseFileOption(responseFile));
+
             return this;
         }
 
@@ -44,19 +55,34 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(responseBytes));
             }
 
-            Response = new MaintenanceResponse
+            AssertResponseNotSpecified();
+
+            MaintenanceResponse response 
+                = new MaintenanceResponse
             {
                 ContentBytes = responseBytes,
                 ContentEncoding = encoding,
                 ContentType = contentType
             };
 
+            Options.Add(new ResponseOption(response));
+
+            return this;
+        }
+
+        public MiddlewareOptionsBuilder UseDefaultResponse()
+        {
+            AssertResponseNotSpecified();
+
+            Options.Add(new UseDefaultResponseOption(true));
+
             return this;
         }
 
         public MiddlewareOptionsBuilder Set503RetryAfterInterval(int interval)
         {
-            Code503RetryAfter = interval;
+            Options.Add(new Code503RetryIntervalOption(interval));
+
             return this;
         }
 
@@ -67,7 +93,8 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(userName));
             }
 
-            UserNamesToBypass.Add(userName);
+            Options.Add(new BypassUserNameOption(userName));
+
             return this;
         }
 
@@ -78,7 +105,11 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(userNames));
             }
 
-            UserNamesToBypass.AddRange(userNames);
+            foreach (string userName in userNames)
+            {
+                BypassUser(userName);
+            }
+
             return this;
         }
 
@@ -89,25 +120,38 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(role));
             }
 
-            UserRolesToBypass.Add(role);
+            Options.Add(new BypassUserRoleOption(role));
+
             return this;
         }
 
         public MiddlewareOptionsBuilder BypassUserRoles(IEnumerable<string> roles)
         {
-            UserRolesToBypass.AddRange(roles);
+            foreach (string role in roles)
+            {
+                BypassUserRole(role);
+            }
+
             return this;
         }
 
-        public bool BypassAuthenticatedUsers { get; set; } = false;
+        public MiddlewareOptionsBuilder BypassAuthenticatedUsers()
+        {
+            Options.Add(new BypassAuthenticatedUsersOption(true));
+
+            return this;
+        }
 
         public MiddlewareOptionsBuilder BypassUrlPath(PathString path, StringComparison comparison = StringComparison.Ordinal)
         {
-            UrlPathsToBypass.Add(new UrlPath
+            UrlPath urlPath = 
+                new UrlPath
             {
                 Comparison = comparison,
                 String = path
-            });
+            };
+
+            Options.Add(new BypassUrlPathOption(urlPath));
 
             return this;
         }
@@ -116,11 +160,7 @@ namespace MaintenanceModeMiddleware.Configuration
         {
             foreach (PathString pathString in paths)
             {
-                UrlPathsToBypass.Add(new UrlPath
-                {
-                    Comparison = comparison,
-                    String = pathString
-                });
+                BypassUrlPath(pathString, comparison);
             }
 
             return this;
@@ -138,51 +178,66 @@ namespace MaintenanceModeMiddleware.Configuration
                 extension = extension.Substring(1);
             }
 
-            FileExtensionsToBypass.Add(extension);
+            Options.Add(new BypassFileExtensionOption(extension));
+
             return this;
         }
 
         public MiddlewareOptionsBuilder BypassFileExtensions(IEnumerable<string> extensions)
         {
-            FileExtensionsToBypass.AddRange(extensions);
+            foreach (string ext in extensions)
+            {
+                BypassFileExtension(ext);
+            }
+
             return this;
         }
 
         internal void FillEmptyOptionsWithDefault()
         {
-            if (!FileExtensionsToBypass.Any())
+            if (!Options.GetAll<BypassFileExtensionOption>().Any())
             {
                 BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
             }
 
-            if (!UrlPathsToBypass.Any())
+            if (!Options.GetAll<BypassUrlPathOption>().Any())
             {
                 BypassUrlPath("/Identity");
             }
             
-            if (!UserRolesToBypass.Any())
+            if (!Options.GetAll<BypassUserRoleOption>().Any())
             {
                 BypassUserRole("Admin");
             }
 
-            if (Code503RetryAfter == 0)
+            if (!Options.GetAll<Code503RetryIntervalOption>().Any())
             {
-                Set503RetryAfterInterval(CODE_503_RETRY_AFTER);
+                Set503RetryAfterInterval(5300);
             }
 
-            if (Response == null && ResponseFile == null)
+            if (!Options.GetAll<ResponseFileOption>().Any()
+                && !Options.GetAll<ResponseOption>().Any())
             {
-                UseDefaultResponse = true;
+                UseDefaultResponse();
             }
         }
 
-        internal bool UseDefaultResponse { get; set; } = false;
-        internal MaintenanceResponse Response { get; set; }
-        internal FileDescriptor ResponseFile { get; set; }
-        internal int Code503RetryAfter { get; set; }
-        internal List<string> UserRolesToBypass { get; set; } = new List<string>();
-        internal List<string> UserNamesToBypass { get; set; } = new List<string>();
-        internal List<UrlPath> UrlPathsToBypass { get; set; } = new List<UrlPath>();
-        internal List<string> FileExtensionsToBypass { get; set; } = new List<string>();
+        private void AssertResponseNotSpecified()
+        {
+            if (Options.GetAll<ResponseOption>().Any())
+            {
+                throw new InvalidOperationException("You have already specified a response.");
+            }
+
+            if (Options.GetAll<ResponseFileOption>().Any())
+            {
+                throw new InvalidOperationException("You have already specified a response file.");
+            }
+
+            if (Options.GetAll<UseDefaultResponseOption>().Any())
+            {
+                throw new InvalidOperationException("You have already specified that the middleware should use its default (built-in) response.");
+            }
+        }
     }
 }

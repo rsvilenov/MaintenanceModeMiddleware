@@ -1,16 +1,42 @@
 ﻿using MaintenanceModeMiddleware.TestApp.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.TestApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IMaintenanceControlService _maintenanceCtrlSvc;
-        public HomeController(IMaintenanceControlService maintenanceCtrlSvc)
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
+
+        public HomeController(IMaintenanceControlService maintenanceCtrlSvc,
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
         {
             _maintenanceCtrlSvc = maintenanceCtrlSvc;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LoginDemoUser()
+        {
+            var user = new IdentityUser { UserName = "Demo", Email = "demo@demo.com" };
+            var result = await _userManager.CreateAsync(user, "1Password!");
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
+            else
+            {
+                return Error();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Index()

@@ -60,21 +60,19 @@ namespace MaintenanceModeMiddleware
 
         void ICanRestoreState.RestoreState()
         {
-            if (_stateStore == null)
+            if (_stateStore != null)
             {
-                throw new InvalidOperationException($"No instance of {nameof(IStateStore)} was provided to {nameof(IMaintenanceControlService)}");
-            }
+                if (_stateStore is IServiceConsumer svcConsumer)
+                {
+                    svcConsumer.ServiceProvider = _svcProvider;
+                }
 
-            if (_stateStore is IServiceConsumer svcConsumer)
-            {
-                svcConsumer.ServiceProvider = _svcProvider;
-            }
-
-            MaintenanceState restored = _stateStore.GetState();
-            if (restored != null)
-            {
-                _state.EndsOn = restored.EndsOn;
-                _state.IsMaintenanceOn = restored.IsMaintenanceOn;
+                MaintenanceState restored = _stateStore.GetState();
+                if (restored != null)
+                {
+                    _state.EndsOn = restored.EndsOn;
+                    _state.IsMaintenanceOn = restored.IsMaintenanceOn;
+                }
             }
         }
     }
