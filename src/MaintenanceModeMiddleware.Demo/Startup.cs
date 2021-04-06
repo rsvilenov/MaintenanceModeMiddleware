@@ -70,7 +70,7 @@ namespace MaintenanceModeMiddleware.TestApp
 
             app.UseMaintenance(options =>
             {
-                options.BypassAuthenticatedUsers();
+                options.BypassAllAuthenticatedUsers();
                 options.BypassUser("rosen.svilenov@gmail.com");
                 //options.UseResponseFile("maintenance.html",
                 //    PathBaseDirectory.WebRootPath);

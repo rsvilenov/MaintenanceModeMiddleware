@@ -1,16 +1,20 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Data;
 using MaintenanceModeMiddleware.StateStore;
 using System;
+using System.Linq;
 
 namespace MaintenanceModeMiddleware
 {
-    internal class MaintenanceControlService : IMaintenanceControlService, ICanRestoreState
+    internal class MaintenanceControlService : 
+        IMaintenanceControlService, ICanRestoreState, ICanOverrideMiddlewareOptions
     {
         private readonly IStateStore _stateStore;
         private readonly IServiceProvider _svcProvider;
 
         private readonly MaintenanceState _state;
+        private OptionCollection _middlewareOptionsToOverride;
 
         public MaintenanceControlService(IServiceProvider svcProvider, 
             Action<ServiceOptionsBuilder> optionBuilderDelegate)
@@ -24,14 +28,34 @@ namespace MaintenanceModeMiddleware
             _state = new MaintenanceState();
         }
 
-        public void EnterMaintanence(DateTime? endsOn = null)
+        public void EnterMaintanence(DateTime? endsOn = null,
+            Action<MiddlewareOptionsBuilder> middlewareOptions = null)
         {
-            ChangeState(isOn: true, endsOn);
+            if (_state.IsMaintenanceOn)
+            {
+                throw new InvalidOperationException("Maintenance mode is already on.");
+            }
+
+            OptionCollection optionsToOverride = null;
+            if (middlewareOptions != null)
+            {
+                MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
+                middlewareOptions?.Invoke(optionsBuilder);
+                if (!(optionsBuilder.Options.Any<UseNoDefaultValuesOption>()
+                    && optionsBuilder.Options.Get<UseNoDefaultValuesOption>().Value))
+                {
+                    optionsBuilder.FillEmptyOptionsWithDefault();
+                }
+                optionsToOverride = optionsBuilder.Options;
+            }
+
+            ChangeState(isOn: true, endsOn, optionsToOverride);
         }
 
         public void LeaveMaintanence()
         {
-            ChangeState(isOn: false);
+            _middlewareOptionsToOverride = null;
+            ChangeState(isOn: false, endsOn: null, middlewareOptions: null);
         }
 
         public bool IsMaintenanceModeOn
@@ -40,7 +64,7 @@ namespace MaintenanceModeMiddleware
             {
                 if (_state.EndsOn <= DateTime.Now)
                 {
-                    ChangeState(isOn: false);
+                    ChangeState(isOn: false, endsOn: null, middlewareOptions: null);
                 }
 
                 return _state.IsMaintenanceOn;
@@ -49,8 +73,19 @@ namespace MaintenanceModeMiddleware
 
         public DateTime? EndsOn => _state.EndsOn;
 
-        private void ChangeState(bool isOn, DateTime? endsOn = null)
+        private void ChangeState(bool isOn, DateTime? endsOn = null, OptionCollection middlewareOptions = null)
         {
+            _middlewareOptionsToOverride = middlewareOptions;
+
+            _state.MiddlewareOptions = middlewareOptions
+                ?.GetAll<IOption>()
+                .Select(o => new StorableOption
+                {
+                    StringValue = o.ToString(),
+                    TypeName = o.TypeName
+                })
+                .ToList();
+
             _state.IsMaintenanceOn = isOn;
             _state.EndsOn = endsOn;
 
@@ -72,8 +107,32 @@ namespace MaintenanceModeMiddleware
                 {
                     _state.EndsOn = restored.EndsOn;
                     _state.IsMaintenanceOn = restored.IsMaintenanceOn;
+                    if (restored.MiddlewareOptions != null)
+                    {
+                        _state.MiddlewareOptions = restored.MiddlewareOptions;
+
+                        _middlewareOptionsToOverride = new OptionCollection(
+                            _state.MiddlewareOptions
+                            .Select(o => RestoreOption(o)));
+                    }
                 }
             }
+        }
+
+        private IOption RestoreOption(StorableOption storableOpt)
+        {
+            Type optionType = Type.GetType($"{GetType().Namespace}.Configuration.Options.{storableOpt.TypeName}");
+            IOption option = (IOption)Activator.CreateInstance(optionType);
+            option.FromString(storableOpt.StringValue);
+            return option;
+        }
+
+        OptionCollection ICanOverrideMiddlewareOptions.GetOptionsToOverride()
+        {
+            // return a copy
+            return _middlewareOptionsToOverride != null 
+                ? new OptionCollection(_middlewareOptionsToOverride.GetAll()) 
+                : null;
         }
     }
 }

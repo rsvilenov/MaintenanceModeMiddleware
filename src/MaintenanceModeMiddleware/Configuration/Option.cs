@@ -1,19 +1,21 @@
 ﻿namespace MaintenanceModeMiddleware.Configuration
 {
-    internal class Option<T> : IOption
+    internal abstract class Option<T> : IOption
     {
-        public Option(T value, bool isDefault = false)
-        {
-            Value = value;
-            IsDefault = isDefault;
-        }
+        public T Value { get; set; }
+        public bool IsDefault { get; set; }
 
-        public T Value { get; }
-        public bool IsDefault { get; }
+        // the members below are used for serialization
+        public string TypeName => GetType().Name;
+        public new abstract string ToString();
+        public abstract void FromString(string str);
     }
 
     internal interface IOption
     {
         bool IsDefault { get; }
+        string TypeName { get; }
+        void FromString(string str);
+        string ToString();
     }
 }

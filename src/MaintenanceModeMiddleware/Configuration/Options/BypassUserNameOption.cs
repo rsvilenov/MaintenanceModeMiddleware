@@ -1,9 +1,22 @@
-﻿namespace MaintenanceModeMiddleware.Configuration.Options
+﻿using System;
+
+namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class BypassUserNameOption : Option<string>
     {
-        public BypassUserNameOption(string userName, bool isDefault = false)
-            : base(userName, isDefault)
-        {}
+        public override void FromString(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            Value = str;
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }

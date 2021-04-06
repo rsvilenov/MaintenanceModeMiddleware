@@ -33,7 +33,10 @@ namespace MaintenanceModeMiddleware.Configuration
             }
 
             FileDescriptor responseFile = new FileDescriptor(relativePath, baseDir);
-            Options.Add(new ResponseFileOption(responseFile));
+            Options.Add(new ResponseFileOption
+            {
+                Value = responseFile
+            });
 
             return this;
         }
@@ -65,7 +68,10 @@ namespace MaintenanceModeMiddleware.Configuration
                 ContentType = contentType
             };
 
-            Options.Add(new ResponseOption(response));
+            Options.Add(new ResponseOption
+            {
+                Value = response
+            });
 
             return this;
         }
@@ -74,14 +80,20 @@ namespace MaintenanceModeMiddleware.Configuration
         {
             AssertResponseNotSpecified();
 
-            Options.Add(new UseDefaultResponseOption(true));
+            Options.Add(new UseDefaultResponseOption
+            {
+                Value = true
+            });
 
             return this;
         }
 
         public MiddlewareOptionsBuilder Set503RetryAfterInterval(int interval)
         {
-            Options.Add(new Code503RetryIntervalOption(interval));
+            Options.Add(new Code503RetryIntervalOption
+            { 
+                Value = interval
+            });
 
             return this;
         }
@@ -93,7 +105,10 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(userName));
             }
 
-            Options.Add(new BypassUserNameOption(userName));
+            Options.Add(new BypassUserNameOption
+            {
+                Value = userName
+            });
 
             return this;
         }
@@ -120,7 +135,10 @@ namespace MaintenanceModeMiddleware.Configuration
                 throw new ArgumentNullException(nameof(role));
             }
 
-            Options.Add(new BypassUserRoleOption(role));
+            Options.Add(new BypassUserRoleOption
+            {
+                Value = role
+            });
 
             return this;
         }
@@ -135,9 +153,12 @@ namespace MaintenanceModeMiddleware.Configuration
             return this;
         }
 
-        public MiddlewareOptionsBuilder BypassAuthenticatedUsers()
+        public MiddlewareOptionsBuilder BypassAllAuthenticatedUsers()
         {
-            Options.Add(new BypassAuthenticatedUsersOption(true));
+            Options.Add(new BypassAllAuthenticatedUsersOption
+            {
+                Value = true
+            }); ;
 
             return this;
         }
@@ -151,7 +172,10 @@ namespace MaintenanceModeMiddleware.Configuration
                 String = path
             };
 
-            Options.Add(new BypassUrlPathOption(urlPath));
+            Options.Add(new BypassUrlPathOption
+            {
+                Value = urlPath
+            });
 
             return this;
         }
@@ -178,7 +202,10 @@ namespace MaintenanceModeMiddleware.Configuration
                 extension = extension.Substring(1);
             }
 
-            Options.Add(new BypassFileExtensionOption(extension));
+            Options.Add(new BypassFileExtensionOption
+            {
+                Value = extension
+            });
 
             return this;
         }
@@ -189,6 +216,16 @@ namespace MaintenanceModeMiddleware.Configuration
             {
                 BypassFileExtension(ext);
             }
+
+            return this;
+        }
+
+        public MiddlewareOptionsBuilder UseNoDefaultValues()
+        {
+            Options.Add(new UseNoDefaultValuesOption
+            {
+                Value = true
+            });
 
             return this;
         }

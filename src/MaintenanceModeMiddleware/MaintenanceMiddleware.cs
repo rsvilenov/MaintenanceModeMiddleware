@@ -16,24 +16,21 @@ namespace MaintenanceModeMiddleware
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSev;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly OptionCollection _options;
+        private readonly OptionCollection _startupOptions;
         private readonly MaintenanceResponse _response;
 
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
             IWebHostEnvironment webHostEnvironment,
-            Action<MiddlewareOptionsBuilder> options)
+            Action<MiddlewareOptionsBuilder> optionsBuilder)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
-
-            MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
-            options?.Invoke(optionsBuilder);
-            optionsBuilder.FillEmptyOptionsWithDefault();
-            _options = optionsBuilder.Options;
-
-            VerifyOptions();
+            
+            OptionCollection options = BuildOptions(optionsBuilder);
+            VerifyOptions(options);
+            _startupOptions = options;
 
             _response = GetMaintenanceResponse();
 
@@ -46,13 +43,25 @@ namespace MaintenanceModeMiddleware
                 iCanRestoreState.RestoreState();
             }
         }
+        private OptionCollection BuildOptions(Action<MiddlewareOptionsBuilder> options)
+        {
+            MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
+            options?.Invoke(optionsBuilder);
+            if (!(optionsBuilder.Options.Any<UseNoDefaultValuesOption>()
+                     && optionsBuilder.Options.Get<UseNoDefaultValuesOption>().Value))
+            {
+                optionsBuilder.FillEmptyOptionsWithDefault();
+            }
+
+            return optionsBuilder.Options;
+        }
 
         private MaintenanceResponse GetMaintenanceResponse()
         {
             MaintenanceResponse response;
 
-            if (_options.Any<UseDefaultResponseOption>() 
-                && _options.Get<UseDefaultResponseOption>().Value)
+            if (_startupOptions.Any<UseDefaultResponseOption>() 
+                && _startupOptions.Get<UseDefaultResponseOption>().Value)
             {
                 Stream resStream = GetType()
                     .Assembly
@@ -70,11 +79,11 @@ namespace MaintenanceModeMiddleware
                     ContentType = ContentType.Html
                 };
             }
-            else if (_options.Any<ResponseOption>())
+            else if (_startupOptions.Any<ResponseOption>())
             {
-                response = _options.Get<ResponseOption>().Value;
+                response = _startupOptions.Get<ResponseOption>().Value;
             }
-            else if(_options.Any<ResponseFileOption>())
+            else if(_startupOptions.Any<ResponseFileOption>())
             {
                 string absPath = GetAbsolutePathOfResponseFile();
                 using StreamReader sr = new StreamReader(absPath, detectEncodingFromByteOrderMarks: true);
@@ -95,26 +104,26 @@ namespace MaintenanceModeMiddleware
             return response;
         }
 
-        private void VerifyOptions()
+        private void VerifyOptions(OptionCollection options)
         {
-            if (!_options.Any<UseDefaultResponseOption>()
-                && !_options.Any<ResponseOption>()
-                && !_options.Any<ResponseFileOption>())
+            if (!options.Any<UseDefaultResponseOption>()
+                && !options.Any<ResponseOption>()
+                && !options.Any<ResponseFileOption>())
             {
                 throw new InvalidOperationException("No response was specified.");
             }
 
-            if (_options.Any<ResponseFileOption>())
+            if (options.Any<ResponseFileOption>())
             {
                 string absPath = GetAbsolutePathOfResponseFile();
 
                 if (!File.Exists(absPath))
                 {
-                    throw new ArgumentException($"Could not find file {_options.Get<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
+                    throw new ArgumentException($"Could not find file {options.Get<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
                 }
             }
 
-            if (!_options.Any<Code503RetryIntervalOption>())
+            if (!options.Any<Code503RetryIntervalOption>())
             {
                 throw new ArgumentException("No value was specified for 503 retry interval.");
             }
@@ -122,7 +131,7 @@ namespace MaintenanceModeMiddleware
 
         private string GetAbsolutePathOfResponseFile()
         {
-            ResponseFileOption resFileOption = _options.Get<ResponseFileOption>();
+            ResponseFileOption resFileOption = _startupOptions.Get<ResponseFileOption>();
             if (resFileOption.Value.BaseDir == null)
             {
                 return resFileOption.Value.FilePath;
@@ -135,6 +144,16 @@ namespace MaintenanceModeMiddleware
             return Path.Combine(baseDir, resFileOption.Value.FilePath);
         }
 
+        private OptionCollection GetOptionCollection()
+        {
+            if (_maintenanceCtrlSev is ICanOverrideMiddlewareOptions optionsOverrider)
+            {
+                return optionsOverrider.GetOptionsToOverride();
+            }
+
+            return _startupOptions;
+        }
+
         public async Task Invoke(HttpContext context)
         {
             if (!_maintenanceCtrlSev.IsMaintenanceModeOn)
@@ -142,41 +161,47 @@ namespace MaintenanceModeMiddleware
                 goto nextDelegate;
             }
 
-            if (_options.GetAll<BypassUrlPathOption>().Any(o =>
+            OptionCollection options = GetOptionCollection();
+            if (options == null)
+            {
+                goto nextDelegate;
+            }
+
+            if (options.GetAll<BypassUrlPathOption>().Any(o =>
                 context.Request.Path.StartsWithSegments(
                     o.Value.String, o.Value.Comparison)))
             {
                 goto nextDelegate;
             }
 
-            if (_options.GetAll<BypassFileExtensionOption>().Any(o =>
+            if (options.GetAll<BypassFileExtensionOption>().Any(o =>
                 context.Request.Path.Value.EndsWith(
                     $".{o.Value}", StringComparison.OrdinalIgnoreCase)))
             {
                 goto nextDelegate;
             }
 
-            if (_options.Any<BypassAuthenticatedUsersOption>()
-                && _options.Get<BypassAuthenticatedUsersOption>().Value
+            if (options.Any<BypassAllAuthenticatedUsersOption>()
+                && options.Get<BypassAllAuthenticatedUsersOption>().Value
                 && context.User.Identity.IsAuthenticated)
             {
                 goto nextDelegate;
             }
 
-            if (_options.GetAll<BypassUserNameOption>().Any(o =>
+            if (options.GetAll<BypassUserNameOption>().Any(o =>
                 o.Value == context.User.Identity.Name))
             {
                 goto nextDelegate;
             }
 
-            if (_options.GetAll<BypassUserRoleOption>().Any(o =>
+            if (options.GetAll<BypassUserRoleOption>().Any(o =>
                 context.User.IsInRole(o.Value)))
             {
                 goto nextDelegate;
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-            context.Response.Headers.Add("Retry-After", _options.Get<Code503RetryIntervalOption>().Value.ToString());
+            context.Response.Headers.Add("Retry-After", options.Get<Code503RetryIntervalOption>().Value.ToString());
             context.Response.ContentType = _response.GetContentTypeString();
 
             await context

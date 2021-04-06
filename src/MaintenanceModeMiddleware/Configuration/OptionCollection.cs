@@ -11,6 +11,11 @@ namespace MaintenanceModeMiddleware.Configuration
             _options = new List<IOption>();
         }
 
+        public OptionCollection(IEnumerable<IOption> options)
+        {
+            _options = options.ToList();
+        }
+
         public void Add<T>(T option)
             where T : IOption
              => _options.Add(option);
@@ -27,6 +32,9 @@ namespace MaintenanceModeMiddleware.Configuration
             => _options
                 .Where(o => o is T)
                 .Cast<T>();
+
+        public IEnumerable<IOption> GetAll()
+            => _options;
 
         public bool Any<T>()
             where T : IOption

@@ -20,6 +20,11 @@ namespace MaintenanceModeMiddleware.StateStore
             if (IO.File.Exists(filePath))
             {
                 string serialized = IO.File.ReadAllText(filePath);
+                if (string.IsNullOrEmpty(serialized))
+                {
+                    return null;
+                }
+
                 return JsonSerializer.Deserialize<MaintenanceState>(serialized);
             }
 

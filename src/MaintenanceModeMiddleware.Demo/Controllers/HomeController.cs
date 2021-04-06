@@ -61,7 +61,12 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintanence(vm.IsEndsOnSpecified ? vm.EndsOn : null);
+                _maintenanceCtrlSvc.EnterMaintanence(vm.IsEndsOnSpecified ? vm.EndsOn : null, 
+                    options =>
+                {
+                    options.BypassAllAuthenticatedUsers();
+                    options.BypassUrlPath("/");
+                });
             }
 
             return RedirectToAction(nameof(Index));

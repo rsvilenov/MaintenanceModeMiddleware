@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MaintenanceModeMiddleware.Configuration;
+using System;
+using System.Collections.Generic;
 
 namespace MaintenanceModeMiddleware.Data
 {
@@ -6,5 +8,6 @@ namespace MaintenanceModeMiddleware.Data
     {
         public DateTime? EndsOn { get; set; }
         public bool IsMaintenanceOn { get; set; }
+        public List<StorableOption> MiddlewareOptions { get; set; }
     }
 }

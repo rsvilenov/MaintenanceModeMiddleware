@@ -2,8 +2,14 @@
 {
     internal class UseDefaultResponseOption : Option<bool>
     {
-        public UseDefaultResponseOption(bool useDefaultResponse, bool isDefault = false)
-            : base(useDefaultResponse, isDefault)
-        { }
+        public override void FromString(string str)
+        {
+            Value = bool.Parse(str);
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 }

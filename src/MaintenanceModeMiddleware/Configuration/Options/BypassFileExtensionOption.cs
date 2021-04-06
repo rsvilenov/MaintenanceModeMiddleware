@@ -1,9 +1,22 @@
-﻿namespace MaintenanceModeMiddleware.Configuration.Options
+﻿using System;
+
+namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class BypassFileExtensionOption : Option<string>
     {
-        public BypassFileExtensionOption(string extension, bool isDefault = false)
-            : base(extension, isDefault)
-        { }
+        public override void FromString(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            Value = str;
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class Code503RetryIntervalOption : Option<int>
+    internal class BypassAllAuthenticatedUsersOption : Option<bool>
     {
         public override void FromString(string str)
         {
-            Value = int.Parse(str);
+            Value = bool.Parse(str);
         }
 
         public override string ToString()

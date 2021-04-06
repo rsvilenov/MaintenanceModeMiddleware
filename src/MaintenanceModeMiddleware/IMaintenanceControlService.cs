@@ -1,10 +1,12 @@
-﻿using System;
+﻿using MaintenanceModeMiddleware.Configuration;
+using System;
 
 namespace MaintenanceModeMiddleware
 {
     public interface IMaintenanceControlService
     {
-        void EnterMaintanence(DateTime? endsOn = null);
+        void EnterMaintanence(DateTime? endsOn = null,
+            Action<MiddlewareOptionsBuilder> middlewareOptions = null);
         void LeaveMaintanence();
         bool IsMaintenanceModeOn { get; }
         public DateTime? EndsOn { get; }
@@ -13,5 +15,10 @@ namespace MaintenanceModeMiddleware
     internal interface ICanRestoreState
     {
         void RestoreState();
+    }
+
+    internal interface ICanOverrideMiddlewareOptions
+    {
+        OptionCollection GetOptionsToOverride();
     }
 }
