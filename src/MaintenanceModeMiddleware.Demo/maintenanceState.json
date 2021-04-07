@@ -1,1 +1,5 @@
-{"EndsOn":null,"IsMaintenanceOn":true,"MiddlewareOptions":[{"TypeName":"BypassAllAuthenticatedUsersOption","StringValue":"True"},{"TypeName":"BypassUrlPathOption","StringValue":"/;Ordinal"},{"TypeName":"BypassFileExtensionOption","StringValue":"css"},{"TypeName":"BypassFileExtensionOption","StringValue":"jpg"},{"TypeName":"BypassFileExtensionOption","StringValue":"png"},{"TypeName":"BypassFileExtensionOption","StringValue":"gif"},{"TypeName":"BypassFileExtensionOption","StringValue":"svg"},{"TypeName":"BypassFileExtensionOption","StringValue":"js"},{"TypeName":"BypassUserRoleOption","StringValue":"Admin"},{"TypeName":"Code503RetryIntervalOption","StringValue":"5300"},{"TypeName":"UseDefaultResponseOption","StringValue":"True"}]}
+{
+  "EndsOn": null,
+  "IsMaintenanceOn": false,
+  "MiddlewareOptions": null
+}

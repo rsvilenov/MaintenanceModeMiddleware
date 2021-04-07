@@ -3,26 +3,60 @@
     ViewData["Title"] = "Home Page";
 }
 
+@if (Model.IsMaintenanceOn)
+{
     <div class="row">
         <div class="col-12">
-            @if (Model.IsMaintenanceOn)
-            {
-                <div class="alert alert-success">
-                    <strong>Maintenance mode is on.</strong>
-                    @if (Model.IsEndsOnSpecified)
-                    {
-                        <p>It will automatically end on @Model.EndsOn</p>
-                    }
-                </div>
-            }
+            <div class="alert alert-success">
+                <strong>Maintenance mode is on.</strong>
+                @if (Model.IsEndsOnSpecified)
+                {
+                    <p>It will automatically end on @Model.EndsOn</p>
+                }
+            </div>
         </div>
     </div>
+}
+else if (User.Identity.IsAuthenticated)
+{
+    <div class="row">
+        <div class="col-12">
+
+            <div class="alert alert-success">
+                <strong>You are now logged in.</strong>
+                <p>You can enter maintenance mode now, which will stop the access to the site for everyone else, except you.</p>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="btn btn-outline-dark">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-primary">
+                <strong>Please log in first.</strong>
+                <p>Just click the log in button to use the built-in demo user. Then you can try the maintenance mode feature.</p>
+
+                <form asp-action="Authenticate" asp-controller="Home" method="post">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+</div>
+}
+
+
+
+@if (User.Identity.IsAuthenticated)
+{
     <div class="row">
         <div class="col-12">
 
             <div class="alert alert-primary">
-                @using (Html.BeginForm("MaintenanceMode", "Home", FormMethod.Post))
-                {
+                <form asp-action="MaintenanceMode" method="post">
                     @Html.HiddenFor(m => m.IsMaintenanceOn)
 
 
@@ -31,7 +65,7 @@
                         <button class="btn btn-primary" type="submit">Leave maintenance mode</button>
                     }
                     else
-                    {   <div class="form-check">
+                    { <div class="form-check">
                             <input class="form-check-input" type="checkbox" asp-for="IsEndsOnSpecified" id="cbTimedLeave">
                             <label class="form-check-label" for="cbTimedLeave">
                                 Automatically leave maintenance after a specified time period
@@ -45,23 +79,22 @@
 
                         <button class="btn btn-primary mt-5" type="submit">Enter maintenance mode</button>
                     }
-                }
+                </form>
             </div>
-
         </div>
-
     </div>
+}
 
 @section Scripts
 {
-<script>
-    $('#cbTimedLeave').change(function () {
-        if ($(this).prop('checked')) {
-            $('#timePicker').show();
-        }
-        else {
-            $('#timePicker').hide();
-        }
-    });
-</script>
-}
+        <script>
+            $('#cbTimedLeave').change(function () {
+                if ($(this).prop('checked')) {
+                    $('#timePicker').show();
+                }
+                else {
+                    $('#timePicker').hide();
+                }
+            });
+        </script>
+    }

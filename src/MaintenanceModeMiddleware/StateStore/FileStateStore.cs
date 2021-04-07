@@ -41,7 +41,11 @@ namespace MaintenanceModeMiddleware.StateStore
                 IO.Directory.CreateDirectory(dirPath);
             }
 
-            string serialized = JsonSerializer.Serialize(state);
+            string serialized = JsonSerializer.Serialize(state, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
             IO.File.WriteAllText(filePath, serialized);
         }
 
