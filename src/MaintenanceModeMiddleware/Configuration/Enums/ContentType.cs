@@ -1,4 +1,4 @@
-﻿namespace MaintenanceModeMiddleware.Configuration
+﻿namespace MaintenanceModeMiddleware.Configuration.Enums
 {
     public enum ContentType
     {

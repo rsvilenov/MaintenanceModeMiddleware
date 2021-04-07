@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 
-namespace MaintenanceModeMiddleware.Configuration
+namespace MaintenanceModeMiddleware.Configuration.Data
 {
     internal class UrlPath
     {

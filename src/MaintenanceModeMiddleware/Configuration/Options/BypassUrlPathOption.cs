@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MaintenanceModeMiddleware.Configuration.Data;
+using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {

@@ -1,9 +1,9 @@
-﻿using MaintenanceModeMiddleware.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace MaintenanceModeMiddleware.Data
+namespace MaintenanceModeMiddleware.Configuration.State
 {
+    [Serializable]
     public class MaintenanceState
     {
         public DateTime? EndsOn { get; set; }

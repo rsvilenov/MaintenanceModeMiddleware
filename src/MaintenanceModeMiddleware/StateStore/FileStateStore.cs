@@ -1,5 +1,6 @@
-﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.Data;
+﻿using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Configuration.State;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Text.Json;

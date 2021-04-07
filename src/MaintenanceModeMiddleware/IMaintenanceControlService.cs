@@ -1,4 +1,5 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Builders;
 using System;
 
 namespace MaintenanceModeMiddleware

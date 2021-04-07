@@ -1,4 +1,6 @@
-﻿using MaintenanceModeMiddleware.Configuration.Options;
+﻿using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Configuration.Options;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -6,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MaintenanceModeMiddleware.Configuration
+namespace MaintenanceModeMiddleware.Configuration.Builders
 {
     public class MiddlewareOptionsBuilder
     {

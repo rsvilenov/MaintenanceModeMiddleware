@@ -1,5 +1,4 @@
-﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.StateStore;
+﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;

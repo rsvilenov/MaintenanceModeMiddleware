@@ -1,4 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Builders;
+using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -146,12 +149,11 @@ namespace MaintenanceModeMiddleware
 
         private OptionCollection GetOptionCollection()
         {
-            if (_maintenanceCtrlSev is ICanOverrideMiddlewareOptions optionsOverrider)
-            {
-                return optionsOverrider.GetOptionsToOverride();
-            }
+            ICanOverrideMiddlewareOptions optionsOverrider =
+                _maintenanceCtrlSev as ICanOverrideMiddlewareOptions;
 
-            return _startupOptions;
+            return optionsOverrider?.GetOptionsToOverride()
+                ?? _startupOptions;
         }
 
         public async Task Invoke(HttpContext context)

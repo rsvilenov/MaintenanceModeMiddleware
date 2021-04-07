@@ -1,7 +1,9 @@
-﻿using MaintenanceModeMiddleware.StateStore;
+﻿using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.StateStore;
 using System;
 
-namespace MaintenanceModeMiddleware.Configuration
+namespace MaintenanceModeMiddleware.Configuration.Builders
 {
     public class ServiceOptionsBuilder
     {

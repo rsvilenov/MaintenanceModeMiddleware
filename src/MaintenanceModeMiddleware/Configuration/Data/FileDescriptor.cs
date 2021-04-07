@@ -1,7 +1,8 @@
-﻿using System;
+﻿using MaintenanceModeMiddleware.Configuration.Enums;
+using System;
 using System.IO;
 
-namespace MaintenanceModeMiddleware.Configuration
+namespace MaintenanceModeMiddleware.Configuration.Data
 {
     internal class FileDescriptor
     {

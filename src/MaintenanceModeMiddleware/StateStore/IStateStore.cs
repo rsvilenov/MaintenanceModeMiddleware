@@ -1,4 +1,4 @@
-﻿using MaintenanceModeMiddleware.Data;
+﻿using MaintenanceModeMiddleware.Configuration.State;
 
 namespace MaintenanceModeMiddleware.StateStore
 {
