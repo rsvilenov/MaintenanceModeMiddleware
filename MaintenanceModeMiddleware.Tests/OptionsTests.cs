@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class Options
+    public class OptionsTests
     {
         [Theory]
         [InlineData("True", true, null)]
@@ -95,11 +95,11 @@ namespace MaintenanceModeMiddleware.Tests
 
             if (shouldBeEqual)
             {
-                isEqual.ShouldBe(true);
+                isEqual.ShouldBeTrue();
             }
             else
             {
-                isEqual.ShouldNotBe(true);
+                isEqual.ShouldBeFalse();
             }
         }
 
