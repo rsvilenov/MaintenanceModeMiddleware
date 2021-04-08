@@ -8,25 +8,25 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
     public class ServiceOptionsBuilder
     {
         private IStateStore _stateStore;
-        private bool _configured;
+        private bool _stateStoreSelected;
 
         public void UseDefaultStateStore()
         {
             _stateStore = GetDefaultStateStore();
-            _configured = true;
+            _stateStoreSelected = true;
         }
 
-        public void UseNoStateStore() => _configured = true;
+        public void UseNoStateStore() => _stateStoreSelected = true;
 
         public void UseStateStore(IStateStore stateStore)
         {
             _stateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
-            _configured = true;
+            _stateStoreSelected = true;
         }
 
         internal IStateStore GetStateStore()
         {
-            return _stateStore ?? (_configured ? null : GetDefaultStateStore());
+            return _stateStore ?? (_stateStoreSelected ? null : GetDefaultStateStore());
         }
 
         private IStateStore GetDefaultStateStore()

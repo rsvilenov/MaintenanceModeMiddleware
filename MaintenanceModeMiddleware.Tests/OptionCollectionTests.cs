@@ -1,4 +1,5 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
+using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace MaintenanceModeMiddleware.Tests
         {
             Action testAction = () => new OptionCollection(new List<IOption>
             {
-                new TestOption()
+                Substitute.For<IOption>()
             });
 
             testAction.ShouldNotThrow();
@@ -31,7 +32,7 @@ namespace MaintenanceModeMiddleware.Tests
         public void Add()
         {
             OptionCollection collection = new OptionCollection();
-            IOption testOption = new TestOption();
+            IOption testOption = Substitute.For<IOption>();
             Action testAction = () => collection.Add(testOption);
 
             testAction.ShouldNotThrow();
@@ -43,7 +44,7 @@ namespace MaintenanceModeMiddleware.Tests
             OptionCollection collection = GetOptionCollection(2);
             Action testAction = () =>
             {
-                collection.Get<TestOption>().ShouldNotBeNull();
+                collection.Get<IOption>().ShouldNotBeNull();
             };
 
             testAction.ShouldNotThrow();
@@ -54,11 +55,11 @@ namespace MaintenanceModeMiddleware.Tests
         {
             OptionCollection collection = GetOptionCollection(2);
 
-            IOption testOption = new TestOption();
+            IOption testOption = Substitute.For<IOption>();
                 Action testAction = () =>
                 {
-                    collection.GetAll<TestOption>().ShouldNotBeNull();
-                    collection.GetAll<TestOption>().ShouldNotBeEmpty();
+                    collection.GetAll<IOption>().ShouldNotBeNull();
+                    collection.GetAll<IOption>().ShouldNotBeEmpty();
                     collection.GetAll().ShouldNotBeNull();
                     collection.GetAll().ShouldNotBeEmpty();
                 };
@@ -76,7 +77,7 @@ namespace MaintenanceModeMiddleware.Tests
 
             testAction.ShouldNotThrow();
 
-            collection.GetAll<TestOption>().ShouldBeEmpty();
+            collection.GetAll<IOption>().ShouldBeEmpty();
         }
 
         [Fact]
@@ -87,7 +88,7 @@ namespace MaintenanceModeMiddleware.Tests
 
             testAction.ShouldNotThrow();
 
-            collection.GetAll<TestOption>().ShouldBeEmpty();
+            collection.GetAll<IOption>().ShouldBeEmpty();
         }
 
         [Theory]
@@ -100,12 +101,12 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 if (empty)
                 {
-                    collection.Any<TestOption>().ShouldBeFalse();
+                    collection.Any<IOption>().ShouldBeFalse();
                 }
                 else
                 {
 
-                    collection.Any<TestOption>().ShouldBeTrue();
+                    collection.Any<IOption>().ShouldBeTrue();
                 }
             };
 
@@ -132,27 +133,10 @@ namespace MaintenanceModeMiddleware.Tests
 
             for (int i = 0; i < numOfEntries; i++)
             {
-                options.Add(new TestOption());
+                options.Add(Substitute.For<IOption>());
             }
 
             return new OptionCollection(options);
         }
-
-        private class TestOption : IOption
-        {
-            public bool IsDefault => throw new NotImplementedException();
-            public string TypeName => throw new NotImplementedException();
-
-            public string GetStringValue()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void LoadFromString(string str)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
     }
 }
