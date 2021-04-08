@@ -7,6 +7,9 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 {
     public class ServiceOptionsBuilder
     {
+        private IStateStore _stateStore;
+        private bool _configured;
+
         public void UseDefaultStateStore()
         {
             _stateStore = GetDefaultStateStore();
@@ -17,12 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public void UseStateStore(IStateStore stateStore)
         {
-            if (stateStore == null)
-            {
-                throw new ArgumentNullException(nameof(stateStore));
-            }
-
-            _stateStore = stateStore;
+            _stateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
             _configured = true;
         }
 
@@ -36,8 +34,5 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return new FileStateStore(new FileDescriptor("maintenanceState.json",
                 PathBaseDirectory.ContentRootPath));
         }
-
-        private IStateStore _stateStore;
-        private bool _configured;
     }
 }

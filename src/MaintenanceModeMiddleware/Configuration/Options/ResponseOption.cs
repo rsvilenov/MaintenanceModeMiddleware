@@ -7,9 +7,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class ResponseOption : Option<MaintenanceResponse>
     {
-        private const char PARTS_SEPARATOR = ';';
+        internal const char PARTS_SEPARATOR = ';';
 
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -19,7 +19,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             string[] parts = str.Split(PARTS_SEPARATOR);
             if (parts.Length != 3)
             {
-                throw new ArgumentException($"{nameof(str)} is in incorrect format.");
+                throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
             
             if (!Enum.TryParse(parts[0], out ContentType contentType))
@@ -27,7 +27,12 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new ArgumentException($"Unknown content type {parts[0]}");
             }
 
-            Encoding encoding = Encoding.GetEncoding(parts[1]);
+            if (!int.TryParse(parts[1], out int codePage))
+            {
+                throw new FormatException($"The code page {parts[1]} is not a known encoding.");
+            }
+
+            Encoding encoding = Encoding.GetEncoding(codePage);
             byte[] contentBytes = encoding.GetBytes(parts[2]);
 
             Value = new MaintenanceResponse
@@ -38,9 +43,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             };
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
-            return $"{Value.ContentType};{Value.ContentEncoding};{Value.ContentEncoding.GetString(Value.ContentBytes)}";
+            return $"{Value.ContentType};{Value.ContentEncoding.CodePage};{Value.ContentEncoding.GetString(Value.ContentBytes)}";
         }
     }
 }

@@ -5,7 +5,7 @@ namespace MaintenanceModeMiddleware.Configuration.Data
 {
     internal class UrlPath
     {
-        internal PathString String { get; set; }
+        internal PathString PathString { get; set; }
         internal StringComparison Comparison { get; set; }
     }
 }

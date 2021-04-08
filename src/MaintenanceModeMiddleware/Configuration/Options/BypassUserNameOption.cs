@@ -4,7 +4,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class BypassUserNameOption : Option<string>
     {
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -14,7 +14,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             Value = str;
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
             return Value;
         }

@@ -6,9 +6,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class ResponseFileOption : Option<FileDescriptor>
     {
-        private const char PARTS_SEPARATOR = ';';
+        internal const char PARTS_SEPARATOR = ';';
 
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -18,7 +18,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             string[] parts = str.Split(PARTS_SEPARATOR);
             if (parts.Length != 2)
             {
-                throw new ArgumentException($"{nameof(str)} is in incorrect format.");
+                throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
 
             if (!Enum.TryParse(parts[0], out PathBaseDirectory baseDir))
@@ -29,7 +29,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             Value = new FileDescriptor(parts[1], baseDir);
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
             return $"{Value.BaseDir}{PARTS_SEPARATOR}{Value.FilePath}";
         }

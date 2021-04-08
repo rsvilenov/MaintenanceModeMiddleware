@@ -82,7 +82,7 @@ namespace MaintenanceModeMiddleware
                 ?.GetAll<IOption>()
                 .Select(o => new StorableOption
                 {
-                    StringValue = o.ToString(),
+                    StringValue = o.GetStringValue(),
                     TypeName = o.TypeName
                 })
                 .ToList();
@@ -124,7 +124,7 @@ namespace MaintenanceModeMiddleware
         {
             Type optionType = Type.GetType($"{GetType().Namespace}.Configuration.Options.{storableOpt.TypeName}");
             IOption option = (IOption)Activator.CreateInstance(optionType);
-            option.FromString(storableOpt.StringValue);
+            option.LoadFromString(storableOpt.StringValue);
             return option;
         }
 

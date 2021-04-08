@@ -171,7 +171,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 new UrlPath
             {
                 Comparison = comparison,
-                String = path
+                PathString = path
             };
 
             Options.Add(new BypassUrlPathOption

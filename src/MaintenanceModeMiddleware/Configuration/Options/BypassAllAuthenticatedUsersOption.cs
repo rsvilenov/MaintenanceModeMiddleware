@@ -2,12 +2,12 @@
 {
     internal class BypassAllAuthenticatedUsersOption : Option<bool>
     {
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             Value = bool.Parse(str);
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
             return Value.ToString();
         }

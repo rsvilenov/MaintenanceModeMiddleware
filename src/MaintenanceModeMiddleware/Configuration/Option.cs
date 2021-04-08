@@ -7,7 +7,7 @@
 
         // the members below are used for serialization
         public string TypeName => GetType().Name;
-        public new abstract string ToString();
-        public abstract void FromString(string str);
+        public abstract string GetStringValue();
+        public abstract void LoadFromString(string str);
     }
 }

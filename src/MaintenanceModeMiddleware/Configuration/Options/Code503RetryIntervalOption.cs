@@ -2,12 +2,12 @@
 {
     internal class Code503RetryIntervalOption : Option<int>
     {
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             Value = int.Parse(str);
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
             return Value.ToString();
         }

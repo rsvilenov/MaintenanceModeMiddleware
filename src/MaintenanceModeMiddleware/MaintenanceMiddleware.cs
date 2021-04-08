@@ -171,7 +171,7 @@ namespace MaintenanceModeMiddleware
 
             if (options.GetAll<BypassUrlPathOption>().Any(o =>
                 context.Request.Path.StartsWithSegments(
-                    o.Value.String, o.Value.Comparison)))
+                    o.Value.PathString, o.Value.Comparison)))
             {
                 goto nextDelegate;
             }

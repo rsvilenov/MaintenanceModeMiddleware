@@ -5,9 +5,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class BypassUrlPathOption : Option<UrlPath>
     {
-        private const char PARTS_SEPARATOR = ';';
+        internal const char PARTS_SEPARATOR = ';';
 
-        public override void FromString(string str)
+        public override void LoadFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -17,7 +17,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             string[] parts = str.Split(PARTS_SEPARATOR);
             if (parts.Length != 2)
             {
-                throw new ArgumentException($"{nameof(str)} is in incorrect format.");
+                throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
 
             if (!Enum.TryParse(parts[1], out StringComparison comparison))
@@ -28,13 +28,13 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             Value = new UrlPath
             {
                 Comparison = comparison,
-                String = parts[0]
+                PathString = parts[0]
             };
         }
 
-        public override string ToString()
+        public override string GetStringValue()
         {
-            return $"{Value.String.Value}{PARTS_SEPARATOR}{Value.Comparison}";
+            return $"{Value.PathString.Value}{PARTS_SEPARATOR}{Value.Comparison}";
         }
     }
 }
