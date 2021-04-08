@@ -142,8 +142,9 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 testAction.ShouldNotThrow();
 
-                option.Value.ShouldNotBeNull();
-                option.Value.ShouldBe(userName);
+                option.Value
+                    .ShouldNotBeNull()
+                    .ShouldBe(userName);
                 option.GetStringValue().ShouldBe(userName);
             }
         }
@@ -164,8 +165,9 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 testAction.ShouldNotThrow();
 
-                option.Value.ShouldNotBeNull();
-                option.Value.ShouldBe(userRole);
+                option.Value
+                    .ShouldNotBeNull()
+                    .ShouldBe(userRole);
                 option.GetStringValue().ShouldBe(userRole);
             }
         }
