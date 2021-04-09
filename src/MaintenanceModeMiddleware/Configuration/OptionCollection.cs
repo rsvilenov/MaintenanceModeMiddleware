@@ -20,12 +20,12 @@ namespace MaintenanceModeMiddleware.Configuration
             where T : IOption
              => _options.Add(option);
 
-        public T Get<T>()
+        public T GetSingleOrDefault<T>()
             where T : IOption
             => _options
                 .Where(o => o is T)
                 .Cast<T>()
-                .FirstOrDefault();
+                .SingleOrDefault();
 
         public IEnumerable<T> GetAll<T>()
             where T : IOption

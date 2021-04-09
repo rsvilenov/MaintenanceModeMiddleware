@@ -38,36 +38,53 @@ namespace MaintenanceModeMiddleware.Tests
             testAction.ShouldNotThrow();
         }
 
-        [Fact]
-        public void Get()
+        [Theory]
+        [InlineData(1, null)]
+        [InlineData(2, typeof(InvalidOperationException))]
+        public void GetSingleOrDefault(int numberOfSameEntries, Type expectedException)
         {
-            OptionCollection collection = GetOptionCollection(2);
-            Action testAction = () =>
-            {
-                collection.Get<IOption>().ShouldNotBeNull();
-            };
+            OptionCollection collection = GetOptionCollection(numberOfSameEntries);
+            Func<IOption> testFunc = () => collection.GetSingleOrDefault<IOption>();
 
-            testAction.ShouldNotThrow();
+            if (expectedException == null)
+            {
+                testFunc
+                    .ShouldNotThrow()
+                    .ShouldNotBeNull();
+            }
+            else
+            {
+                testFunc.ShouldThrow(expectedException);
+            }
         }
 
         [Fact]
         public void GetAll()
         {
             OptionCollection collection = GetOptionCollection(2);
-
             IOption testOption = Substitute.For<IOption>();
-                Action testAction = () =>
-                {
-                    collection.GetAll<IOption>().ShouldNotBeNull();
-                    collection.GetAll<IOption>().ShouldNotBeEmpty();
-                    collection.GetAll().ShouldNotBeNull();
-                    collection.GetAll().ShouldNotBeEmpty();
-                };
+            Func<IEnumerable<IOption>> testFunc = () => collection.GetAll();
 
-            testAction.ShouldNotThrow();
+            testFunc
+                .ShouldNotThrow()
+                .ShouldNotBeNull()
+                .ShouldNotBeEmpty();
         }
 
-        
+        [Fact]
+        public void GetAllT()
+        {
+            OptionCollection collection = GetOptionCollection(2);
+            IOption testOption = Substitute.For<IOption>();
+            Func<IEnumerable<IOption>> testFunc = () => collection.GetAll<IOption>();
+
+            testFunc
+                .ShouldNotThrow()
+                .ShouldNotBeNull()
+                .ShouldNotBeEmpty();
+        }
+
+
 
         [Fact]
         public void Clear()

@@ -51,7 +51,7 @@ namespace MaintenanceModeMiddleware
             MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
             options?.Invoke(optionsBuilder);
             if (!(optionsBuilder.Options.Any<UseNoDefaultValuesOption>()
-                     && optionsBuilder.Options.Get<UseNoDefaultValuesOption>().Value))
+                     && optionsBuilder.Options.GetSingleOrDefault<UseNoDefaultValuesOption>().Value))
             {
                 optionsBuilder.FillEmptyOptionsWithDefault();
             }
@@ -64,7 +64,7 @@ namespace MaintenanceModeMiddleware
             MaintenanceResponse response;
 
             if (_startupOptions.Any<UseDefaultResponseOption>() 
-                && _startupOptions.Get<UseDefaultResponseOption>().Value)
+                && _startupOptions.GetSingleOrDefault<UseDefaultResponseOption>().Value)
             {
                 Stream resStream = GetType()
                     .Assembly
@@ -84,7 +84,7 @@ namespace MaintenanceModeMiddleware
             }
             else if (_startupOptions.Any<ResponseOption>())
             {
-                response = _startupOptions.Get<ResponseOption>().Value;
+                response = _startupOptions.GetSingleOrDefault<ResponseOption>().Value;
             }
             else if(_startupOptions.Any<ResponseFileOption>())
             {
@@ -122,7 +122,7 @@ namespace MaintenanceModeMiddleware
 
                 if (!File.Exists(absPath))
                 {
-                    throw new ArgumentException($"Could not find file {options.Get<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
+                    throw new ArgumentException($"Could not find file {options.GetSingleOrDefault<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
                 }
             }
 
@@ -134,7 +134,7 @@ namespace MaintenanceModeMiddleware
 
         private string GetAbsolutePathOfResponseFile()
         {
-            ResponseFileOption resFileOption = _startupOptions.Get<ResponseFileOption>();
+            ResponseFileOption resFileOption = _startupOptions.GetSingleOrDefault<ResponseFileOption>();
             if (resFileOption.Value.BaseDir == null)
             {
                 return resFileOption.Value.FilePath;
@@ -184,7 +184,7 @@ namespace MaintenanceModeMiddleware
             }
 
             if (options.Any<BypassAllAuthenticatedUsersOption>()
-                && options.Get<BypassAllAuthenticatedUsersOption>().Value
+                && options.GetSingleOrDefault<BypassAllAuthenticatedUsersOption>().Value
                 && context.User.Identity.IsAuthenticated)
             {
                 goto nextDelegate;
@@ -203,7 +203,7 @@ namespace MaintenanceModeMiddleware
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-            context.Response.Headers.Add("Retry-After", options.Get<Code503RetryIntervalOption>().Value.ToString());
+            context.Response.Headers.Add("Retry-After", options.GetSingleOrDefault<Code503RetryIntervalOption>().Value.ToString());
             context.Response.ContentType = _response.GetContentTypeString();
 
             await context

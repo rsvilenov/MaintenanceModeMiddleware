@@ -122,6 +122,11 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(userNames));
             }
 
+            if (!userNames.Any())
+            {
+                throw new ArgumentException($"{nameof(userNames)} is empty.");
+            }
+
             foreach (string userName in userNames)
             {
                 BypassUser(userName);
@@ -147,6 +152,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder BypassUserRoles(IEnumerable<string> roles)
         {
+            if (roles == null)
+            {
+                throw new ArgumentNullException(nameof(roles));
+            }
+
+            if (!roles.Any())
+            {
+                throw new ArgumentException($"{nameof(roles)} is empty.");
+            }
+
             foreach (string role in roles)
             {
                 BypassUserRole(role);
@@ -184,6 +199,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder BypassUrlPaths(IEnumerable<PathString> paths, StringComparison comparison = StringComparison.Ordinal)
         {
+            if (paths == null)
+            {
+                throw new ArgumentNullException(nameof(paths));
+            }
+
+            if (!paths.Any())
+            {
+                throw new ArgumentException($"{nameof(paths)} is empty.");
+            }
+
             foreach (PathString pathString in paths)
             {
                 BypassUrlPath(pathString, comparison);
@@ -214,6 +239,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder BypassFileExtensions(IEnumerable<string> extensions)
         {
+            if (extensions == null)
+            {
+                throw new ArgumentNullException(nameof(extensions));
+            }
+
+            if (!extensions.Any())
+            {
+                throw new ArgumentException($"{nameof(extensions)} is empty.");
+            }
+
             foreach (string ext in extensions)
             {
                 BypassFileExtension(ext);
