@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace MaintenanceModeMiddleware.Tests
+namespace MaintenanceModeMiddleware.Tests.StateStore
 {
     public class FileStateStoreTest
     {

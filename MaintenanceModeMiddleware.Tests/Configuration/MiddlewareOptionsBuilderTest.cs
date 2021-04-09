@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace MaintenanceModeMiddleware.Tests
+namespace MaintenanceModeMiddleware.Tests.Configuration
 {
     public class MiddlewareOptionsBuilderTest
     {

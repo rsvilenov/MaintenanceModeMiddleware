@@ -1,14 +1,9 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Options;
-using MaintenanceModeMiddleware.Configuration.State;
-using MaintenanceModeMiddleware.StateStore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 using Xunit.Extensions.Ordering;
@@ -52,7 +47,8 @@ namespace MaintenanceModeMiddleware.Tests
 
             TimeSpan delay = svc.EndsOn.Value - DateTime.Now;
             Thread.Sleep((int)delay.TotalMilliseconds);
-            svc.IsMaintenanceModeOn.ShouldBeFalse();
+            svc.IsMaintenanceModeOn
+                .ShouldBeFalse($"The maintenance mode didn't automatically end after the set {nameof(svc.EndsOn)} date: {svc.EndsOn}.");
         }
 
         [Fact]

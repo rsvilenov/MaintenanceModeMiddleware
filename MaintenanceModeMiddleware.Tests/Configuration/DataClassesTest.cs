@@ -4,7 +4,7 @@ using Shouldly;
 using System;
 using Xunit;
 
-namespace MaintenanceModeMiddleware.Tests
+namespace MaintenanceModeMiddleware.Tests.Configuration
 {
     public class DataClassesTest
     {
