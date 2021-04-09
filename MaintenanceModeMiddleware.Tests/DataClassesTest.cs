@@ -6,7 +6,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class DataClassesTests
+    public class DataClassesTest
     {
         [Theory]
         [InlineData("/test/file.txt", null)]

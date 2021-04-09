@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class Extensions
+    public class ExtensionsTest
     {
         [Fact]
         public void IApplicationBuilder_UseMaintenance_NoService()
@@ -25,10 +25,11 @@ namespace MaintenanceModeMiddleware.Tests
         public void IApplicationBuilder_UseMaintenance()
         {
             // TODO: check the parameters and that the registration actually happened
-            var svcCollection = new ServiceCollection();
+
+            ServiceCollection svcCollection = new ServiceCollection();
             svcCollection.AddMaintenance();
-            var serviceProvider = svcCollection.BuildServiceProvider();
-            var appBuilder = new ApplicationBuilder(serviceProvider);
+            ServiceProvider serviceProvider = svcCollection.BuildServiceProvider();
+            ApplicationBuilder appBuilder = new ApplicationBuilder(serviceProvider);
             Action testAction = () => appBuilder.UseMaintenance();
 
             testAction.ShouldNotThrow();

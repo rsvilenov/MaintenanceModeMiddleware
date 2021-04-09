@@ -1,5 +1,4 @@
-﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.Configuration.Data;
+﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.StateStore;
@@ -9,12 +8,12 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Xunit;
 using System.Linq;
+using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class FileStateStoreTests
+    public class FileStateStoreTest
     {
         [Theory]
         [InlineData(true, true, true)]

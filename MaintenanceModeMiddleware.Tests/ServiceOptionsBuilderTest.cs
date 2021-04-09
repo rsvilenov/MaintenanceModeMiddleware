@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class ServiceOptionsBuilderTests
+    public class ServiceOptionsBuilderTest
     {
         [Fact]
         public void ServiceOptionsBuilder_NoStateStore()

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class OptionCollectionTests
+    public class OptionCollectionTest
     {
         [Fact]
         public void ConstructEmpty()

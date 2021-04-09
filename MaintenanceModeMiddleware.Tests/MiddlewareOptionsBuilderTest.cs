@@ -11,7 +11,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class MiddlewareOptionsBuilderTests
+    public class MiddlewareOptionsBuilderTest
     {
         [Fact]
         public void Constructor()

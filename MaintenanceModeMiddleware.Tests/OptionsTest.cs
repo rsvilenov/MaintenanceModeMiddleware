@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
 {
-    public class OptionsTests
+    public class OptionsTest
     {
         [Theory]
         [InlineData("True", true, null)]
