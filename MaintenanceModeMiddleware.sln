@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaintenanceModeMiddleware.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaintenanceModeMiddleware", "src\MaintenanceModeMiddleware\MaintenanceModeMiddleware.csproj", "{A92CAD89-6152-4786-B147-46BB3FDC48EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaintenanceModeMiddleware.Tests", "MaintenanceModeMiddleware.Tests\MaintenanceModeMiddleware.Tests.csproj", "{C649F17F-EBB0-40B0-9153-6F8F1AD52694}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaintenanceModeMiddleware.Tests", "src\MaintenanceModeMiddleware.Tests\MaintenanceModeMiddleware.Tests.csproj", "{C649F17F-EBB0-40B0-9153-6F8F1AD52694}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

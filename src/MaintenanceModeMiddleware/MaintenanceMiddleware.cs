@@ -30,10 +30,9 @@ namespace MaintenanceModeMiddleware
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
-            
-            OptionCollection options = BuildOptions(optionsBuilder);
-            VerifyOptions(options);
-            _startupOptions = options;
+
+            _startupOptions = BuildOptions(optionsBuilder);
+            VerifyOptions();
 
             _response = GetMaintenanceResponse();
 
@@ -46,12 +45,15 @@ namespace MaintenanceModeMiddleware
                 iCanRestoreState.RestoreState();
             }
         }
+
         private OptionCollection BuildOptions(Action<MiddlewareOptionsBuilder> options)
         {
             MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
             options?.Invoke(optionsBuilder);
-            if (!(optionsBuilder.Options.Any<UseNoDefaultValuesOption>()
-                     && optionsBuilder.Options.GetSingleOrDefault<UseNoDefaultValuesOption>().Value))
+
+            if (optionsBuilder.Options
+                .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                ?.Value == true)
             {
                 optionsBuilder.FillEmptyOptionsWithDefault();
             }
@@ -63,8 +65,9 @@ namespace MaintenanceModeMiddleware
         {
             MaintenanceResponse response;
 
-            if (_startupOptions.Any<UseDefaultResponseOption>() 
-                && _startupOptions.GetSingleOrDefault<UseDefaultResponseOption>().Value)
+            if (_startupOptions
+                .GetSingleOrDefault<UseDefaultResponseOption>()
+                ?.Value == true)
             {
                 Stream resStream = GetType()
                     .Assembly
@@ -107,26 +110,26 @@ namespace MaintenanceModeMiddleware
             return response;
         }
 
-        private void VerifyOptions(OptionCollection options)
+        private void VerifyOptions()
         {
-            if (!options.Any<UseDefaultResponseOption>()
-                && !options.Any<ResponseOption>()
-                && !options.Any<ResponseFileOption>())
+            if (!_startupOptions.Any<UseDefaultResponseOption>()
+                && !_startupOptions.Any<ResponseOption>()
+                && !_startupOptions.Any<ResponseFileOption>())
             {
-                throw new InvalidOperationException("No response was specified.");
+                throw new ArgumentException("No response was specified.");
             }
 
-            if (options.Any<ResponseFileOption>())
+            if (_startupOptions.Any<ResponseFileOption>())
             {
                 string absPath = GetAbsolutePathOfResponseFile();
 
                 if (!File.Exists(absPath))
                 {
-                    throw new ArgumentException($"Could not find file {options.GetSingleOrDefault<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
+                    throw new ArgumentException($"Could not find file {_startupOptions.GetSingleOrDefault<ResponseFileOption>().Value.FilePath}. Expected absolute path: {absPath}.");
                 }
             }
 
-            if (!options.Any<Code503RetryIntervalOption>())
+            if (!_startupOptions.Any<Code503RetryIntervalOption>())
             {
                 throw new ArgumentException("No value was specified for 503 retry interval.");
             }
@@ -183,8 +186,7 @@ namespace MaintenanceModeMiddleware
                 goto nextDelegate;
             }
 
-            if (options.Any<BypassAllAuthenticatedUsersOption>()
-                && options.GetSingleOrDefault<BypassAllAuthenticatedUsersOption>().Value
+            if (options.GetSingleOrDefault<BypassAllAuthenticatedUsersOption>()?.Value == true
                 && context.User.Identity.IsAuthenticated)
             {
                 goto nextDelegate;

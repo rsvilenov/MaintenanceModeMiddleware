@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\MaintenanceModeMiddleware\MaintenanceModeMiddleware.csproj" />
+    <ProjectReference Include="..\MaintenanceModeMiddleware\MaintenanceModeMiddleware.csproj" />
   </ItemGroup>
 
 </Project>

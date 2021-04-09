@@ -2,7 +2,7 @@
 using MaintenanceModeMiddleware.StateStore;
 using System;
 
-namespace MaintenanceModeMiddleware.Tests
+namespace MaintenanceModeMiddleware.Tests.HelperTypes
 {
     internal class InMemoryStateStore : IStateStore
     {

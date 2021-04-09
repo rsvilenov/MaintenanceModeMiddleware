@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Tests.HelperTypes;
 using NSubstitute;
 using Shouldly;
 using System;
@@ -46,7 +47,7 @@ namespace MaintenanceModeMiddleware.Tests
             svc.EndsOn.ShouldNotBeNull();
 
             TimeSpan delay = svc.EndsOn.Value - DateTime.Now;
-            Thread.Sleep((int)delay.TotalMilliseconds);
+            Thread.Sleep((int)delay.TotalMilliseconds + 1000);
             svc.IsMaintenanceModeOn
                 .ShouldBeFalse($"The maintenance mode didn't automatically end after the set {nameof(svc.EndsOn)} date: {svc.EndsOn}.");
         }
