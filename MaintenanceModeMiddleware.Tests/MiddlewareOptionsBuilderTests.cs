@@ -1,9 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
-using MaintenanceModeMiddleware.StateStore;
 using Microsoft.AspNetCore.Http;
-using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;

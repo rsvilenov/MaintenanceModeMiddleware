@@ -17,6 +17,12 @@ namespace MaintenanceModeMiddleware
 
         public static IApplicationBuilder UseMaintenance(this IApplicationBuilder builder, Action<MiddlewareOptionsBuilder> options = null)
         {
+            var maintenanceSvc = builder.ApplicationServices.GetService<IMaintenanceControlService>();
+            if (maintenanceSvc == null)
+            {
+                throw new InvalidOperationException($"Unable to find the required service. You should call {nameof(AddMaintenance)} in Startup's Configure method.");
+            }
+
             return builder.UseMiddleware<MaintenanceMiddleware>(options);
         }
     }
