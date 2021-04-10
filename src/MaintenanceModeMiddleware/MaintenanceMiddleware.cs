@@ -51,9 +51,10 @@ namespace MaintenanceModeMiddleware
             MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
             options?.Invoke(optionsBuilder);
 
+            
             if (optionsBuilder.Options
                 .GetSingleOrDefault<UseNoDefaultValuesOption>()
-                ?.Value == true)
+                ?.Value != true)
             {
                 optionsBuilder.FillEmptyOptionsWithDefault();
             }
