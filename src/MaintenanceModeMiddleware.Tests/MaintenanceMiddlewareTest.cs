@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -22,12 +23,6 @@ namespace MaintenanceModeMiddleware.Tests
 {
     public class MaintenanceMiddlewareTest
     {
-        private readonly string _tempDir;
-        public MaintenanceMiddlewareTest()
-        {
-            _tempDir = Path.GetTempPath();
-        }
-
         [Fact]
         public void Constructor_DefaultOptions()
         {
@@ -140,7 +135,9 @@ namespace MaintenanceModeMiddleware.Tests
                     null,
                     optionBuilderDelegate);
 
+
             testAction.ShouldNotThrow();
+
 
             (svc as ICanRestoreState).Received(1)
                                      .RestoreState();
@@ -173,6 +170,7 @@ namespace MaintenanceModeMiddleware.Tests
                 null,
                 optionBuilderDelegate);
 
+
             Action testAction = async ()
                 => await middleware.Invoke(httpContext);
 
@@ -201,10 +199,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUrlPath(bypassPath, comparison);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -226,10 +227,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUrlPaths(bypassPathStrings, comparison);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -247,10 +251,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassFileExtension(extension);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -268,10 +275,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassFileExtensions(extensions);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -289,10 +299,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassAllAuthenticatedUsers();
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -310,10 +323,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUser(bypassUser);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -332,10 +348,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUsers(bypassUsers);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -353,10 +372,13 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUserRole(bypassUserRole);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
-            desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
         }
 
         [Theory]
@@ -375,10 +397,108 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilder.BypassUserRoles(bypassUserRoles);
                 });
 
+
             await desk.MiddlewareInstance
                 .Invoke(desk.CurrentHttpContext);
 
+
             desk.CurrentHttpContext.Response.StatusCode.ShouldBe(expectedStatusCode);
+        }
+
+        [Fact]
+        public async void UseDefaultResponseOption()
+        {
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                });
+
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(503);
+            desk.CurrentHttpContext.Response.Headers
+                .Any(h => h.Key == "Retry-After").ShouldBeTrue();
+            desk.CurrentHttpContext.Response.ContentType
+                .ShouldBe("text/html");
+            GetResponseString(desk.CurrentHttpContext)
+                .ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async void UseResponseOption()
+        {
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+                });
+
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(503);
+            desk.CurrentHttpContext.Response.Headers
+                .Any(h => h.Key == "Retry-After")
+                .ShouldBeTrue();
+            desk.CurrentHttpContext.Response.ContentType
+                .ShouldBe("text/plain");
+            GetResponseString(desk.CurrentHttpContext)
+                .ShouldBe("test");
+        }
+
+        [Fact]
+        public async void UseResponseFileOption()
+        {
+            string tempDir = Path.GetTempPath();
+            File.WriteAllText(Path.Combine(tempDir, "test.txt"), "test");
+
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
+                },
+                tempDir);
+            
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(503);
+            desk.CurrentHttpContext.Response.Headers
+                .Any(h => h.Key == "Retry-After")
+                .ShouldBeTrue();
+            desk.CurrentHttpContext.Response.ContentType
+                .ShouldBe("text/plain");
+            GetResponseString(desk.CurrentHttpContext)
+                .ShouldBe("test");
+        }
+
+        private string GetResponseString(HttpContext context)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                context.Response.Body.Position = 0;
+                context.Response.Body.CopyTo(ms);
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
         }
 
         private ClaimsPrincipal MockUser(string userName, string userRole, bool isAuthenticated)
@@ -396,10 +516,12 @@ namespace MaintenanceModeMiddleware.Tests
 
         private MiddlewareTestDesk GetTestDesk(
             Action<HttpContext> contextSetup,
-            Action<MiddlewareOptionsBuilder> optionsSetup
-            )
+            Action<MiddlewareOptionsBuilder> optionsSetup,
+            string tempDir = null)
         {
             DefaultHttpContext httpContext = new DefaultHttpContext();
+            httpContext.Response.Body = new MemoryStream();
+
             contextSetup(httpContext);
 
             bool isNextDelegateCalled = false;
@@ -412,9 +534,14 @@ namespace MaintenanceModeMiddleware.Tests
             IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
             svc.IsMaintenanceModeOn.Returns(true);
 
+            if (tempDir == null)
+            {
+                tempDir = Path.GetTempPath();
+            }
+
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
-            webHostEnv.ContentRootPath.Returns(_tempDir);
-            webHostEnv.WebRootPath.Returns(_tempDir);
+            webHostEnv.ContentRootPath.Returns(tempDir);
+            webHostEnv.WebRootPath.Returns(tempDir);
 
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,
