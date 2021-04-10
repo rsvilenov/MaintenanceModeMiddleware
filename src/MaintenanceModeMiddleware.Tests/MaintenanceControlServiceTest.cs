@@ -14,7 +14,6 @@ namespace MaintenanceModeMiddleware.Tests
     [TestCaseOrderer("Xunit.Extensions.Ordering.TestCaseOrderer", "Xunit.Extensions.Ordering")]
     public class MaintenanceControlServiceTest
     {
-
         private const string testUserName = "testUser";
 
         [Fact]
