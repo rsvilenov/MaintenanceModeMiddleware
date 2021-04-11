@@ -6,15 +6,13 @@ namespace MaintenanceModeMiddleware.Configuration
     internal class OptionCollection
     {
         private readonly List<IOption> _options;
-        public OptionCollection()
-        {
-            _options = new List<IOption>();
-        }
 
+        public OptionCollection()
+            => _options = new List<IOption>();
+        
         public OptionCollection(IEnumerable<IOption> options)
-        {
-            _options = options.ToList();
-        }
+            => _options = options.ToList();
+        
 
         public void Add<T>(T option)
             where T : IOption
@@ -41,12 +39,13 @@ namespace MaintenanceModeMiddleware.Configuration
             => _options
                 .Any(o => o is T);
 
-        public void Clear<T>() =>
-            _options.RemoveAll(o => o is T);
+        public void Clear<T>() 
+            => _options.RemoveAll(o => o is T);
 
-        public void Clear() =>
-            _options.Clear();
+        public void Clear() 
+            => _options.Clear();
 
-        public int Count => _options.Count;
+        public int Count 
+            => _options.Count;
     }
 }

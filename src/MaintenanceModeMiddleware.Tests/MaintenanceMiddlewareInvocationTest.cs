@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -63,6 +64,39 @@ namespace MaintenanceModeMiddleware.Tests
                     var bypassPathStrings = bypassPaths
                         .Select(s => new PathString(s));
                     optionBuilder.BypassUrlPaths(bypassPathStrings, comparison);
+                });
+
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(expectedStatusCode);
+        }
+
+        [Theory]
+        [InlineData("/somePath", "/someOverriden", "/somePath", 200)]
+        [InlineData("/somePath", "/someOverriden", "/someOverriden", 503)]
+        public async void Invoke_With_BypassUrlPath_SvcOverride(string requestPath,
+            string bypassPath,
+            string overridenPath,
+            int expectedStatusCode)
+        {
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = new PathString(requestPath);
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.BypassUrlPath(bypassPath);
+                },
+                (optionsToOverrideFromSvc) =>
+                {
+                    // this is an option, passed as a parameter to
+                    // the method EnterMaintanence() of MaintenanceControlService
+                    optionsToOverrideFromSvc.BypassUrlPath(overridenPath);
                 });
 
 
@@ -254,7 +288,7 @@ namespace MaintenanceModeMiddleware.Tests
                 (optionBuilder) =>
                 {
                     // UseDefaultResponseOption() is automatically set if no response option is specified
-                    // and UseNoDefaultValues() was not called.
+                    // and UseNoDefaultValues() is not called.
                 });
 
 
@@ -314,6 +348,7 @@ namespace MaintenanceModeMiddleware.Tests
                 {
                     optionBuilder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
                 },
+                null,
                 tempDir);
             
 
@@ -390,6 +425,7 @@ namespace MaintenanceModeMiddleware.Tests
         private MiddlewareTestDesk GetTestDesk(
             Action<HttpContext> contextSetup,
             Action<MiddlewareOptionsBuilder> optionsSetup,
+            Action<MiddlewareOptionsBuilder> optionsOverrideSetup = null,
             string tempDir = null)
         {
             DefaultHttpContext httpContext = new DefaultHttpContext();
@@ -404,8 +440,17 @@ namespace MaintenanceModeMiddleware.Tests
                 return Task.CompletedTask;
             };
 
-            IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
+            IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService, ICanOverrideMiddlewareOptions>();
             svc.IsMaintenanceModeOn.Returns(true);
+
+            if (optionsOverrideSetup != null)
+            {
+                MiddlewareOptionsBuilder optionOverrideBuilder = BuildOptionsToOverride(optionsOverrideSetup);
+
+                (svc as ICanOverrideMiddlewareOptions)
+                    .GetOptionsToOverride()
+                    .Returns(optionOverrideBuilder.Options);
+            }
 
             if (tempDir == null)
             {
@@ -428,6 +473,21 @@ namespace MaintenanceModeMiddleware.Tests
                 IsNextDelegateCalled = isNextDelegateCalled,
                 MiddlewareInstance = middleware
             };
+        }
+
+        private MiddlewareOptionsBuilder BuildOptionsToOverride(Action<MiddlewareOptionsBuilder> optionsOverrideSetup)
+        {
+            MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder();
+            optionsOverrideSetup.Invoke(optionOverrideBuilder);
+
+            if (optionOverrideBuilder.Options
+                .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                ?.Value != true)
+            {
+                optionOverrideBuilder.FillEmptyOptionsWithDefault();
+            }
+
+            return optionOverrideBuilder;
         }
     }
 }

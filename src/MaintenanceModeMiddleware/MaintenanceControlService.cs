@@ -42,11 +42,14 @@ namespace MaintenanceModeMiddleware
             {
                 MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
                 middlewareOptions?.Invoke(optionsBuilder);
-                if (!(optionsBuilder.Options.Any<UseNoDefaultValuesOption>()
-                    && optionsBuilder.Options.GetSingleOrDefault<UseNoDefaultValuesOption>().Value))
+
+                if (optionsBuilder.Options
+                    .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                    ?.Value != true)
                 {
                     optionsBuilder.FillEmptyOptionsWithDefault();
                 }
+
                 optionsToOverride = optionsBuilder.Options;
             }
 
