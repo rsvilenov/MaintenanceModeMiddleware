@@ -73,7 +73,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         [Theory]
         [InlineData(ContentType.Html, "text/html")]
-        [InlineData(ContentType.Text, "text/plain")]
+        [InlineData(ContentType.Html, "text/html")]
+        [InlineData(ContentType.Json, "application/json")]
         public void MaintenanceResponse_GetContentType(ContentType contentType, string contnetTypeString)
         {
             MaintenanceResponse response = new MaintenanceResponse

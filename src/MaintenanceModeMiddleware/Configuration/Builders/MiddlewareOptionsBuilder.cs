@@ -30,9 +30,9 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             AssertResponseNotSpecified();
 
             string fileExtension = Path.GetExtension(relativePath);
-            if (!new string[] { ".txt", ".html" }.Contains(fileExtension))
+            if (!new string[] { ".txt", ".html", ".json" }.Contains(fileExtension))
             {
-                throw new ArgumentException($"The file, specified in {relativePath} must be either .txt or .html.");
+                throw new ArgumentException($"The file, specified in {relativePath} must have one of the following extensions: .txt, .html or .json.");
             }
 
             FileDescriptor responseFile = new FileDescriptor(relativePath, baseDir);

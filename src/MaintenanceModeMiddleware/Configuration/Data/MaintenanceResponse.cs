@@ -16,6 +16,7 @@ namespace MaintenanceModeMiddleware.Configuration.Data
             {
                 ContentType.Html => "text/html",
                 ContentType.Text => "text/plain",
+                ContentType.Json => "application/json",
                 _ => throw new InvalidOperationException("Content type could not be translated."),
             };
         }

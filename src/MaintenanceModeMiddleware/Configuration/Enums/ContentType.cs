@@ -3,6 +3,7 @@
     public enum ContentType
     {
         Text,
-        Html
+        Html,
+        Json
     }
 }

@@ -82,12 +82,19 @@ namespace MaintenanceModeMiddleware
                 string absPath = GetAbsolutePathOfResponseFile();
                 using StreamReader sr = new StreamReader(absPath, detectEncodingFromByteOrderMarks: true);
 
+                ContentType contentType = Path.GetExtension(absPath) switch
+                {
+                    ".txt" => ContentType.Text,
+                    ".html" => ContentType.Html,
+                    ".json" => ContentType.Json,
+                    _ => throw new InvalidOperationException($"Path {absPath} is not in any of the supported formats."),
+                };
+
                 response = new MaintenanceResponse
                 {
                     ContentBytes = sr.CurrentEncoding.GetBytes(sr.ReadToEnd()),
                     ContentEncoding = sr.CurrentEncoding,
-                    ContentType = absPath.EndsWith(".txt")
-                        ? ContentType.Text : ContentType.Html
+                    ContentType = contentType
                 };
             }
             else
