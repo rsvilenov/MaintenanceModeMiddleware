@@ -25,13 +25,16 @@ namespace MaintenanceModeMiddleware
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
             IWebHostEnvironment webHostEnvironment,
-            Action<MiddlewareOptionsBuilder> optionsBuilder)
+            Action<MiddlewareOptionsBuilder> options)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
 
-            _startupOptions = BuildOptions(optionsBuilder);
+            MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
+            options?.Invoke(optionsBuilder);
+            _startupOptions = optionsBuilder.GetOptions();
+
             VerifyOptions();
 
             _response = GetMaintenanceResponse();
@@ -44,22 +47,6 @@ namespace MaintenanceModeMiddleware
             {
                 iCanRestoreState.RestoreState();
             }
-        }
-
-        private OptionCollection BuildOptions(Action<MiddlewareOptionsBuilder> options)
-        {
-            MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
-            options?.Invoke(optionsBuilder);
-
-            
-            if (optionsBuilder.Options
-                .GetSingleOrDefault<UseNoDefaultValuesOption>()
-                ?.Value != true)
-            {
-                optionsBuilder.FillEmptyOptionsWithDefault();
-            }
-
-            return optionsBuilder.Options;
         }
 
         private MaintenanceResponse GetMaintenanceResponse()

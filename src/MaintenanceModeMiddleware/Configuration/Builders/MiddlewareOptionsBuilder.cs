@@ -12,11 +12,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 {
     public class MiddlewareOptionsBuilder
     {
-        internal OptionCollection Options { get; }
-
+        private readonly OptionCollection _options;
+        private bool _areDefaultOptionsFilledIn;
+        
         internal MiddlewareOptionsBuilder()
         {
-            Options = new OptionCollection();
+            _options = new OptionCollection();
         }
 
         public MiddlewareOptionsBuilder UseResponseFile(string relativePath, PathBaseDirectory baseDir)
@@ -35,7 +36,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             }
 
             FileDescriptor responseFile = new FileDescriptor(relativePath, baseDir);
-            Options.Add(new ResponseFileOption
+            _options.Add(new ResponseFileOption
             {
                 Value = responseFile
             });
@@ -70,7 +71,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 ContentType = contentType
             };
 
-            Options.Add(new ResponseOption
+            _options.Add(new ResponseOption
             {
                 Value = response
             });
@@ -82,7 +83,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         {
             AssertResponseNotSpecified();
 
-            Options.Add(new UseDefaultResponseOption
+            _options.Add(new UseDefaultResponseOption
             {
                 Value = true
             });
@@ -92,7 +93,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder Set503RetryAfterInterval(int interval)
         {
-            Options.Add(new Code503RetryIntervalOption
+            _options.Add(new Code503RetryIntervalOption
             { 
                 Value = interval
             });
@@ -107,7 +108,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(userName));
             }
 
-            Options.Add(new BypassUserNameOption
+            _options.Add(new BypassUserNameOption
             {
                 Value = userName
             });
@@ -142,7 +143,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(role));
             }
 
-            Options.Add(new BypassUserRoleOption
+            _options.Add(new BypassUserRoleOption
             {
                 Value = role
             });
@@ -172,7 +173,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder BypassAllAuthenticatedUsers()
         {
-            Options.Add(new BypassAllAuthenticatedUsersOption
+            _options.Add(new BypassAllAuthenticatedUsersOption
             {
                 Value = true
             }); ;
@@ -189,7 +190,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 PathString = path
             };
 
-            Options.Add(new BypassUrlPathOption
+            _options.Add(new BypassUrlPathOption
             {
                 Value = urlPath
             });
@@ -229,7 +230,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 extension = extension.Substring(1);
             }
 
-            Options.Add(new BypassFileExtensionOption
+            _options.Add(new BypassFileExtensionOption
             {
                 Value = extension
             });
@@ -259,7 +260,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public MiddlewareOptionsBuilder UseNoDefaultValues()
         {
-            Options.Add(new UseNoDefaultValuesOption
+            _options.Add(new UseNoDefaultValuesOption
             {
                 Value = true
             });
@@ -269,46 +270,59 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         internal void FillEmptyOptionsWithDefault()
         {
-            if (!Options.GetAll<BypassFileExtensionOption>().Any())
+            if (!_options.GetAll<BypassFileExtensionOption>().Any())
             {
                 BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
             }
 
-            if (!Options.GetAll<BypassUrlPathOption>().Any())
+            if (!_options.GetAll<BypassUrlPathOption>().Any())
             {
                 BypassUrlPath("/Identity");
             }
             
-            if (!Options.GetAll<BypassUserRoleOption>().Any())
+            if (!_options.GetAll<BypassUserRoleOption>().Any())
             {
                 BypassUserRole("Admin");
             }
 
-            if (!Options.GetAll<Code503RetryIntervalOption>().Any())
+            if (!_options.GetAll<Code503RetryIntervalOption>().Any())
             {
                 Set503RetryAfterInterval(5300);
             }
 
-            if (!Options.GetAll<ResponseFileOption>().Any()
-                && !Options.GetAll<ResponseOption>().Any())
+            if (!_options.GetAll<ResponseFileOption>().Any()
+                && !_options.GetAll<ResponseOption>().Any())
             {
                 UseDefaultResponse();
             }
         }
+        internal OptionCollection GetOptions()
+        {
+            if (!_areDefaultOptionsFilledIn
+                && _options
+                    .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                    ?.Value != true)
+            {
+                FillEmptyOptionsWithDefault();
+                _areDefaultOptionsFilledIn = true;
+            }
+
+            return _options;
+        }
 
         private void AssertResponseNotSpecified()
         {
-            if (Options.GetAll<ResponseOption>().Any())
+            if (_options.GetAll<ResponseOption>().Any())
             {
                 throw new InvalidOperationException("You have already specified a response.");
             }
 
-            if (Options.GetAll<ResponseFileOption>().Any())
+            if (_options.GetAll<ResponseFileOption>().Any())
             {
                 throw new InvalidOperationException("You have already specified a response file.");
             }
 
-            if (Options.GetAll<UseDefaultResponseOption>().Any())
+            if (_options.GetAll<UseDefaultResponseOption>().Any())
             {
                 throw new InvalidOperationException("You have already specified that the middleware should use its default (built-in) response.");
             }

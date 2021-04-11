@@ -445,11 +445,12 @@ namespace MaintenanceModeMiddleware.Tests
 
             if (optionsOverrideSetup != null)
             {
-                MiddlewareOptionsBuilder optionOverrideBuilder = BuildOptionsToOverride(optionsOverrideSetup);
+                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder();
+                optionsOverrideSetup.Invoke(optionOverrideBuilder);
 
                 (svc as ICanOverrideMiddlewareOptions)
                     .GetOptionsToOverride()
-                    .Returns(optionOverrideBuilder.Options);
+                    .Returns(optionOverrideBuilder.GetOptions());
             }
 
             if (tempDir == null)
@@ -473,21 +474,6 @@ namespace MaintenanceModeMiddleware.Tests
                 IsNextDelegateCalled = isNextDelegateCalled,
                 MiddlewareInstance = middleware
             };
-        }
-
-        private MiddlewareOptionsBuilder BuildOptionsToOverride(Action<MiddlewareOptionsBuilder> optionsOverrideSetup)
-        {
-            MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder();
-            optionsOverrideSetup.Invoke(optionOverrideBuilder);
-
-            if (optionOverrideBuilder.Options
-                .GetSingleOrDefault<UseNoDefaultValuesOption>()
-                ?.Value != true)
-            {
-                optionOverrideBuilder.FillEmptyOptionsWithDefault();
-            }
-
-            return optionOverrideBuilder;
         }
     }
 }

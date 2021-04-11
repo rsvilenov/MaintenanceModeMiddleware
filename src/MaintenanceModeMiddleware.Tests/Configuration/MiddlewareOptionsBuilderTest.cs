@@ -21,7 +21,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldNotThrow();
 
-            builder.Options.ShouldNotBeNull();
+            builder.GetOptions()
+                .ShouldNotBeNull();
         }
 
         [Theory]
@@ -36,7 +37,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<ResponseFileOption> testFunc = () =>
             {
                 builder.UseResponseFile(relativePath, baseDir);
-                return builder.Options.GetSingleOrDefault<ResponseFileOption>();
+                return builder.GetOptions().GetSingleOrDefault<ResponseFileOption>();
             };
 
             if (expectedException == null)
@@ -72,7 +73,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
                 {
                     var builder = new MiddlewareOptionsBuilder();
                     builder.UseResponse(response, contentType, encoding);
-                    return builder.Options.GetSingleOrDefault<ResponseOption>();
+                    return builder.GetOptions().GetSingleOrDefault<ResponseOption>();
                 },
                 () =>
                 {
@@ -83,7 +84,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
                         contentType, 
                         encoding);
 
-                    return builder.Options.GetSingleOrDefault<ResponseOption>();
+                    return builder.GetOptions().GetSingleOrDefault<ResponseOption>();
                 }
             };
 
@@ -115,11 +116,16 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void UseDefaultResponse()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Action testAction = () => builder.UseDefaultResponse();
+            Action testAction = () =>
+            {
+                // ensure that the UseDefaultResponse option is used
+                builder.UseNoDefaultValues();
+                builder.UseDefaultResponse();
+            };
 
             testAction.ShouldNotThrow();
 
-            builder.Options
+            builder.GetOptions()
                 .GetSingleOrDefault<UseDefaultResponseOption>()
                 .ShouldNotBeNull();
         }
@@ -172,7 +178,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<Code503RetryIntervalOption> testFunc = () =>
             {
                 builder.Set503RetryAfterInterval(interval);
-                return builder.Options.GetSingleOrDefault<Code503RetryIntervalOption>();
+                return builder.GetOptions().GetSingleOrDefault<Code503RetryIntervalOption>();
             };
 
             Code503RetryIntervalOption option = testFunc.ShouldNotThrow();
@@ -192,7 +198,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<BypassUserNameOption> testFunc = () =>
             {
                 builder.BypassUser(userName);
-                return builder.Options.GetSingleOrDefault<BypassUserNameOption>();
+                return builder.GetOptions().GetSingleOrDefault<BypassUserNameOption>();
             };
 
             if (expectedException != null)
@@ -218,7 +224,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<IEnumerable<BypassUserNameOption>> testFunc = () =>
             {
                 builder.BypassUsers(userNames);
-                return builder.Options.GetAll<BypassUserNameOption>();
+                return builder.GetOptions().GetAll<BypassUserNameOption>();
             };
 
             if (expectedException != null)
@@ -249,7 +255,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<BypassUserRoleOption> testFunc = () =>
             {
                 builder.BypassUserRole(userRole);
-                return builder.Options.GetSingleOrDefault<BypassUserRoleOption>();
+                return builder.GetOptions().GetSingleOrDefault<BypassUserRoleOption>();
             };
 
             if (expectedException != null)
@@ -275,7 +281,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<IEnumerable<BypassUserRoleOption>> testFunc = () =>
             {
                 builder.BypassUserRoles(userRoles);
-                return builder.Options.GetAll<BypassUserRoleOption>();
+                return builder.GetOptions().GetAll<BypassUserRoleOption>();
             };
 
             if (expectedException != null)
@@ -304,7 +310,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldNotThrow();
 
-            builder.Options
+            builder.GetOptions()
                 .GetSingleOrDefault<BypassAllAuthenticatedUsersOption>()
                 .ShouldNotBeNull();
         }
@@ -316,7 +322,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<BypassUrlPathOption> testFunc = () =>
             {
                 builder.BypassUrlPath(new PathString(), StringComparison.Ordinal);
-                return builder.Options.GetSingleOrDefault<BypassUrlPathOption>();
+                return builder.GetOptions().GetSingleOrDefault<BypassUrlPathOption>();
             };
 
 
@@ -333,7 +339,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<IEnumerable<BypassUrlPathOption>> testFunc = () =>
             {
                 builder.BypassUrlPaths(pathStrings, StringComparison.Ordinal);
-                return builder.Options.GetAll<BypassUrlPathOption>();
+                return builder.GetOptions().GetAll<BypassUrlPathOption>();
             };
 
             if (expectedException != null)
@@ -394,7 +400,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<BypassFileExtensionOption> testFunc = () =>
             {
                 builder.BypassFileExtension(extension);
-                return builder.Options.GetSingleOrDefault<BypassFileExtensionOption>();
+                return builder.GetOptions().GetSingleOrDefault<BypassFileExtensionOption>();
             };
 
             if (expectedException != null)
@@ -424,7 +430,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Func<IEnumerable<BypassFileExtensionOption>> testFunc = () =>
             {
                 builder.BypassFileExtensions(extensions);
-                return builder.Options.GetAll<BypassFileExtensionOption>();
+                return builder.GetOptions().GetAll<BypassFileExtensionOption>();
             };
 
             if (expectedException != null)
@@ -456,7 +462,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldNotThrow();
 
-            builder.Options
+            builder.GetOptions()
                 .GetSingleOrDefault<UseNoDefaultValuesOption>()
                 .ShouldNotBeNull();
         }
@@ -465,11 +471,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void FillEmptyOptionsWithDefault()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Action testAction = () => builder.FillEmptyOptionsWithDefault();
+            Action testAction = () => { };
 
             testAction.ShouldNotThrow();
 
-            builder.Options.ShouldNotBeNull()
+            builder.GetOptions().ShouldNotBeNull()
                 .GetAll().ShouldNotBeEmpty();
         }
     }
