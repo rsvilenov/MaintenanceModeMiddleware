@@ -133,11 +133,7 @@ namespace MaintenanceModeMiddleware
         private string GetAbsolutePathOfResponseFile()
         {
             ResponseFileOption resFileOption = _startupOptions.GetSingleOrDefault<ResponseFileOption>();
-            if (resFileOption.Value.BaseDir == null)
-            {
-                return resFileOption.Value.FilePath;
-            }
-
+            
             string baseDir = resFileOption.Value.BaseDir == PathBaseDirectory.WebRootPath 
                 ? _webHostEnvironment.WebRootPath 
                 : _webHostEnvironment.ContentRootPath;

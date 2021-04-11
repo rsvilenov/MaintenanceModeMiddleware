@@ -42,22 +42,34 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             stateStore.ShouldBeOfType<FileStateStore>();
         }
 
-        [Fact]
-        public void ServiceOptionsBuilder_CustomStateStore()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ServiceOptionsBuilder_CustomStateStore(bool passNull)
         {
             ServiceOptionsBuilder builder = new ServiceOptionsBuilder();
             IStateStore stateStore = null;
-            IStateStore storeSubstitute = Substitute.For<IStateStore>();
+            IStateStore storeSubstitute = passNull 
+                ? null 
+                : Substitute.For<IStateStore>();
+
             Action testAction = () =>
             {
                 builder.UseStateStore(storeSubstitute);
                 stateStore = builder.GetStateStore();
             };
 
-            testAction.ShouldNotThrow();
+            if (passNull)
+            {
+                testAction.ShouldThrow<ArgumentNullException>();
+            }
+            else
+            {
+                testAction.ShouldNotThrow();
 
-            stateStore.ShouldNotBeNull();
-            stateStore.ShouldBe(storeSubstitute);
+                stateStore.ShouldNotBeNull();
+                stateStore.ShouldBe(storeSubstitute);
+            }
         }
     }
 }

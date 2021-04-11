@@ -467,6 +467,49 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
                 .ShouldNotBeNull();
         }
 
+        [Theory]
+        [InlineData(new int[] { 1, 2, 3 })]
+        [InlineData(new int[] { 1, 3, 2 })]
+        [InlineData(new int[] { 2, 1, 3 })]
+        [InlineData(new int[] { 3, 1, 2 })]
+        [InlineData(new int[] { 2, 3, 1 })]
+        [InlineData(new int[] { 3, 2, 1 })]
+        public void UseDuplicateResponseOption(int[] order)
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            int usedOptionCount = 0;
+            Action testAction = () =>
+            {
+                builder.UseNoDefaultValues();
+
+                foreach (int i in order)
+                {
+                    if (i == 1)
+                    {
+                        builder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
+                    }
+                    else if (i == 2)
+                    {
+                        builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+                    }
+                    else if (i == 3)
+                    {
+                        builder.UseDefaultResponse();
+                    }
+
+                    // the builder shouldn't allow more than one response
+                    // option to be used at a time before throwing an exception,
+                    // so this counter should always be 1
+                    usedOptionCount++;
+                }
+            };
+
+            testAction.ShouldThrow<InvalidOperationException>()
+                .Message.ShouldStartWith("You have already specified");
+            usedOptionCount.ShouldBe(1);
+
+        }
+
         [Fact]
         public void FillEmptyOptionsWithDefault()
         {

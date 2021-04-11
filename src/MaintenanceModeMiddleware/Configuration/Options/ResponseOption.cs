@@ -29,7 +29,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
             if (!int.TryParse(parts[1], out int codePage))
             {
-                throw new FormatException($"The code page {parts[1]} is not a known encoding.");
+                throw new FormatException($"The code page {parts[1]} is not a valid integer.");
             }
 
             Encoding encoding = Encoding.GetEncoding(codePage);

@@ -57,6 +57,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("/path/page;Ordinal", null)]
         [InlineData("/patH/Page;OrdinalIgnoreCase", null)]
         [InlineData("/patH/Page;Ordinal", null)]
+        [InlineData("/patH/Page;NonExistentComparison", typeof(ArgumentException))]
         [InlineData("/path/page", typeof(FormatException))]
         [InlineData(null, typeof(ArgumentNullException))]
         public void Test_BypassUrlPathOption(string input, Type expectedException)
@@ -152,6 +153,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Theory]
         [InlineData("demoRole", null)]
         [InlineData(null, typeof(ArgumentNullException))]
+        [InlineData("", typeof(ArgumentNullException))]
         public void Test_BypassUserRoleOption(string userRole, Type expectedException)
         {
             var option = new BypassUserNameOption();
@@ -262,7 +264,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         [Theory]
         [InlineData("Text;65001;maintenance mode", null)]
-        [InlineData("Html;65002;maintenance mode", typeof(NotSupportedException) /* there is no encoding with code page 65002 */ )]
+        [InlineData("Html;65002;maintenance mode", typeof(NotSupportedException))] /* there is no encoding with code page 65002 */
+        [InlineData("Music;65001;maintenance mode", typeof(ArgumentException))] /* music is not a valid content type */
+        [InlineData("Text;10v10s54;maintenance mode", typeof(FormatException))] /* 10v10s54 is not a valid integer */
+        [InlineData("Text;101054;maintenance mode", typeof(ArgumentOutOfRangeException))] /* 101054 is not a valid code page */
         [InlineData(null, typeof(ArgumentNullException))]
         [InlineData("string in wrong format", typeof(FormatException))]
         public void Test_ResponseOption(string input, Type expectedException)

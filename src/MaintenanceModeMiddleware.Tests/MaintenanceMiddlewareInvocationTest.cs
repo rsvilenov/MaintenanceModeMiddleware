@@ -333,11 +333,25 @@ namespace MaintenanceModeMiddleware.Tests
                 .ShouldBe("test");
         }
 
-        [Fact]
-        public async void Invoke_With_UseResponseFile()
+        [Theory]
+        [InlineData("test.txt", "text/plain", PathBaseDirectory.ContentRootPath)]
+        [InlineData("test.html", "text/html", PathBaseDirectory.ContentRootPath)]
+        [InlineData("test.json", "application/json", PathBaseDirectory.ContentRootPath)]
+        [InlineData("test.txt", "text/plain", PathBaseDirectory.WebRootPath)]
+        public async void Invoke_With_UseResponseFile(string fileName, string expectedContentType, PathBaseDirectory baseDir)
         {
             string tempDir = Path.GetTempPath();
-            File.WriteAllText(Path.Combine(tempDir, "test.txt"), "test");
+            string rootDir;
+            if (baseDir == PathBaseDirectory.ContentRootPath)
+            {
+                rootDir = Path.Combine(tempDir, "contentRoot");
+            }
+            else
+            {
+                rootDir = Path.Combine(tempDir, "wwwRoot");
+            }
+
+            File.WriteAllText(Path.Combine(rootDir, fileName), "test");
 
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -345,23 +359,23 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 (optionBuilder) =>
                 {
-                    optionBuilder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
+                    optionBuilder.UseResponseFile(fileName, baseDir);
                 },
                 null,
                 tempDir);
+
             
-
             await desk.MiddlewareInstance
-                .Invoke(desk.CurrentHttpContext);
+                .Invoke(desk.CurrentHttpContext); 
 
-
+            
             desk.CurrentHttpContext.Response.StatusCode
                 .ShouldBe(503);
             desk.CurrentHttpContext.Response.Headers
                 .Any(h => h.Key == "Retry-After")
                 .ShouldBeTrue();
             desk.CurrentHttpContext.Response.ContentType
-                .ShouldBe("text/plain");
+                .ShouldBe(expectedContentType);
             GetResponseString(desk.CurrentHttpContext)
                 .ShouldBe("test");
         }
@@ -458,8 +472,14 @@ namespace MaintenanceModeMiddleware.Tests
             }
 
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
-            webHostEnv.ContentRootPath.Returns(tempDir);
-            webHostEnv.WebRootPath.Returns(tempDir);
+
+            string contentRootPath = Path.Combine(tempDir, "contentRoot");
+            Directory.CreateDirectory(contentRootPath);
+            webHostEnv.ContentRootPath.Returns(contentRootPath);
+
+            string wwwRootPath = Path.Combine(tempDir, "wwwRoot");
+            Directory.CreateDirectory(wwwRootPath);
+            webHostEnv.WebRootPath.Returns(wwwRootPath);
 
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,

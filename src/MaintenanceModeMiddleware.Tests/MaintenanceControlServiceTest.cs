@@ -1,6 +1,8 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Configuration.State;
+using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using NSubstitute;
 using Shouldly;
@@ -69,6 +71,23 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Fact]
+        public void EnterMaintenance_Twice()
+        {
+            IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
+            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            {
+                options.UseNoStateStore();
+            };
+            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            Action testAction = () => svc.EnterMaintanence();
+
+            testAction.ShouldNotThrow();
+            // the second call to EnterMaintenance should throw,
+            // as the maintenance mode is alreary on
+            testAction.ShouldThrow<InvalidOperationException>();
+        }
+
+        [Fact]
         public void EnterMaintenance_WithMiddlewareOptions()
         {
             IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
@@ -98,6 +117,29 @@ namespace MaintenanceModeMiddleware.Tests
             overridenMiddlewareOpts
                 .GetSingleOrDefault<BypassUserNameOption>()
                 .Value.ShouldBe(testUserName);
+        }
+
+        [Fact]
+        public void EnterMaintenance_WithNoMiddlewareOptions_GetOptionsToOverride_Should_Return_Null()
+        {
+            IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
+            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            {
+                options.UseNoStateStore();
+            };
+            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            Func<OptionCollection> testFunc = () =>
+            {
+                svc.EnterMaintanence();
+
+                ICanOverrideMiddlewareOptions overrider = svc;
+                return overrider.GetOptionsToOverride();
+            };
+
+            OptionCollection overridenMiddlewareOpts = testFunc.ShouldNotThrow();
+
+            overridenMiddlewareOpts.
+                ShouldBeNull();
         }
 
         [Fact]
@@ -169,6 +211,28 @@ namespace MaintenanceModeMiddleware.Tests
                 .Any<IOption>().ShouldBeTrue();
             restoredOptions.GetSingleOrDefault<BypassUserNameOption>()
                 .Value.ShouldBe(testUserName);
+        }
+
+        [Fact]
+        public void RestoreState_When_StateStore_Is_SvcConsumer()
+        {
+            IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
+            IStateStore stateStore = Substitute.For<IStateStore, IServiceConsumer>();
+            stateStore.GetState().Returns(new MaintenanceState());
+            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            {
+                options.UseStateStore(stateStore);
+            };
+            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            Action testAction = () =>
+            {
+                ICanRestoreState restorer = svc;
+                restorer.RestoreState();
+            };
+
+            testAction.ShouldNotThrow();
+            (stateStore as IServiceConsumer).ServiceProvider
+                .ShouldNotBeNull();
         }
 
     }
