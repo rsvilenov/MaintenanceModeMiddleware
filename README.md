@@ -1,3 +1,3 @@
 # MaintenanceModeMiddleware
 
-![build&test workflow](https://github.com/github/docs/actions/workflows/dotnet.yml/badge.svg)
+![build workflow](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml/badge.svg)
