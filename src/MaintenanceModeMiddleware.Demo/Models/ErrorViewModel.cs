@@ -1,5 +1,3 @@
-using System;
-
 namespace MaintenanceModeMiddleware.TestApp.Models
 {
     public class ErrorViewModel

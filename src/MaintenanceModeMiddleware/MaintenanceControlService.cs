@@ -1,6 +1,5 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
-using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.StateStore;
 using System;
