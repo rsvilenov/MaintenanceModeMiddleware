@@ -69,7 +69,7 @@ You can specify multiple extensions at once by calling this method:
     options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
 ```
 
-### UseEncoding
+### UseResponse
 
 Customize the maintenance message to the users.
 
