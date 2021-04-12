@@ -8,6 +8,10 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 
 Unlike the IIS method, relying on "app_offline.htm", this middleware allows you to keep parts of the site alive while the rest is unaccessable for the public. You can enter maintenance mode from a controller action, for example by pressing a button in the administration area of your applicaiton, or by calling an API. You can specify that the maintenance mode should end automatically after a given period.
 
+### General
+
+This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
+
 Key functionality:
   * Enter and exit maintenance mode by calling a controller action or view method
   * Specify the time for which the maintenance mode should be on
