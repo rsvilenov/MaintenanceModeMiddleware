@@ -7,7 +7,11 @@ This document describes in detail how to configure this component.
     - [Configure in Startup](#Configure-in-Startup)
     - [Configure by the control service](#Configure-by-the-control-service)
     - [Override default configuration values](#Override-default-configuration-values)
-- [Options](#options)
+- [Options for the control service](#Options-for-the-control-service)
+    - [UseNoStateStore](#UseNoStateStore)
+    - [UseStateStore](#UseStateStore)
+    - [UseDefaultStateStore](#UseDefaultStateStore)
+- [Options for the middleware](#Options-for-the-middleware)
     - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
     - [BypassUser](#BypassUser)
     - [BypassUserRole](#BypassUserRole)
@@ -32,8 +36,16 @@ call the method, associated with it. You can see examples of how to do this belo
 
 ### Override default configuration values
 
+## Options for the control service
 
-## Options
+### UseNoStateStore
+
+### UseStateStore
+
+### UseDefaultStateStore
+
+
+## Options for the middleware
 
 Here is a list of all available options.
 
