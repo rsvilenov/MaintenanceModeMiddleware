@@ -58,7 +58,7 @@ When we are in maintenance mode, we want to continue serving specific file types
     options.BypassFileExtension(".png");
 ```
 
-If no extensions are explicitly specified in BypassFileExtension by the user, then these file extensions will remain accessable:
+If no extensions are explicitly specified in `BypassFileExtension()` by the user, then these file extensions will remain accessable:
 ```
 "css", "jpg", "png", "gif", "svg", "js"
 ```
