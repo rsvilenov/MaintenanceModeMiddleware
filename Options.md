@@ -66,7 +66,7 @@ If BypassFileExtension has been used, the extensions above will not be accessibl
 
 You can specify multiple extensions at once by calling this method:
 ```csharp
-options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
+    options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
 ```
 
 ### UseEncoding
@@ -74,5 +74,16 @@ options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
 Customize the maintenance message to the users.
 
 ```csharp
-options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8);
+    options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8);
 ```
+If the option is not specified, a default html response is served.
+
+### UseResponseFile
+
+Specify a file, containing the maintenance response. This file can be placed either in ContentRootPath or in WebRootPath.
+
+```csharp
+    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath);
+```
+
+If the option is not specified, a default html response is served.
