@@ -12,7 +12,7 @@ Unlike the IIS method, relying on "app_offline.htm", this middleware allows you 
 
 - [General](#General)
 - [Registration](#Registration)
-- [Basic use](#Basic use)
+- [Basic use](#Basic-use)
 - [Options](#Options)
 
 
