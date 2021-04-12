@@ -1,7 +1,12 @@
-# Middleware configuration
+# Configuration
+
+This document describes in detail how to configure this component.
 
 ### Table of Contents  
-- [General](#general)  
+- [General](#general)
+    - [Configure in Startup](#Configure-in-Startup)
+    - [Configure by the control service](#Configure-by-the-control-service)
+    - [Override default configuration values](#Override-default-configuration-values)
 - [Options](#options)
     - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
     - [BypassUser](#BypassUser)
@@ -16,8 +21,16 @@
 ## General
 
 You can configure the middleware by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
-The single argument of app.UseMaintenance is a delegate, containing an instance of an option builder class, which you can use to set options. To set an option,
+The single argument of `app.UseMaintenance` is a delegate, containing an instance of an option builder class, which you can use to set options. To set an option,
 call the method, associated with it. You can see examples of how to do this below.
+
+### Configure in Startup
+
+
+### Configure by the control service
+
+
+### Override default configuration values
 
 
 ## Options
