@@ -1,8 +1,17 @@
 # Middleware configuration
 
 ##### Table of Contents  
-[General](#general)  
-[Options](#options)
+- [General](#general)  
+- [Options](#options)
+    - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
+    - [BypassUser](#BypassUser)
+    - [BypassUserRole](#BypassUserRole)
+    - [BypassUrlPath](#BypassUrlPath)
+    - [BypassFileExtension](#BypassFileExtension)
+    - [UseResponse](#UseResponse)
+    - [UseResponseFile](#UseResponseFile)
+
+
 
 ## General
 
