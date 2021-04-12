@@ -47,7 +47,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default, when you use the option UseFileStateStore() the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the IStateStore interface.
+You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default, when you use the option options.UseDefaultStateStore() the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the IStateStore interface to optoins.UseStateStore(yourStateStore).
 
 ### Basic use
 
