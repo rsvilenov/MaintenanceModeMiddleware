@@ -1,6 +1,6 @@
 # Middleware configuration
 
-##### Table of Contents  
+### Table of Contents  
 - [General](#general)  
 - [Options](#options)
     - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
