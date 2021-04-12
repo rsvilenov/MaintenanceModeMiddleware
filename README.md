@@ -17,9 +17,9 @@ Key functionality:
   * Customize your maintenance mode response (html, text and json files/data are supported)
   * SEO friendly, as it relies on response code 503 with a "Retry-After" interval
 
-### Basic registration
+### Registration
 
-1. Register the middleware in Startup.cs:
+* Register the middleware in Startup.cs:
 
 ```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -37,7 +37,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 ```
 Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is recommended that you put its registration just before app.UseEndpoints(..);
 
-2. Register the control service in Startup.cs:
+* Register the control service in Startup.cs:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -47,6 +47,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default, when you use the option UseFileStateStore() the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the IStateStore interface.
 
 ### Basic use
 
