@@ -46,7 +46,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 ...
 }
 ```
-Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is recommended that you put its registration just before app.UseEndpoints(..);
+Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is highly recommended that you put its registration just before app.UseEndpoints(..);
 
 * Register the control service in Startup.cs:
 
