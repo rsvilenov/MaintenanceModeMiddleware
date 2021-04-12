@@ -10,10 +10,7 @@ call the method, associated with it. You can see examples of how to do this belo
 When this option is set, all authenticated users will have access to the site, while it is in maintenance mode. All others will be served the "maintenance mode" page or response.
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassAllAuthenticatedUsers();
-}
 ```
 
 
@@ -22,10 +19,7 @@ app.UseMaintenance(options =>
 When a user is passed to this option, this user retains full access to the site, while it is in maintenance mode. You can pass multiple users at once by employing the method BypassUsers(IEnumerable<string>).
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassUser("myUserName");
-}
 ```
 
 
@@ -34,10 +28,7 @@ app.UseMaintenance(options =>
 Use this to let users of a particular role access the application, while it is in maintenance mode.
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassUserRole("Admin");
-}
 ```
 
 By default, the option is set for role "Admin".
@@ -48,19 +39,13 @@ By default, the option is set for role "Admin".
 The url path (relative to the domain), which starts with the string, specified with this option, remain accessible.
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassUrlPath("/PartNotInMaintenance")
-}
 ```
 
 or match all paths, beginning with the specified string, in a case-insensitive manner
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassUrlPath("/PartNotInMaintenance", StringComparison.OrdinalIgnoreCase)
-}
 ```
 
 You can pass multiple paths at once by using options.BypassUrlPaths(IEnumerable<string>, StringComparison).
@@ -70,10 +55,7 @@ You can pass multiple paths at once by using options.BypassUrlPaths(IEnumerable<
 When we are in maintenance mode, we want to continue serving specific file types. For example, the maintenance mode page itself may have images in it, or it may use a separate css and javascript files. By employing this option we can specify which filetypes we want to be exempt from blocking when the application is in maintenance mode.
 
 ```csharp
-app.UseMaintenance(options =>
-{
     options.BypassFileExtension(".png");
-}
 ```
 
 If no extensions are explicitly specified in BypassFileExtension by the user, then these file extensions will remain accessable:
@@ -84,5 +66,13 @@ If BypassFileExtension has been used, the extensions above will not be accessibl
 
 You can specify multiple extensions at once by calling this method:
 ```csharp
-options.BypassFileExtension(new string[] { "css", "jpg" "mp3" });
+options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
+```
+
+### UseEncoding
+
+Customize the maintenance message to the users.
+
+```csharp
+options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8);
 ```
