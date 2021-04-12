@@ -4,7 +4,7 @@
 
 ### Put your ASP.NET Core application (or parts of it) in maintenance mode
 
-We all know that putting a publicly available website or application in maintenance mode is not the perfect thing to do. Reality, however, puts us in situations where this is inevitable. 
+For the cases when "app_offline.htm" and the staging environment are just not enough.
 
 Unlike the IIS method, relying on "app_offline.htm", this middleware allows you to keep parts of the site alive while the rest is unaccessable for the public. You can enter maintenance mode from a controller action, for example by pressing a button in the administration area of your applicaiton, or by calling an API. You can specify that the maintenance mode should end automatically after a given period.
 
@@ -14,6 +14,8 @@ Key functionality:
   * Let certain parts of the site remain accessibe while in maintenance mode
   * Let certain users (e.g. admins) still be able to access the entire site
   * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
+  * Customize your maintenance mode response (html, text and json files/data are supported)
+  * SEO friendly, as it relies on 503 response code 503 with a "Retry-After" interval
 
 ### Basic registration
 
@@ -25,8 +27,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 ...
     app.UseMaintenance(options =>
     {
-        options.BypassAllAuthenticatedUsers();
-        options.BypassUser("Admin");
+        options.BypassUserRole("Admin");
     });
 
     app.UseEndpoints(endpoints =>
