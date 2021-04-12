@@ -16,7 +16,7 @@ When this option is set, all authenticated users will have access to the site, w
 
 ### BypassUser
 
-When a user is passed to this option, this user retains full access to the site, while it is in maintenance mode. You can pass multiple users at once by employing the method BypassUsers(IEnumerable<string>).
+When a user is passed to this option, this user retains full access to the site, while it is in maintenance mode. You can pass multiple users at once by employing the method `BypassUsers(IEnumerable<string>)`.
 
 ```csharp
     options.BypassUser("myUserName");
@@ -48,7 +48,7 @@ or match all paths, beginning with the specified string, in a case-insensitive m
     options.BypassUrlPath("/PartNotInMaintenance", StringComparison.OrdinalIgnoreCase)
 ```
 
-You can pass multiple paths at once by using options.BypassUrlPaths(IEnumerable<string>, StringComparison).
+You can pass multiple paths at once by using `BypassUrlPaths(IEnumerable<string>, StringComparison)`.
 
 ### BypassFileExtension
 
@@ -80,7 +80,7 @@ If the option is not specified, a default html response is served.
 
 ### UseResponseFile
 
-Specify a file, containing the maintenance response. This file can be placed either in ContentRootPath or in WebRootPath.
+Specify a file, containing the maintenance response. This file can be placed either in `ContentRootPath` or in `WebRootPath`.
 
 ```csharp
     options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath);
