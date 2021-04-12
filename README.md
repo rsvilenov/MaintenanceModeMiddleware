@@ -55,7 +55,7 @@ Inject the control service in the controller, from which you want to trigger the
 ```csharp
 private readonly IMaintenanceControlService _maintenanceCtrlSvc;
 
-public HomeController(IMaintenanceControlService maintenanceCtrlSvc)
+public AdminController(IMaintenanceControlService maintenanceCtrlSvc)
 {
    _maintenanceCtrlSvc = maintenanceCtrlSvc;
 }
