@@ -49,6 +49,8 @@ public void ConfigureServices(IServiceCollection services)
 
 You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default, when you use the option options.UseDefaultStateStore() the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the IStateStore interface to optoins.UseStateStore(yourStateStore).
 
+⚠️ **Note**: The identity area remains accessible in maintenance mode so that you can log in with the users, for which the site should be visible. You can block the access to this area as well. Read how to do that in the full [documentation](docs/options.md)
+
 ### Basic use
 
 Inject the control service in the controller, from which you want to trigger the maintenance mode:
