@@ -1,4 +1,4 @@
-# Middleware options
+# Middleware configuration
 
 You can configure the middleware by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
 The single argument of app.UseMaintenance is a delegate, containing an instance of an option builder class, which you can use to set options. To set an option,
@@ -41,3 +41,24 @@ app.UseMaintenance(options =>
 ```
 
 By default, the option is set for role "Admin".
+
+
+### BypassUrlPath
+The url path (relative to the domain), which starts with the string, specified with this option, remain accessible.
+
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassUrlPath("/PartNotInMaintenance")
+}
+```
+
+or match all paths, beginning with the specified string, in a case-insensitive manner
+
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassUrlPath("/PartNotInMaintenance", StringComparison.OrdinalIgnoreCase)
+}
+```
+
