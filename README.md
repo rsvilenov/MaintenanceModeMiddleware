@@ -15,9 +15,9 @@ Key functionality:
   * Let certain users (e.g. admins) still be able to access the entire site (or parts of it)
   * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
 
-### Basic use
+### Basic registration
 
-Register the middleware in Startup.cs:
+1. Register the middleware in Startup.cs:
 
 ```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -35,3 +35,46 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is recommended that you put its registration just before app.UseEndpoints(..);
+
+2. Register the control service in Startup.cs:
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+   ...
+   services.AddMaintenance();
+}
+```
+
+
+### Basic use
+
+Inject the control service in the controller, from which you want to trigger the maintenance mode:
+
+```csharp
+private readonly IMaintenanceControlService _maintenanceCtrlSvc;
+
+public HomeController(IMaintenanceControlService maintenanceCtrlSvc)
+{
+   _maintenanceCtrlSvc = maintenanceCtrlSvc;
+}
+```
+
+Then just call its methods from the controller actions:
+
+```csharp
+[HttpPost]
+public IActionResult MaintenanceMode()
+{
+    if (_maintenanceCtrlSvc.IsMaintenanceOn)
+    {
+        _maintenanceCtrlSvc.LeaveMaintanence();
+    }
+    else
+    {
+        _maintenanceCtrlSvc.EnterMaintanence();
+    }
+
+    return RedirectToAction(nameof(Index));
+}
+```
