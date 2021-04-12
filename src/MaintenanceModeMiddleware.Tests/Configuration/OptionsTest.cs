@@ -156,7 +156,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("", typeof(ArgumentNullException))]
         public void Test_BypassUserRoleOption(string userRole, Type expectedException)
         {
-            var option = new BypassUserNameOption();
+            var option = new BypassUserRoleOption();
             Action testAction = () => option.LoadFromString(userRole);
 
             if (expectedException != null)

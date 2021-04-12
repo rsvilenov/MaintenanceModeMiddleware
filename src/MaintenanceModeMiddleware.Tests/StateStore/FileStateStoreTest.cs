@@ -69,7 +69,120 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
             }
         }
 
-        private FileStateStore GetStateStore()
+        [Theory]
+        [InlineData("test1.json", null)]
+        [InlineData("test2.json", PathBaseDirectory.ContentRootPath)]
+        [InlineData("test3.json", PathBaseDirectory.WebRootPath)]
+        public void Store_In_Various_Paths(string file, PathBaseDirectory? baseDir)
+        {
+            FileStateStore store = GetStateStore(file, baseDir);
+            var testState = new MaintenanceState
+            {
+                IsMaintenanceOn = true,
+                EndsOn = DateTime.Now
+            };
+
+
+            Func<MaintenanceState> testFunc = () =>
+            {
+                store.SetState(testState);
+                return store.GetState();
+            };
+
+            MaintenanceState restoredState = testFunc.ShouldNotThrow();
+
+            restoredState.ShouldNotBeNull();
+            restoredState.EndsOn.ShouldBe(testState.EndsOn);
+            restoredState.IsMaintenanceOn.ShouldBe(testState.IsMaintenanceOn);
+        }
+
+        [Fact]
+        public void GetState_File_Is_Empty()
+        {
+            string generatedFilePath = null;
+            FileStateStore store = GetStateStore("test_to_be_emptied.json", null, (filePath) =>
+            {
+                generatedFilePath = filePath;
+            });
+
+            Func<MaintenanceState> testFunc = () =>
+            {
+                File.WriteAllText(generatedFilePath, "");
+                return store.GetState();
+            };
+
+            testFunc
+                .ShouldNotThrow()
+                .ShouldBeNull();
+        }
+
+        [Fact]
+        public void GetState_File_Does_Not_Exist()
+        {
+            string generatedFilePath = null;
+            FileStateStore store = GetStateStore("test_to_be_deleted.json", null, (filePath) =>
+            {
+                generatedFilePath = filePath;
+            });
+
+            Func<MaintenanceState> testFunc = () =>
+            {
+                if (File.Exists(generatedFilePath))
+                {
+                    File.Delete(generatedFilePath);
+                }
+
+                return store.GetState();
+            };
+
+            testFunc
+                .ShouldNotThrow()
+                .ShouldBeNull();
+        }
+
+        [Fact]
+        public void SetState_Directory_Does_Not_Exist()
+        {
+            string generatedFilePath = null;
+            FileStateStore store = GetStateStore("test_dir/test_to_be_deleted.json", null, (filePath) =>
+            {
+                generatedFilePath = filePath;
+            });
+
+            Action testAction = () =>
+            {
+                store.SetState(new MaintenanceState());
+            };
+
+            testAction
+                .ShouldNotThrow();
+        }
+
+        [Fact]
+        public void SetState_PathBaseDirectory_Invalid_Enum_Value()
+        {
+            string generatedFilePath = null;
+            FileStateStore store = GetStateStore("invalid_basedir.json",
+                (PathBaseDirectory)(-1),
+                (filePath) =>
+            {
+                generatedFilePath = filePath;
+            });
+
+            Action testAction = () =>
+            {
+                store.SetState(new MaintenanceState());
+            };
+
+            testAction
+                .ShouldThrow<InvalidOperationException>();
+        }
+
+
+
+        private FileStateStore GetStateStore(string file = "test.json",
+            PathBaseDirectory? baseDir = PathBaseDirectory.ContentRootPath,
+            Action<string> onFileGenerated = null)
         {
             string tempPath = Path.GetTempPath();
 
@@ -82,8 +195,15 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 .GetService(typeof(IWebHostEnvironment))
                 .Returns(webHostEnv);
 
-            FileStateStore store = new FileStateStore(new FileDescriptor("test.json", PathBaseDirectory.ContentRootPath));
+            string randFilePrefix = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+            FileDescriptor fileDescriptor = baseDir.HasValue
+                ? new FileDescriptor($"{randFilePrefix}{file}", baseDir.Value)
+                : new FileDescriptor(Path.Combine(tempPath, $"{randFilePrefix}{file}"));
+
+            FileStateStore store = new FileStateStore(fileDescriptor);
             (store as IServiceConsumer).ServiceProvider = serviceProvider;
+
+            onFileGenerated?.Invoke(Path.Combine(tempPath, $"{randFilePrefix}{file}"));
 
             return store;
         }
