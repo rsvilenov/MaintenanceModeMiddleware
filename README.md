@@ -15,7 +15,7 @@ Key functionality:
   * Let certain users (e.g. admins) still be able to access the entire site
   * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
   * Customize your maintenance mode response (html, text and json files/data are supported)
-  * SEO friendly, as it relies on 503 response code 503 with a "Retry-After" interval
+  * SEO friendly, as it relies on response code 503 with a "Retry-After" interval
 
 ### Basic registration
 
