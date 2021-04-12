@@ -12,7 +12,7 @@ Key functionality:
   * Enter and exit maintenance mode by calling a controller action or view method
   * Specify the time for which the maintenance mode should be on
   * Let certain parts of the site remain accessibe while in maintenance mode
-  * Let certain users (e.g. admins) still be able to access the entire site (or parts of it)
+  * Let certain users (e.g. admins) still be able to access the entire site
   * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
 
 ### Basic registration
