@@ -44,6 +44,7 @@ By default, the option is set for role "Admin".
 
 
 ### BypassUrlPath
+
 The url path (relative to the domain), which starts with the string, specified with this option, remain accessible.
 
 ```csharp
@@ -62,3 +63,26 @@ app.UseMaintenance(options =>
 }
 ```
 
+You can pass multiple paths at once by using options.BypassUrlPaths(IEnumerable<string>, StringComparison).
+
+### BypassFileExtension
+
+When we are in maintenance mode, we want to continue serving specific file types. For example, the maintenance mode page itself may have images in it, or it may use a separate css and javascript files. By employing this option we can specify which filetypes we want to be exempt from blocking when the application is in maintenance mode.
+
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassFileExtension(".png");
+}
+```
+
+If no extensions are explicitly specified in BypassFileExtension by the user, then these file extensions will remain accessable:
+```
+"css", "jpg", "png", "gif", "svg", "js"
+```
+If BypassFileExtension has been used, the extensions above will not be accessible, except if they are specified in the arguments for the option.
+
+You can specify multiple extensions at once by calling this method:
+```csharp
+options.BypassFileExtension(new string[] { "css", "jpg" "mp3" });
+```
