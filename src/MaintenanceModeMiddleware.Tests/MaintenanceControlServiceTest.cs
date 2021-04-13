@@ -235,5 +235,23 @@ namespace MaintenanceModeMiddleware.Tests
                 .ShouldNotBeNull();
         }
 
+        [Fact]
+        public void RestoreState_When_StateStore_Is_Not_Set_Should_Not_Throw()
+        {
+            IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
+            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            {
+                options.UseNoStateStore();
+            };
+            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            Action testAction = () =>
+            {
+                ICanRestoreState restorer = svc;
+                restorer.RestoreState();
+            };
+
+            testAction.ShouldNotThrow();
+        }
+
     }
 }
