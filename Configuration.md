@@ -106,6 +106,7 @@ To override any of these default settings, you have two options:
 ```csharp
 app.UseMaintenance(options =>
 {
+    options.UseNoDefaultValues(); // this will cause BypassUserRoles(new [] {'Admin'... not to be applied.
     options.BypassUser("John");
     
     // the following two options are mandatory and if they are not specified,
