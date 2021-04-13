@@ -74,7 +74,7 @@ Instead of passing options to `UseMaintenance()`, you can pass them each time wh
 
 ```
 
-Notice the first parameter of the call. It allows you to specify the duration of the maintenance. When this datetime mark is reached, the application goes out of maintenance mode automatically.
+Notice the first parameter of the call. It allows you to specify the duration of the maintenance. When this datetime mark is reached, the application goes out of maintenance mode automatically. If you want to enter maintenance for an indefinite time, pass null to this parameter. When you are done with the maintenance, call `LeaveMaintenance()`.
 
 
 ### Override default configuration values
