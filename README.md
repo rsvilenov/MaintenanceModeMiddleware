@@ -46,7 +46,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 ...
 }
 ```
-Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is highly recommended that you put its registration just before `app.UseEndpoints(..);`.
+:information_source: Since this is a middleware, the order of registration is important. In order for you to be able to profit from the entire set of features of this middleware, it is highly recommended that you put its registration just before `app.UseEndpoints(..);`.
 
 * Register the control service in Startup.cs:
 
@@ -92,7 +92,7 @@ public IActionResult MaintenanceMode()
 }
 ```
 
-⚠️ **Note**: The identity area remains accessible in maintenance mode so that you can log in with the users, for which the site should be visible. You can block the access to this area as well. Read how to do that in the full [documentation](Configuration.md).
+:information_source: **Note**: The identity area remains accessible in maintenance mode so that you can log in with the users, for which the site should be visible. You can block the access to this area as well. Read how to do that in the full [documentation](Configuration.md).
 
 
 ### Options

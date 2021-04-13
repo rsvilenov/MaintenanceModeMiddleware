@@ -24,25 +24,119 @@ This document describes in detail how to configure this component.
 
 ## General
 
-You can configure the middleware by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
-The single argument of `app.UseMaintenance` is a delegate, containing an instance of an option builder class, which you can use to set options. To set an option,
-call the method, associated with it. You can see examples of how to do this below.
+The middleware can be configured by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
+The single argument of `app.UseMaintenance` is a delegate, containing an instance of an option builder class, which can be used to set options. To set an option, just
+call the method, associated with it. See examples of how to do this below.
 
 ### Configure in Startup
 
+To specify where the maintenance state is stored, so that it can be restored after a restart of the application, use the options, available in the extension method for registeratin of the control service. By default, the state is stored in a json file. To override that, you can implement your own state store and pass it as a parameter to UseStateStore(). For inspiration, take a look at the implementation of [FileStateStore](src/MaintenanceModeMiddleware/StateStore/FileStateStore.cs).
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+...
+    services.AddMaintenance(options =>
+    {
+        options.UseStateStore(myStateStore);
+    });
+ ```
+
+To configure what parts of the application will be taken down for maintenance and which users will still have access to the entire application, as well as to specify what the exact response in maintenance mode will be, use this:
+
+```csharp
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+...
+// place this before UseEndPoints()
+app.UseMaintenance(options =>
+{
+    options.BypassUser("Demo");
+    options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+    //... some other options
+    // You can configure it using the fluid interface the configuration methods provide. Like this:
+    // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+});
+
+app.UseEndpoints(endpoints =>
+...
+```
 
 ### Configure by the control service
 
+Instead of passing options to `UseMaintenance()`, you can pass them each time when you want to enter maintenance mode. You can even pass different options each time, thus taking down for maintenance different parts of the site one by one. This way, you can implement a user interface, which allows you to specify the options before hitting the button "Enter maintenance". To do that, pass the options to the `EnterMaintenance()` method of the control service:
+
+```csharp
+    _maintenanceConrolService.EnterMaintenance(DateTime.Now.AddHours(1), options =>
+    {
+        options.UseResponse("We will be back in an hour", ContentType.Text, Encoding.UTF8);
+    });
+
+```
+
+Notice the first parameter of the call. It allows you to specify the duration of the maintenance. When this datetime mark is reached, the application goes out of maintenance mode automatically. If you want to enter maintenance for an indefinite time, pass null to this parameter. When you are done with the maintenance, call `LeaveMaintenance()`.
+
 
 ### Override default configuration values
+
+If no options are passed to services.AddMaintenance(), the default configuration would be the same as if the following option was specififed:
+```csharp
+services.AddMaintenance(options =>
+{
+    options.UseDefaultStateStore();
+});
+```
+
+if no options are passed to app.UseMaintenance(), the default configuration would be the same as if the following options were specified:
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
+    options.BypassUrlPath("/Identity");
+    options.BypassUserRoles(new string[] { "Admin", "Administrator"});
+    options.Set503RetryAfterInterval(5300);
+    options.UseDefaultResponse();
+});
+```
+
+To override any of these default settings, you have two options:
+1. Call its method and pass your own values. This will cause the default setting to be ommitted in favour of the value you have specified.
+2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you don't want to allow only a specific user to retain access to the site, regardless of the roles he has.
+
+```csharp
+app.UseMaintenance(options =>
+{
+    options.UseNoDefaultValues(); // this will cause BypassUserRoles(new [] {'Admin'... not to be applied.
+    options.BypassUser("John");
+    
+    // the following two options are mandatory and if they are not specified,
+    // the middleware will throw an exception.
+    options.Set503RetryAfterInterval(5300);
+    options.UseDefaultResponse();
+});
+```
 
 ## Options for the control service
 
 ### UseNoStateStore
 
+To disable the storing of the maintenance state, thus preventing the applicatin to being able to restore it upon restart, use this option.
+
+```csharp
+    options.UseNoStateStore();
+```
+
 ### UseStateStore
 
+To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this methid.
+
+```csharp
+    options.UseStateStore(myCustomStateStore);
+```
+
 ### UseDefaultStateStore
+
+This is the default setting. If you do not call any of the methods above, this setting will be applied.
 
 
 ## Options for the middleware
@@ -112,6 +206,8 @@ You can specify multiple extensions at once by calling this method:
 ```csharp
     options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
 ```
+
+The static files will still be served, regardless of whether their extensions are specified here, if UseStaticFiles() middleware is placed before the current middleware in the chain.
 
 ### UseResponse
 
