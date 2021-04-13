@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware
 {
-    public class MaintenanceMiddleware
+    internal class MaintenanceMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSev;

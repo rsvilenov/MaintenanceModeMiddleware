@@ -2,10 +2,10 @@
 
 namespace MaintenanceModeMiddleware.Tests.HelperTypes
 {
-    public class MiddlewareTestDesk
+    internal class MiddlewareTestDesk
     {
-        public MaintenanceMiddleware MiddlewareInstance { get; set; }
-        public HttpContext CurrentHttpContext { get; set; }
-        public bool IsNextDelegateCalled { get; set; }
+        internal MaintenanceMiddleware MiddlewareInstance { get; set; }
+        internal HttpContext CurrentHttpContext { get; set; }
+        internal bool IsNextDelegateCalled { get; set; }
     }
 }

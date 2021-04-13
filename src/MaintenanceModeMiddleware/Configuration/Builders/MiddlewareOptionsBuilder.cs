@@ -10,6 +10,9 @@ using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
+    /// <summary>
+    /// A builder for the middleware options.
+    /// </summary>
     public class MiddlewareOptionsBuilder
     {
         private readonly OptionCollection _options;
@@ -20,6 +23,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             _options = new OptionCollection();
         }
 
+        /// <summary>
+        /// Specify the response file which will be served to the users, trying to
+        /// enter the web application while it is in maintenance mode.
+        /// </summary>
+        /// <param name="relativePath">File path, relative to the location, specified in the second parameter.</param>
+        /// <param name="baseDir">Either ContentRootPath, or WWWRootPath.</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponseFile(string relativePath, PathBaseDirectory baseDir)
         {
             if (string.IsNullOrEmpty(relativePath))
@@ -44,6 +54,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify a response to be served to the users, trying to access the web application
+        /// while it is in maintenance mode.
+        /// </summary>
+        /// <param name="response">The content of the response.</param>
+        /// <param name="contentType">The type of the content: text, html or json</param>
+        /// <param name="encoding">The encoding of the content</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponse(string response, ContentType contentType, Encoding encoding)
         {
             if (string.IsNullOrEmpty(response))
@@ -54,6 +72,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return UseResponse(encoding.GetBytes(response), contentType, encoding);
         }
 
+        /// <summary>
+        /// Specify a response to be served to the users, trying to access the web application
+        /// while it is in maintenance mode.
+        /// </summary>
+        /// <param name="responseBytes">The content of the response, encoded with the encoding, specified in the third parameter.</param>
+        /// <param name="contentType">The type of the content: text, html or json</param>
+        /// <param name="encoding">The encoding of the content</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, ContentType contentType, Encoding encoding)
         {
             if (responseBytes == null)
@@ -79,6 +105,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Serve the built-in html response to the users, trying to access the application
+        /// while it is in maintenance mode. If no other response option is specified,
+        /// this is set by default.
+        /// </summary>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder UseDefaultResponse()
         {
             AssertResponseNotSpecified();
@@ -91,6 +123,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify the value of 'Retry-After' header of the 503 http response.
+        /// The value is in seconds. If no other value is specified, the value of
+        /// 5300 seconds (roughly an hour and a half) is used.
+        /// </summary>
+        /// <param name="interval">Seconds</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder Set503RetryAfterInterval(int interval)
         {
             _options.Add(new Code503RetryIntervalOption
@@ -101,6 +140,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify which user should retain access to the web application after
+        /// it has been put in maintenance mode.
+        /// </summary>
+        /// <param name="userName">User name</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUser(string userName)
         {
             if (string.IsNullOrEmpty(userName))
@@ -116,6 +161,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+
+        /// <summary>
+        /// Specify which users should retain access to the web application after
+        /// it has been put in maintenance mode.
+        /// </summary>
+        /// <param name="userNames">A collection of user names</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUsers(IEnumerable<string> userNames)
         {
             if (userNames == null)
@@ -136,6 +188,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify which user role should retain access to the web application after
+        /// it has been put in maintenance mode. 
+        /// You can set user roles one by one by using this method or set multiple
+        ///  roles at once by calling <see cref="BypassUserRoles">BypassUserRoles()</see>.
+        /// </summary>
+        /// <param name="role">Role</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUserRole(string role)
         {
             if (string.IsNullOrEmpty(role))
@@ -151,6 +211,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify which user roles should retain access to the web application after
+        /// it has been put in maintenance mode. 
+        /// </summary>
+        /// <param name="roles">A collection of roles.</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUserRoles(IEnumerable<string> roles)
         {
             if (roles == null)
@@ -171,6 +237,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify that all logged in users should have access to the entire web application
+        /// after it has been put in maintanence mode.
+        /// This does not apply only to the users, which had been already logged in when the application
+        /// was put in maintenance mode. Since, if not specified otherwise, the Identity area remains
+        /// accessible, other users may log in and still get the access to the web application.
+        /// To limit the users, which should have access, use <see cref="BypassUser">BypassUser()</see>  
+        /// and <see cref="BypassUserRole">BypassUserRole()</see> methods instead.
+        /// </summary>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassAllAuthenticatedUsers()
         {
             _options.Add(new BypassAllAuthenticatedUsersOption
@@ -181,6 +257,15 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Spcify which url path should remain accessible 
+        /// while the web applicaiton is in maintenance mode.
+        /// Pass the string with which the path BEGINS.
+        /// All paths, which begin with the specified string will be matched.
+        /// </summary>
+        /// <param name="path">The path to be excempt from blocking.</param>
+        /// <param name="comparison">How the path strings should be compared.</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUrlPath(PathString path, StringComparison comparison = StringComparison.Ordinal)
         {
             UrlPath urlPath = 
@@ -198,6 +283,15 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Spcify which url paths should remain accessible 
+        /// while the web applicaiton is in maintenance mode.
+        /// Pass a collectin of strings with which the paths BEGIN.
+        /// All paths, which begin with one of the specified string will be matched.
+        /// </summary>
+        /// <param name="paths">A collection of paths to be excempt from blocking.</param>
+        /// <param name="comparison">How the path strings should be compared.</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUrlPaths(IEnumerable<PathString> paths, StringComparison comparison = StringComparison.Ordinal)
         {
             if (paths == null)
@@ -218,6 +312,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify which file extensions will still be served after the
+        /// application enters maintenance mode.
+        /// If this method is not called, the application will serve the following extensions:
+        /// "css", "jpg", "png", "gif", "svg", "js".
+        /// The static files will still be served, regardless of whether their extensions are specified here, 
+        /// if <see cref="UseStaticFiles">UseStaticFiles()</see> middleware is placed before the current middleware in the chain.
+        /// </summary>
+        /// <param name="extension">file extension (with or without the dot)</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassFileExtension(string extension)
         {
             if (string.IsNullOrEmpty(extension))
@@ -238,6 +342,16 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Specify which file extensions will still be served after the
+        /// application enters maintenance mode.
+        /// If this method is not called, the application will serve the following extensions:
+        /// "css", "jpg", "png", "gif", "svg", "js".
+        /// The static files will still be served, regardless of whether their extensions are specified here, 
+        /// if <see cref="UseStaticFiles">UseStaticFiles()</see> middleware is placed before the current middleware in the chain.
+        /// </summary>
+        /// <param name="extension">A collection of file extensions (with or without the dot)</param>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder BypassFileExtensions(IEnumerable<string> extensions)
         {
             if (extensions == null)
@@ -258,6 +372,11 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+        /// <summary>
+        /// Do not fill the options, which are not explicitly specified by the user,
+        /// with their default values.
+        /// </summary>
+        /// <returns></returns>
         public MiddlewareOptionsBuilder UseNoDefaultValues()
         {
             _options.Add(new UseNoDefaultValuesOption
@@ -282,7 +401,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             
             if (!_options.GetAll<BypassUserRoleOption>().Any())
             {
-                BypassUserRole("Admin");
+                BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
             if (!_options.GetAll<Code503RetryIntervalOption>().Any())
