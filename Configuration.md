@@ -120,9 +120,23 @@ app.UseMaintenance(options =>
 
 ### UseNoStateStore
 
+To disable the storing of the maintenance state, thus preventing the applicatin to being able to restore it upon restart, use this option.
+
+```csharp
+    options.UseNoStateStore();
+```
+
 ### UseStateStore
 
+To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this methid.
+
+```csharp
+    options.UseStateStore(myCustomStateStore);
+```
+
 ### UseDefaultStateStore
+
+This is the default setting. If you do not call any of the methods above, this setting will be applied.
 
 
 ## Options for the middleware
