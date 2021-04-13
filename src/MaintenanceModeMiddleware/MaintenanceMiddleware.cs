@@ -154,45 +154,47 @@ namespace MaintenanceModeMiddleware
         {
             if (!_maintenanceCtrlSev.IsMaintenanceModeOn)
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             OptionCollection options = GetOptionCollection();
-            if (options == null)
-            {
-                goto nextDelegate;
-            }
 
             if (options.GetAll<BypassUrlPathOption>().Any(o =>
                 context.Request.Path.StartsWithSegments(
                     o.Value.PathString, o.Value.Comparison)))
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             if (options.GetAll<BypassFileExtensionOption>().Any(o =>
                 context.Request.Path.Value.EndsWith(
                     $".{o.Value}", StringComparison.OrdinalIgnoreCase)))
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             if (options.GetSingleOrDefault<BypassAllAuthenticatedUsersOption>()?.Value == true
                 && context.User.Identity.IsAuthenticated)
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             if (options.GetAll<BypassUserNameOption>().Any(o =>
                 o.Value == context.User.Identity.Name))
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             if (options.GetAll<BypassUserRoleOption>().Any(o =>
                 context.User.IsInRole(o.Value)))
             {
-                goto nextDelegate;
+                await _next.Invoke(context);
+                return;
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
@@ -203,12 +205,6 @@ namespace MaintenanceModeMiddleware
                 .Response
                 .WriteAsync(_response.ContentEncoding.GetString(_response.ContentBytes),
                     _response.ContentEncoding);
-
-            return;
-
-
-        nextDelegate:
-            await _next.Invoke(context);
         }
     }
 }

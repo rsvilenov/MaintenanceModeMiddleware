@@ -514,12 +514,22 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void FillEmptyOptionsWithDefault()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Action testAction = () => { };
-
-            testAction.ShouldNotThrow();
 
             builder.GetOptions().ShouldNotBeNull()
                 .GetAll().ShouldNotBeEmpty();
+        }
+
+        [Fact]
+        public void GetOptionsTwice_ShouldNotThrow()
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            Action testAction = () => 
+            {
+                builder.GetOptions();
+                builder.GetOptions();
+            };
+
+            testAction.ShouldNotThrow();
         }
     }
 }

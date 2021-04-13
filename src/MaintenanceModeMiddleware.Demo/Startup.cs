@@ -1,3 +1,4 @@
+using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.TestApp.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text;
 
 namespace MaintenanceModeMiddleware.TestApp
 {
@@ -62,10 +64,7 @@ namespace MaintenanceModeMiddleware.TestApp
 
             app.UseMaintenance(options =>
             {
-                options.BypassAllAuthenticatedUsers();
-                options.BypassUser("rosen.svilenov@gmail.com");
-                //options.UseResponseFile("maintenance.html",
-                //    PathBaseDirectory.WebRootPath);
+                options.BypassUser("Demo");
             });
 
             app.UseEndpoints(endpoints =>
