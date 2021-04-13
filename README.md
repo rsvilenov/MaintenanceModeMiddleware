@@ -21,7 +21,7 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 
 This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
 
-Key functionality:
+Key features:
   * Enter and exit maintenance mode by calling the control service from a controller action or view method
   * Specify the time for which the maintenance mode should be on
   * Let certain parts of the site remain accessibe while in maintenance mode
