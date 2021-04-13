@@ -30,6 +30,36 @@ call the method, associated with it. You can see examples of how to do this belo
 
 ### Configure in Startup
 
+To specify where the maintenance state is stored, so that it can be restored after a restart of the application, use the options, available in the extension method for registeratin of the control service. By default, the state is stored in a json file. To override that, you can implement your own state store and pass it as a parameter to UseStateStore(). For inspiration, take a look at the implementation of [FileStateStore](src/MaintenanceModeMiddleware/StateStore/FileStateStore.cs).
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+...
+    services.AddMaintenance(options =>
+    {
+        options.UseStateStore(myStateStore);
+    });
+ ```
+
+To configure what parts of the application will be taken down for maintenance and which users will still have access to the entire application, as well as to specify what the exact response in maintenance mode will be, use this:
+
+```csharp
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+...
+// place this before UseEndPoints()
+app.UseMaintenance(options =>
+{
+    options.BypassUser("Demo");
+    options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+    //... some other options
+    // You can configure it using the fluid interface the configuration methods provide. Like this:
+    // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+});
+
+app.UseEndpoints(endpoints =>
+...
 
 ### Configure by the control service
 
