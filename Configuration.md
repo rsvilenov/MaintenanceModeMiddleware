@@ -35,11 +35,13 @@ To specify where the maintenance state is stored, so that it can be restored aft
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-...
+    ...
     services.AddMaintenance(options =>
     {
         options.UseStateStore(myStateStore);
     });
+    ...
+}
  ```
 
 To configure what parts of the application will be taken down for maintenance and which users will still have access to the entire application, as well as to specify what the exact response in maintenance mode will be, use this:
@@ -60,6 +62,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
     app.UseEndpoints(endpoints =>
     ...
+}
 ```
 
 ### Configure by the control service
