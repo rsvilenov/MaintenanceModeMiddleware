@@ -74,10 +74,11 @@ namespace MaintenanceModeMiddleware.Tests
             }
         }
 
-        const string testFileName = "test.txt";
+        const string testFileNameCaseExists = "test_response_option_file_exists.txt";
+        const string testFileNameCaseNotExists = "nonexistent_response_option_file.txt";
         [Theory]
-        [InlineData(testFileName, null, null)]
-        [InlineData("nonexistent.txt", typeof(ArgumentException), "Could not find file")]
+        [InlineData(testFileNameCaseExists, null, null)]
+        [InlineData(testFileNameCaseNotExists, typeof(ArgumentException), "Could not find file")]
         public void Constructor_ResponseFileOption(
             string filePath,
             Type expectedException,
@@ -85,30 +86,37 @@ namespace MaintenanceModeMiddleware.Tests
         {
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
             webHostEnv.ContentRootPath.Returns(Path.GetTempPath());
-            File.Create(Path.Combine(webHostEnv.ContentRootPath, testFileName))
+            File.Create(Path.Combine(webHostEnv.ContentRootPath, testFileNameCaseExists))
                 .Dispose();
 
-            Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+            try
             {
-                options.UseResponseFile(filePath, PathBaseDirectory.ContentRootPath);
+                Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+                {
+                    options.UseResponseFile(filePath, PathBaseDirectory.ContentRootPath);
                 // prevent other exceptions due to missing required options
                 options.FillEmptyOptionsWithDefault();
-            };
+                };
 
-            Action testAction = () =>
-                new MaintenanceMiddleware(null,
-                    null,
-                    webHostEnv,
-                    optionBuilderDelegate);
+                Action testAction = () =>
+                    new MaintenanceMiddleware(null,
+                        null,
+                        webHostEnv,
+                        optionBuilderDelegate);
 
-            if (expectedException == null)
-            {
-                testAction.ShouldNotThrow();
+                if (expectedException == null)
+                {
+                    testAction.ShouldNotThrow();
+                }
+                else
+                {
+                    testAction.ShouldThrow(expectedException)
+                        .Message.ShouldStartWith(expectedExMsgStart);
+                }
             }
-            else
+            finally
             {
-                testAction.ShouldThrow(expectedException)
-                    .Message.ShouldStartWith(expectedExMsgStart);
+                File.Delete(Path.Combine(webHostEnv.ContentRootPath, testFileNameCaseExists));
             }
         }
 

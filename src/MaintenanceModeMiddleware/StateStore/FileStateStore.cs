@@ -18,18 +18,18 @@ namespace MaintenanceModeMiddleware.StateStore
         public MaintenanceState GetState()
         {
             string filePath = GetFileFullPath();
-            if (IO.File.Exists(filePath))
+            if (!IO.File.Exists(filePath))
             {
-                string serialized = IO.File.ReadAllText(filePath);
-                if (string.IsNullOrEmpty(serialized))
-                {
-                    return null;
-                }
-
-                return JsonSerializer.Deserialize<MaintenanceState>(serialized);
+                return null;
             }
 
-            return null;
+            string serialized = IO.File.ReadAllText(filePath);
+            if (string.IsNullOrEmpty(serialized))
+            {
+                return null;
+            }
+
+            return JsonSerializer.Deserialize<MaintenanceState>(serialized);
         }
 
         public void SetState(MaintenanceState state)
@@ -56,26 +56,24 @@ namespace MaintenanceModeMiddleware.StateStore
         {
             IWebHostEnvironment webHostEnv = GetWebHostEnvironment();
 
-            string fullFilePath;
-            if (File.BaseDir != null)
+            if (File.BaseDir == null)
             {
-                switch (File.BaseDir)
-                {
-                    case PathBaseDirectory.ContentRootPath:
-                        fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.FilePath);
-                        break;
-                    case PathBaseDirectory.WebRootPath:
-                        fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.FilePath);
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unknown base dir type: {File.BaseDir}.");
-                }
-            }
-            else
-            {
-                fullFilePath = File.FilePath;
+                return File.FilePath;
             }
 
+            string fullFilePath;
+            switch (File.BaseDir)
+            {
+                case PathBaseDirectory.ContentRootPath:
+                    fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.FilePath);
+                    break;
+                case PathBaseDirectory.WebRootPath:
+                    fullFilePath = IO.Path.Combine(webHostEnv.WebRootPath, File.FilePath);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unknown base dir type: {File.BaseDir}.");
+            }
+            
             return fullFilePath;
         }
 

@@ -91,26 +91,29 @@ namespace MaintenanceModeMiddleware
 
         void ICanRestoreState.RestoreState()
         {
-            if (_stateStore != null)
+            if (_stateStore == null)
             {
-                if (_stateStore is IServiceConsumer svcConsumer)
-                {
-                    svcConsumer.ServiceProvider = _svcProvider;
-                }
+                return;
+            }
 
-                MaintenanceState restored = _stateStore.GetState();
-                if (restored != null)
-                {
-                    _state.EndsOn = restored.EndsOn;
-                    _state.IsMaintenanceOn = restored.IsMaintenanceOn;
-                    if (restored.MiddlewareOptions != null)
-                    {
-                        _state.MiddlewareOptions = restored.MiddlewareOptions;
+            if (_stateStore is IServiceConsumer svcConsumer)
+            {
+                svcConsumer.ServiceProvider = _svcProvider;
+            }
 
-                        _middlewareOptionsToOverride = new OptionCollection(
-                            _state.MiddlewareOptions
-                            .Select(o => RestoreOption(o)));
-                    }
+            MaintenanceState restored = _stateStore.GetState();
+            if (restored != null)
+            {
+                _state.EndsOn = restored.EndsOn;
+                _state.IsMaintenanceOn = restored.IsMaintenanceOn;
+
+                if (restored.MiddlewareOptions != null)
+                {
+                    _state.MiddlewareOptions = restored.MiddlewareOptions;
+
+                    _middlewareOptionsToOverride = new OptionCollection(
+                        _state.MiddlewareOptions
+                        .Select(o => RestoreOption(o)));
                 }
             }
         }

@@ -350,8 +350,8 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 rootDir = Path.Combine(tempDir, "wwwRoot");
             }
-
-            File.WriteAllText(Path.Combine(rootDir, fileName), "test");
+            string safeTempFileName = SafeTempFileName.Create(fileName);
+            File.WriteAllText(Path.Combine(rootDir, safeTempFileName), "test");
 
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -359,7 +359,7 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 (optionBuilder) =>
                 {
-                    optionBuilder.UseResponseFile(fileName, baseDir);
+                    optionBuilder.UseResponseFile(safeTempFileName, baseDir);
                 },
                 null,
                 tempDir);
@@ -471,15 +471,7 @@ namespace MaintenanceModeMiddleware.Tests
                 tempDir = Path.GetTempPath();
             }
 
-            IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
-
-            string contentRootPath = Path.Combine(tempDir, "contentRoot");
-            Directory.CreateDirectory(contentRootPath);
-            webHostEnv.ContentRootPath.Returns(contentRootPath);
-
-            string wwwRootPath = Path.Combine(tempDir, "wwwRoot");
-            Directory.CreateDirectory(wwwRootPath);
-            webHostEnv.WebRootPath.Returns(wwwRootPath);
+            IWebHostEnvironment webHostEnv = FakeWebHostEnvironment.Create(tempDir);
 
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,
