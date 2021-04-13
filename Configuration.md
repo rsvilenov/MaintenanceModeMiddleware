@@ -79,7 +79,41 @@ Notice the first parameter of the call. It allows you to specify the duration of
 
 ### Override default configuration values
 
+If no options are passed to services.AddMaintenance(), the default configuration would be the same as if the following option was specififed:
+```csharp
+services.AddMaintenance(options =>
+{
+    options.UseDefaultStateStore();
+});
+```
 
+if no options are passed to app.UseMaintenance(), the default configuration would be the same as if the following options were specified:
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
+    options.BypassUrlPath("/Identity");
+    options.BypassUserRoles(new string[] { "Admin", "Administrator"});
+    options.Set503RetryAfterInterval(5300);
+    options.UseDefaultResponse();
+});
+```
+
+To override any of these default settings, you have two options:
+1. Call its method and pass your own values. This will cause the default setting to be ommitted in favour of the value you have specified.
+2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you don't want to allow only a specific user to retain access to the site, regardless of the roles he has.
+
+```csharp
+app.UseMaintenance(options =>
+{
+    options.BypassUser("John");
+    
+    // the following two options are mandatory and if they are not specified,
+    // the middleware will throw an exception.
+    options.Set503RetryAfterInterval(5300);
+    options.UseDefaultResponse();
+});
+```
 
 ## Options for the control service
 
