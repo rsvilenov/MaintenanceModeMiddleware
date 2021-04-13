@@ -24,9 +24,9 @@ This document describes in detail how to configure this component.
 
 ## General
 
-You can configure the middleware by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
-The single argument of `app.UseMaintenance` is a delegate, containing an instance of an option builder class, which you can use to set options. To set an option,
-call the method, associated with it. You can see examples of how to do this below.
+The middleware can be configured by passing options during the registration or when calling the method EnterMaintenance() of the injectable IMaintenanceControlService.
+The single argument of `app.UseMaintenance` is a delegate, containing an instance of an option builder class, which can be used to set options. To set an option, just
+call the method, associated with it. See examples of how to do this below.
 
 ### Configure in Startup
 
@@ -60,11 +60,26 @@ app.UseMaintenance(options =>
 
 app.UseEndpoints(endpoints =>
 ...
+```
 
 ### Configure by the control service
 
+Instead of passing options to `UseMaintenance()`, you can pass them each time when you want to enter maintenance mode. You can even pass different options each time, thus taking down for maintenance different parts of the site one by one. This way, you can implement a user interface, which allows you to specify the options before hitting the button "Enter maintenance". To do that, pass the options to the `EnterMaintenance()` method of the control service:
+
+```csharp
+    _maintenanceConrolService.EnterMaintenance(DateTime.Now.AddHours(1), options =>
+    {
+        options.UseResponse("We will be back in an hour", ContentType.Text, Encoding.UTF8);
+    });
+
+```
+
+Notice the first parameter of the call. It allows you to specify the duration of the maintenance. When this datetime mark is reached, the application goes out of maintenance mode automatically.
+
 
 ### Override default configuration values
+
+
 
 ## Options for the control service
 
