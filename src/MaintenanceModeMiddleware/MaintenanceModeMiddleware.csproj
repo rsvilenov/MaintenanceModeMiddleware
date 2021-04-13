@@ -1,9 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Authors>Rosen Svilenov</Authors>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+    <Authors>Rossen Svilenov</Authors>
     <Company />
+    <Description>Put your ASP.NET Core application (or parts of it) in maintenance mode.</Description>
+    <Copyright>Copyright 2021</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rsvilenov/MaintenanceModeMiddleware</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rsvilenov/MaintenanceModeMiddleware</RepositoryUrl>
+    <PackageTags>ASP.NET Core Maintenance Mode</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
