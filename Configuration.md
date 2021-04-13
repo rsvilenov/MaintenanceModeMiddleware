@@ -35,11 +35,13 @@ To specify where the maintenance state is stored, so that it can be restored aft
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-...
+    ...
     services.AddMaintenance(options =>
     {
         options.UseStateStore(myStateStore);
     });
+    ...
+}
  ```
 
 To configure what parts of the application will be taken down for maintenance and which users will still have access to the entire application, as well as to specify what the exact response in maintenance mode will be, use this:
@@ -47,19 +49,20 @@ To configure what parts of the application will be taken down for maintenance an
 ```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
-...
-// place this before UseEndPoints()
-app.UseMaintenance(options =>
-{
-    options.BypassUser("Demo");
-    options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
-    //... some other options
-    // You can configure it using the fluid interface the configuration methods provide. Like this:
-    // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
-});
+    ...
+    // place this before UseEndPoints()
+    app.UseMaintenance(options =>
+    {
+        options.BypassUser("Demo");
+        options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+        //... some other options
+        // You can configure it using the fluid interface the configuration methods provide. Like this:
+        // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+    });
 
-app.UseEndpoints(endpoints =>
-...
+    app.UseEndpoints(endpoints =>
+    ...
+}
 ```
 
 ### Configure by the control service
@@ -67,10 +70,10 @@ app.UseEndpoints(endpoints =>
 Instead of passing options to `UseMaintenance()`, you can pass them each time when you want to enter maintenance mode. You can even pass different options each time, thus taking down for maintenance different parts of the site one by one. This way, you can implement a user interface, which allows you to specify the options before hitting the button "Enter maintenance". To do that, pass the options to the `EnterMaintenance()` method of the control service:
 
 ```csharp
-    _maintenanceConrolService.EnterMaintenance(DateTime.Now.AddHours(1), options =>
-    {
-        options.UseResponse("We will be back in an hour", ContentType.Text, Encoding.UTF8);
-    });
+_maintenanceConrolService.EnterMaintenance(DateTime.Now.AddHours(1), options =>
+{
+    options.UseResponse("We will be back in an hour", ContentType.Text, Encoding.UTF8);
+});
 
 ```
 
