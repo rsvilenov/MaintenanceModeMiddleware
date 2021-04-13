@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet: [ '3.1.x', '5.0.x' ]
+        dotnet: [ '3.1.x' ]
 
     steps:
       - uses: actions/checkout@v1
@@ -28,5 +28,5 @@ jobs:
         uses: coverallsapp/github-action@v1.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./src/MaintenanceModeMiddleware.Tests/coverage.info   
+          path-to-lcov: ./src/MaintenanceModeMiddleware.Tests/coverage.netcoreapp3.1.info 
      
