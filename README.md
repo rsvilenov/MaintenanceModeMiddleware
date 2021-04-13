@@ -92,7 +92,7 @@ public IActionResult MaintenanceMode()
 }
 ```
 
-⚠️ **Note**: The identity area remains accessible in maintenance mode so that you can log in with the users, for which the site should be visible. You can block the access to this area as well. Read how to do that in the full [documentation](Configuration.md).
+:information_source: **Note**: The identity area remains accessible in maintenance mode so that you can log in with the users, for which the site should be visible. You can block the access to this area as well. Read how to do that in the full [documentation](Configuration.md).
 
 
 ### Options
