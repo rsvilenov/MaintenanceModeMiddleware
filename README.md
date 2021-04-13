@@ -33,6 +33,8 @@ Key functionality:
 * Register the middleware in Startup.cs:
 
 ```csharp
+using MaintenanceModeMiddleware;
+
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
 ...
