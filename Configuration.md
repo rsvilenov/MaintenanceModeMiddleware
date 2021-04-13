@@ -207,6 +207,8 @@ You can specify multiple extensions at once by calling this method:
     options.BypassFileExtensions(new string[] { "css", "jpg" "mp3" });
 ```
 
+The static files will still be served, regardless of whether their extensions are specified here, if UseStaticFiles() middleware is placed before the current middleware in the chain.
+
 ### UseResponse
 
 Customize the maintenance message to the users.
