@@ -6,6 +6,8 @@
 
 For the cases when "app_offline.htm" and the staging environment are just not enough.
 
+> Supports ASP.NET Core 3.1 and 5.0 
+
 ### Table of Contents  
 
 - [General](#General)
