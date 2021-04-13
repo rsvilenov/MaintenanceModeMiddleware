@@ -54,7 +54,7 @@ namespace MaintenanceModeMiddleware.StateStore
 
         private string GetFileFullPath()
         {
-            IWebHostEnvironment webHostEnv = GetDependency<IWebHostEnvironment>();
+            IWebHostEnvironment webHostEnv = GetWebHostEnvironment();
 
             string fullFilePath;
             if (File.BaseDir != null)
@@ -79,9 +79,10 @@ namespace MaintenanceModeMiddleware.StateStore
             return fullFilePath;
         }
 
-        private T GetDependency<T>()
+        private IWebHostEnvironment GetWebHostEnvironment()
         {
-            return (T)((IServiceConsumer)this).ServiceProvider.GetService(typeof(T));
+            IServiceProvider svcProvider = ((IServiceConsumer)this).ServiceProvider;
+            return (IWebHostEnvironment)svcProvider.GetService(typeof(IWebHostEnvironment));
         }
 
         IServiceProvider IServiceConsumer.ServiceProvider
