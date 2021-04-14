@@ -1,10 +1,12 @@
 # Maintenance Mode Middleware
 
-[![build workflow](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml)   [![Coverage Status](https://coveralls.io/repos/github/rsvilenov/MaintenanceModeMiddleware/badge.svg?branch=master)](https://coveralls.io/github/rsvilenov/MaintenanceModeMiddleware?branch=master)   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![build workflow](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml)   [![Coverage Status](https://coveralls.io/repos/github/rsvilenov/MaintenanceModeMiddleware/badge.svg?branch=master)](https://coveralls.io/github/rsvilenov/MaintenanceModeMiddleware?branch=master)   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)   [![nuget](https://img.shields.io/nuget/v/MaintenanceModeMiddleware)](https://www.nuget.org/packages/MaintenanceModeMiddleware/)
 
 ### Put your ASP.NET Core application (or parts of it) in maintenance mode
 
 For the cases when "app_offline.htm" and the staging environment are just not enough.
+
+> Supports ASP.NET Core 3.1 and 5.0 
 
 ### Table of Contents  
 
@@ -19,7 +21,7 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 
 This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
 
-Key functionality:
+Key features:
   * Enter and exit maintenance mode by calling the control service from a controller action or view method
   * Specify the time for which the maintenance mode should be on
   * Let certain parts of the site remain accessibe while in maintenance mode
@@ -33,6 +35,8 @@ Key functionality:
 * Register the middleware in Startup.cs:
 
 ```csharp
+using MaintenanceModeMiddleware;
+
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
 ...
@@ -58,7 +62,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the IStateStore interface to optoins.UseStateStore(yourStateStore).
+You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the `IStateStore` interface to `optoins.UseStateStore(yourStateStore)`.
 
 ### Basic use
 
