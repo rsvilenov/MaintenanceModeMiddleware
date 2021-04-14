@@ -7,7 +7,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
 {
-    public class OptionsTest
+    public class OptionsStringSerializationTest
     {
         [Theory]
         [InlineData("True", true, null)]

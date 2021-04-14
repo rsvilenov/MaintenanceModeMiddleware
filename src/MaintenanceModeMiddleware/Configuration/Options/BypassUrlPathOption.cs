@@ -1,9 +1,10 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class BypassUrlPathOption : Option<UrlPath>
+    internal class BypassUrlPathOption : Option<UrlPath>, IContextMatcher
     {
         internal const char PARTS_SEPARATOR = ';';
 
@@ -35,6 +36,14 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         public override string GetStringValue()
         {
             return $"{Value.PathString.Value}{PARTS_SEPARATOR}{Value.Comparison}";
+        }
+
+        public bool IsMatch(HttpContext context)
+        {
+            return context
+                .Request
+                .Path
+                .StartsWithSegments(Value.PathString, Value.Comparison);
         }
     }
 }

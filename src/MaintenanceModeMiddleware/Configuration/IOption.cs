@@ -1,9 +1,9 @@
-﻿namespace MaintenanceModeMiddleware.Configuration
+﻿using Microsoft.AspNetCore.Hosting;
+
+namespace MaintenanceModeMiddleware.Configuration
 {
     internal interface IOption
     {
-        string TypeName { get; }
-        void LoadFromString(string str);
-        string GetStringValue();
+        void Verify(IWebHostEnvironment webHostEnv);
     }
 }

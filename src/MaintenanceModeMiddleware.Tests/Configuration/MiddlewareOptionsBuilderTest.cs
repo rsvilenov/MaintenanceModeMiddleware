@@ -131,45 +131,6 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData(true, false, false, null)]
-        [InlineData(true, true, false, typeof(InvalidOperationException))]
-        [InlineData(true, false, true, typeof(InvalidOperationException))]
-        [InlineData(false, true, true, typeof(InvalidOperationException))]
-        public void ResponseAlreadySpecifiedAssertion(bool useDefaultResponse,
-            bool useResponseFile,
-            bool useResponse,
-            Type expectedException)
-        {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Action testAction = () =>
-            {
-                if (useDefaultResponse)
-                {
-                    builder.UseDefaultResponse();
-                }
-
-                if (useResponseFile)
-                {
-                    builder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
-                }
-
-                if (useResponse)
-                {
-                    builder.UseResponse("test", ContentType.Text, Encoding.UTF8);
-                }
-            };
-
-            if (expectedException != null)
-            {
-                testAction.ShouldThrow(expectedException);
-            }
-            else
-            {
-                testAction.ShouldNotThrow();
-            }
-        }
-
-        [Theory]
         [InlineData(1)]
         [InlineData(5001)]
         public void Set503RetryAfterInterval(int interval)
@@ -462,52 +423,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldNotThrow();
 
-            builder.GetOptions()
-                .GetSingleOrDefault<UseNoDefaultValuesOption>()
-                .ShouldNotBeNull();
-        }
-
-        [Theory]
-        [InlineData(new int[] { 1, 2, 3 })]
-        [InlineData(new int[] { 1, 3, 2 })]
-        [InlineData(new int[] { 2, 1, 3 })]
-        [InlineData(new int[] { 3, 1, 2 })]
-        [InlineData(new int[] { 2, 3, 1 })]
-        [InlineData(new int[] { 3, 2, 1 })]
-        public void UseDuplicateResponseOption(int[] order)
-        {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            int usedOptionCount = 0;
-            Action testAction = () =>
-            {
-                builder.UseNoDefaultValues();
-
-                foreach (int i in order)
-                {
-                    if (i == 1)
-                    {
-                        builder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
-                    }
-                    else if (i == 2)
-                    {
-                        builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
-                    }
-                    else if (i == 3)
-                    {
-                        builder.UseDefaultResponse();
-                    }
-
-                    // the builder shouldn't allow more than one response
-                    // option to be used at a time before throwing an exception,
-                    // so this counter should always be 1
-                    usedOptionCount++;
-                }
-            };
-
-            testAction.ShouldThrow<InvalidOperationException>()
-                .Message.ShouldStartWith("You have already specified");
-            usedOptionCount.ShouldBe(1);
-
+            Action assertAction = () => builder.GetOptions();
+            assertAction.ShouldThrow<ArgumentException>()
+                .Message.ShouldStartWith("No response was specified.");
         }
 
         [Fact]
@@ -530,6 +448,23 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             };
 
             testAction.ShouldNotThrow();
+        }
+
+        [Fact]
+        public void When_DuplicateResponseOption_GetOption_Should_Throw()
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            Action testAction = () =>
+            {
+                builder.UseNoDefaultValues();
+                builder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
+                builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+                builder.GetOptions();
+            };
+
+            testAction.ShouldThrow<ArgumentException>()
+                .Message.ShouldStartWith("More than one response");
+
         }
     }
 }

@@ -37,8 +37,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
-            AssertResponseNotSpecified();
-
             string fileExtension = Path.GetExtension(relativePath);
             if (!new string[] { ".txt", ".html", ".json" }.Contains(fileExtension))
             {
@@ -87,8 +85,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(responseBytes));
             }
 
-            AssertResponseNotSpecified();
-
             MaintenanceResponse response 
                 = new MaintenanceResponse
             {
@@ -113,8 +109,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <returns></returns>
         public MiddlewareOptionsBuilder UseDefaultResponse()
         {
-            AssertResponseNotSpecified();
-
             _options.Add(new UseDefaultResponseOption
             {
                 Value = true
@@ -404,11 +398,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
-            if (!_options.GetAll<Code503RetryIntervalOption>().Any())
-            {
-                Set503RetryAfterInterval(5300);
-            }
-
             if (!_options.GetAll<ResponseFileOption>().Any()
                 && !_options.GetAll<ResponseOption>().Any())
             {
@@ -426,24 +415,30 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 _areDefaultOptionsFilledIn = true;
             }
 
+            VerifyResponseOptions();
+            
+            // this option is mandatory
+            if (!_options.GetAll<Code503RetryIntervalOption>().Any())
+            {
+                Set503RetryAfterInterval(5300);
+            }
+
             return _options;
         }
 
-        private void AssertResponseNotSpecified()
+        private void VerifyResponseOptions()
         {
-            if (_options.GetAll<ResponseOption>().Any())
+            IEnumerable<IResponseHolder> responseHolders = _options
+                .GetAll<IResponseHolder>();
+
+            if (!responseHolders.Any())
             {
-                throw new InvalidOperationException("You have already specified a response.");
+                throw new ArgumentException("No response was specified.");
             }
 
-            if (_options.GetAll<ResponseFileOption>().Any())
+            if (responseHolders.Count() > 1)
             {
-                throw new InvalidOperationException("You have already specified a response file.");
-            }
-
-            if (_options.GetAll<UseDefaultResponseOption>().Any())
-            {
-                throw new InvalidOperationException("You have already specified that the middleware should use its default (built-in) response.");
+                throw new ArgumentException("More than one response was specified.");
             }
         }
     }

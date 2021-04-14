@@ -33,12 +33,10 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Theory]
-        [InlineData(true, true, null, null)]
-        [InlineData(false, true, typeof(ArgumentException), "No response was specified")]
-        [InlineData(true, false, typeof(ArgumentException), "No value was specified for 503")]
+        [InlineData(true, null, null)]
+        [InlineData(false, typeof(ArgumentException), "No response was specified")]
         public void Constructor_MandatoryOptions(
             bool responseSpecified,
-            bool retryIntervalSpecified,
             Type expectedException,
             string expectedExMsgStart)
         {
@@ -49,11 +47,6 @@ namespace MaintenanceModeMiddleware.Tests
                 if (responseSpecified)
                 {
                     options.UseDefaultResponse();
-                }
-
-                if (retryIntervalSpecified)
-                {
-                    options.Set503RetryAfterInterval(1000);
                 }
             };
 
@@ -78,7 +71,7 @@ namespace MaintenanceModeMiddleware.Tests
         const string testFileNameCaseNotExists = "nonexistent_response_option_file.txt";
         [Theory]
         [InlineData(testFileNameCaseExists, null, null)]
-        [InlineData(testFileNameCaseNotExists, typeof(ArgumentException), "Could not find file")]
+        [InlineData(testFileNameCaseNotExists, typeof(FileNotFoundException), "Could not find file")]
         public void Constructor_ResponseFileOption(
             string filePath,
             Type expectedException,

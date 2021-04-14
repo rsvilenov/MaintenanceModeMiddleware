@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class BypassFileExtensionOption : Option<string>
+    internal class BypassFileExtensionOption : Option<string>, IContextMatcher
     {
         public override void LoadFromString(string str)
         {
@@ -18,5 +19,16 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         {
             return Value;
         }
+
+        public bool IsMatch(HttpContext context)
+        {
+            return context
+                .Request
+                .Path
+                .Value
+                .EndsWith(Value,
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
     }
 }

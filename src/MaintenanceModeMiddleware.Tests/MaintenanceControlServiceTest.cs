@@ -4,6 +4,7 @@ using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
+using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
 using Shouldly;
 using System;
@@ -17,6 +18,7 @@ namespace MaintenanceModeMiddleware.Tests
     public class MaintenanceControlServiceTest
     {
         private const string testUserName = "testUser";
+        private readonly IWebHostEnvironment _webHostEnv = FakeWebHostEnvironment.Create();
 
         [Fact]
         public void Constructor()
@@ -24,7 +26,11 @@ namespace MaintenanceModeMiddleware.Tests
             IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
             bool delegateCalled = false;
             Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) => delegateCalled = true;
-            Action testAction = () => new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            Action testAction = () => 
+                new MaintenanceControlService(
+                    svcProvider,
+                    _webHostEnv,
+                    optionBuilderDelegate);
 
             testAction.ShouldNotThrow();
 
@@ -39,7 +45,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Action testAction = () => svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
 
             testAction.ShouldNotThrow();
@@ -61,7 +70,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate); 
             Action testAction = () => svc.EnterMaintanence();
 
             testAction.ShouldNotThrow();
@@ -78,7 +90,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate); 
             Action testAction = () => svc.EnterMaintanence();
 
             testAction.ShouldNotThrow();
@@ -95,7 +110,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Func<OptionCollection> testFunc = () =>
             {
                 svc.EnterMaintanence(null, options =>
@@ -111,7 +129,7 @@ namespace MaintenanceModeMiddleware.Tests
             
             overridenMiddlewareOpts
                 .ShouldNotBeNull()
-                .Any<IOption>()
+                .Any<ISerializableOption>()
                 .ShouldBeTrue();
 
             overridenMiddlewareOpts
@@ -127,7 +145,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Func<OptionCollection> testFunc = () =>
             {
                 svc.EnterMaintanence();
@@ -150,7 +171,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Func<bool[]> testAction = () =>
             {
                 svc.EnterMaintanence();
@@ -175,7 +199,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseStateStore(new InMemoryStateStore());
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Action testAction = () =>
             {
                 svc.EnterMaintanence(DateTime.Today, options =>
@@ -196,7 +223,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseStateStore(new InMemoryStateStore());
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Func<OptionCollection> testFunc = () =>
             {
                 ICanRestoreState restorer = svc;
@@ -208,7 +238,7 @@ namespace MaintenanceModeMiddleware.Tests
 
             OptionCollection restoredOptions = testFunc.ShouldNotThrow();
             restoredOptions.ShouldNotBeNull()
-                .Any<IOption>().ShouldBeTrue();
+                .Any<ISerializableOption>().ShouldBeTrue();
             restoredOptions.GetSingleOrDefault<BypassUserNameOption>()
                 .Value.ShouldBe(testUserName);
         }
@@ -223,7 +253,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseStateStore(stateStore);
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate); 
             Action testAction = () =>
             {
                 ICanRestoreState restorer = svc;
@@ -243,7 +276,10 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 options.UseNoStateStore();
             };
-            MaintenanceControlService svc = new MaintenanceControlService(svcProvider, optionBuilderDelegate);
+            MaintenanceControlService svc = new MaintenanceControlService(
+                svcProvider,
+                _webHostEnv,
+                optionBuilderDelegate);
             Action testAction = () =>
             {
                 ICanRestoreState restorer = svc;
@@ -252,6 +288,5 @@ namespace MaintenanceModeMiddleware.Tests
 
             testAction.ShouldNotThrow();
         }
-
     }
 }

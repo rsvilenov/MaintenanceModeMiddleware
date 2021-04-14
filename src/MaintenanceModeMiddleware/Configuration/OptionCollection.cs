@@ -52,6 +52,7 @@ namespace MaintenanceModeMiddleware.Configuration
         }
 
         public void Clear<T>()
+            where T : IOption
         {
             _options.RemoveAll(o => o is T);
         }

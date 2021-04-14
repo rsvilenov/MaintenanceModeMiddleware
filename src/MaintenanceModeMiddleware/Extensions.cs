@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -15,7 +16,9 @@ namespace MaintenanceModeMiddleware
         public static IServiceCollection AddMaintenance(this IServiceCollection services, Action<ServiceOptionsBuilder> optionBuilderDelegate = null)
         {
             services.AddSingleton<IMaintenanceControlService>(svcProvider =>
-                new MaintenanceControlService(svcProvider, optionBuilderDelegate));
+                new MaintenanceControlService(svcProvider, 
+                    svcProvider.GetService<IWebHostEnvironment>(),
+                    optionBuilderDelegate));
 
             return services;
         }

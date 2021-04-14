@@ -8,6 +8,11 @@ namespace MaintenanceModeMiddleware.Tests.HelperTypes
     {
         public static IWebHostEnvironment Create(string tempPath = null)
         {
+            if (tempPath == null)
+            {
+                tempPath = SafeTempPath.Create(Path.GetTempPath());
+            }
+
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
 
             string contentRootPath = Path.Combine(tempPath, "contentRoot");

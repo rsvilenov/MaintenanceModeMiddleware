@@ -20,9 +20,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void ConstructNotEmpty()
         {
-            Action testAction = () => new OptionCollection(new List<IOption>
+            Action testAction = () => new OptionCollection(new List<ISerializableOption>
             {
-                Substitute.For<IOption>()
+                Substitute.For<ISerializableOption>()
             });
 
             testAction.ShouldNotThrow();
@@ -32,7 +32,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void Add()
         {
             OptionCollection collection = new OptionCollection();
-            IOption testOption = Substitute.For<IOption>();
+            ISerializableOption testOption = Substitute.For<ISerializableOption>();
             Action testAction = () => collection.Add(testOption);
 
             testAction.ShouldNotThrow();
@@ -44,7 +44,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void GetSingleOrDefault(int numberOfSameEntries, Type expectedException)
         {
             OptionCollection collection = GetOptionCollection(numberOfSameEntries);
-            Func<IOption> testFunc = () => collection.GetSingleOrDefault<IOption>();
+            Func<ISerializableOption> testFunc = () => collection.GetSingleOrDefault<ISerializableOption>();
 
             if (expectedException == null)
             {
@@ -62,7 +62,6 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void GetAll()
         {
             OptionCollection collection = GetOptionCollection(2);
-            IOption testOption = Substitute.For<IOption>();
             Func<IEnumerable<IOption>> testFunc = () => collection.GetAll();
 
             testFunc
@@ -75,8 +74,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void GetAllT()
         {
             OptionCollection collection = GetOptionCollection(2);
-            IOption testOption = Substitute.For<IOption>();
-            Func<IEnumerable<IOption>> testFunc = () => collection.GetAll<IOption>();
+            ISerializableOption testOption = Substitute.For<ISerializableOption>();
+            Func<IEnumerable<ISerializableOption>> testFunc = () => collection.GetAll<ISerializableOption>();
 
             testFunc
                 .ShouldNotThrow()
@@ -94,18 +93,18 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldNotThrow();
 
-            collection.GetAll<IOption>().ShouldBeEmpty();
+            collection.GetAll<ISerializableOption>().ShouldBeEmpty();
         }
 
         [Fact]
         public void AddClearT()
         {
             OptionCollection collection = GetOptionCollection(2);
-            Action testAction = () => collection.Clear<IOption>();
+            Action testAction = () => collection.Clear<ISerializableOption>();
 
             testAction.ShouldNotThrow();
 
-            collection.GetAll<IOption>().ShouldBeEmpty();
+            collection.GetAll<ISerializableOption>().ShouldBeEmpty();
         }
 
         [Theory]
@@ -118,12 +117,12 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             {
                 if (empty)
                 {
-                    collection.Any<IOption>().ShouldBeFalse();
+                    collection.Any<ISerializableOption>().ShouldBeFalse();
                 }
                 else
                 {
 
-                    collection.Any<IOption>().ShouldBeTrue();
+                    collection.Any<ISerializableOption>().ShouldBeTrue();
                 }
             };
 
@@ -146,11 +145,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         private OptionCollection GetOptionCollection(int numOfEntries = 1)
         {
-            List<IOption> options = new List<IOption>();
+            List<ISerializableOption> options = new List<ISerializableOption>();
 
             for (int i = 0; i < numOfEntries; i++)
             {
-                options.Add(Substitute.For<IOption>());
+                options.Add(Substitute.For<ISerializableOption>());
             }
 
             return new OptionCollection(options);

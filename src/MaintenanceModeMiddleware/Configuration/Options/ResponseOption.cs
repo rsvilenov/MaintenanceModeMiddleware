@@ -1,11 +1,12 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class ResponseOption : Option<MaintenanceResponse>
+    internal class ResponseOption : Option<MaintenanceResponse>, IResponseHolder
     {
         internal const char PARTS_SEPARATOR = ';';
 
@@ -46,6 +47,11 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         public override string GetStringValue()
         {
             return $"{Value.ContentType};{Value.ContentEncoding.CodePage};{Value.ContentEncoding.GetString(Value.ContentBytes)}";
+        }
+
+        public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)
+        {
+            return Value;
         }
     }
 }

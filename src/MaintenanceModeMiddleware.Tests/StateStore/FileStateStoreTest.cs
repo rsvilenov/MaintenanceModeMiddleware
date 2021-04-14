@@ -76,7 +76,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         [InlineData("test3.json", PathBaseDirectory.WebRootPath)]
         public void Store_In_Various_Paths(string file, PathBaseDirectory? baseDir)
         {
-            FileStateStore store = GetStateStore(SafeTempFileName.Create(file), baseDir);
+            FileStateStore store = GetStateStore(SafeTempPath.Create(file), baseDir);
             var testState = new MaintenanceState
             {
                 IsMaintenanceOn = true,
@@ -108,7 +108,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         {
             var testState = new MaintenanceState();
             string tempDir = Path.GetTempPath();
-            string prefixedFileName = SafeTempFileName.Create(file);
+            string prefixedFileName = SafeTempPath.Create(file);
             Func<string> testFuncStore = () =>
             {
                 string tempPath = null;
@@ -143,7 +143,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void GetState_File_Is_Empty()
         {
             string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempFileName.Create("test_to_be_emptied.json"), null, (filePath) =>
+            FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_emptied.json"), null, (filePath) =>
             {
                 generatedFilePath = filePath;
             });
@@ -163,7 +163,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void GetState_File_Does_Not_Exist()
         {
             string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempFileName.Create("test_to_be_deleted.json"), null, (filePath) =>
+            FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_deleted.json"), null, (filePath) =>
             {
                 generatedFilePath = filePath;
             });
@@ -187,7 +187,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void SetState_Directory_Does_Not_Exist()
         {
             string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempFileName.Create("test_dir/test_to_be_deleted.json"), null, (filePath) =>
+            FileStateStore store = GetStateStore(SafeTempPath.Create("test_dir/test_to_be_deleted.json"), null, (filePath) =>
             {
                 generatedFilePath = filePath;
             });
@@ -205,7 +205,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void SetState_PathBaseDirectory_Invalid_Enum_Value()
         {
             string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempFileName.Create("invalid_basedir.json"),
+            FileStateStore store = GetStateStore(SafeTempPath.Create("invalid_basedir.json"),
                 (PathBaseDirectory)(-1),
                 (filePath) =>
             {

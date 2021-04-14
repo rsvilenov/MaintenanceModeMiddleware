@@ -350,7 +350,7 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 rootDir = Path.Combine(tempDir, "wwwRoot");
             }
-            string safeTempFileName = SafeTempFileName.Create(fileName);
+            string safeTempFileName = SafeTempPath.Create(fileName);
             File.WriteAllText(Path.Combine(rootDir, safeTempFileName), "test");
 
             MiddlewareTestDesk desk = GetTestDesk(

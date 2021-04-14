@@ -2,6 +2,7 @@
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.StateStore;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Linq;
 
@@ -12,14 +13,17 @@ namespace MaintenanceModeMiddleware
     {
         private readonly IStateStore _stateStore;
         private readonly IServiceProvider _svcProvider;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         private readonly MaintenanceState _state;
         private OptionCollection _middlewareOptionsToOverride;
 
-        public MaintenanceControlService(IServiceProvider svcProvider, 
+        public MaintenanceControlService(IServiceProvider svcProvider,
+            IWebHostEnvironment webHostEnvironment,
             Action<ServiceOptionsBuilder> optionBuilderDelegate)
         {
             _svcProvider = svcProvider;
+            _webHostEnvironment = webHostEnvironment;
 
             ServiceOptionsBuilder optionsBuilder = new ServiceOptionsBuilder();
             optionBuilderDelegate?.Invoke(optionsBuilder);
@@ -43,6 +47,15 @@ namespace MaintenanceModeMiddleware
                 middlewareOptions?.Invoke(optionsBuilder);
 
                 optionsToOverride = optionsBuilder.GetOptions();
+
+                IResponseHolder responseHolder = optionsToOverride
+                    .GetAll<IResponseHolder>()
+                    .FirstOrDefault();
+
+                if (responseHolder != null)
+                {
+                    responseHolder.Verify(_webHostEnvironment);
+                }
             }
 
             ChangeState(isOn: true, endsOn, optionsToOverride);
@@ -74,7 +87,7 @@ namespace MaintenanceModeMiddleware
             _middlewareOptionsToOverride = middlewareOptions;
 
             _state.MiddlewareOptions = middlewareOptions
-                ?.GetAll<IOption>()
+                ?.GetAll<ISerializableOption>()
                 .Select(o => new StorableOption
                 {
                     StringValue = o.GetStringValue(),
@@ -118,10 +131,10 @@ namespace MaintenanceModeMiddleware
             }
         }
 
-        private IOption RestoreOption(StorableOption storableOpt)
+        private ISerializableOption RestoreOption(StorableOption storableOpt)
         {
             Type optionType = Type.GetType($"{GetType().Namespace}.Configuration.Options.{storableOpt.TypeName}");
-            IOption option = (IOption)Activator.CreateInstance(optionType);
+            ISerializableOption option = (ISerializableOption)Activator.CreateInstance(optionType);
             option.LoadFromString(storableOpt.StringValue);
             return option;
         }
