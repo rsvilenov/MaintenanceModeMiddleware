@@ -64,6 +64,20 @@ namespace MaintenanceModeMiddleware.Tests.Services
         }
 
         [Fact]
+        public void SetState_With_MaintenanceOptions_Null()
+        {
+            IStateStoreService svc = new StateStoreService(_svcProvider);
+            svc.SetStateStore(new InMemoryStateStore());
+
+            Action testAction = () => svc.SetState(new MaintenanceState
+            {
+                IsMaintenanceOn = true
+            });
+
+            testAction.ShouldNotThrow();
+        }
+
+        [Fact]
         public void RestoreState_When_StateStore_Is_SvcConsumer()
         {
             IStateStoreService svc = new StateStoreService(_svcProvider);

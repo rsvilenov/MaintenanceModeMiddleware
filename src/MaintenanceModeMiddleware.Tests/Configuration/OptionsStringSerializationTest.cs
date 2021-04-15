@@ -239,6 +239,26 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             }
         }
 
+        [Theory]
+        [InlineData("ContentRootPath;file.txt;5300", 5300, null)]
+        [InlineData("ContentRootPath;file.txt;abc", 0, typeof(ArgumentException))]
+        public void Test_ResponseFileOption_RetryTimeout(string input, int expectedTimeout, Type expectedExceptionType)
+        {
+            var option = new ResponseFromFileOption();
+            Action testAction = () => option.LoadFromString(input);
+
+            if (expectedExceptionType != null)
+            {
+                testAction.ShouldThrow(expectedExceptionType);
+            }
+            else 
+            { 
+                testAction.ShouldNotThrow();
+                option.Value.ShouldNotBeNull();
+                option.Value.Code503RetryInterval.ShouldBe(expectedTimeout);
+            }
+        }
+
         [Fact]
         public void Test_ResponseFileOption_ParamConstructor()
         {
