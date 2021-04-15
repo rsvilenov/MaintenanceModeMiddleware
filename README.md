@@ -96,7 +96,9 @@ Then just call its methods from the controller actions:
 [HttpPost]
 public IActionResult MaintenanceMode()
 {
-    if (_maintenanceCtrlSvc.IsMaintenanceOn)
+    var maintenanceState = _maintenanceCtrlSvc.GetState();
+
+    if (maintenanceState.IsMaintenanceOn)
     {
         _maintenanceCtrlSvc.LeaveMaintanence();
     }
