@@ -11,6 +11,7 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 ### Table of Contents  
 
 - [General](#General)
+- Installation(#Installation)
 - [Registration](#Registration)
 - [Basic use](#Basic-use)
 - [Options](#Options)
@@ -29,6 +30,16 @@ Key features:
   * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
   * Customize your maintenance mode response (html, text and json files/data are supported)
   * SEO friendly, as it relies on response code 503 with a "Retry-After" interval
+
+### Installation
+
+You can view the [package page on NuGet](hhttps://www.nuget.org/packages/MaintenanceModeMiddleware/).
+
+To install `MaintenanceModeMiddleware`, run the following command in the Package Manager Console:
+
+```
+PM> Install-Package MaintenanceModeMiddleware
+```
 
 ### Registration
 
