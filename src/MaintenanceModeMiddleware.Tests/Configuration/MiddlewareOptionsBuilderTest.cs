@@ -1,10 +1,13 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Tests.HelperTypes;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -13,11 +16,13 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 {
     public class MiddlewareOptionsBuilderTest
     {
+        private readonly IWebHostEnvironment _webHostEnvironment = FakeWebHostEnvironment.Create();
+
         [Fact]
         public void Constructor()
         {
             MiddlewareOptionsBuilder builder = null;
-            Action testAction = () => builder = new MiddlewareOptionsBuilder();
+            Action testAction = () => builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
 
             testAction.ShouldNotThrow();
 
@@ -26,16 +31,27 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData(null, default(PathBaseDirectory), typeof(ArgumentNullException))]
-        [InlineData("", default(PathBaseDirectory), typeof(ArgumentNullException))]
-        [InlineData("test" /* file name without an extension */, default(PathBaseDirectory), typeof(ArgumentException))]
-        [InlineData("test.txt", PathBaseDirectory.ContentRootPath, null)]
-        [InlineData("test.txt", PathBaseDirectory.WebRootPath, null)]
-        public void UseResponseFile(string relativePath, PathBaseDirectory baseDir, Type expectedException)
+        [InlineData(null, default(PathBaseDirectory), false, typeof(ArgumentNullException))]
+        [InlineData("", default(PathBaseDirectory), false, typeof(ArgumentNullException))]
+        [InlineData("test" /* file name without an extension */, default(PathBaseDirectory), true, typeof(ArgumentException))]
+        [InlineData("test.txt", PathBaseDirectory.ContentRootPath, true, null)]
+        [InlineData("test.txt", PathBaseDirectory.WebRootPath, true, null)]
+        public void UseResponseFile(string relativePath, 
+            PathBaseDirectory baseDir, 
+            bool createFile,
+            Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<ResponseFromFileOption> testFunc = () =>
             {
+                if (createFile)
+                {
+                    string filePath = Path.Combine(baseDir == PathBaseDirectory.ContentRootPath
+                        ? _webHostEnvironment.ContentRootPath
+                        : _webHostEnvironment.WebRootPath, relativePath);
+                    File.Create(filePath);
+                }
+
                 builder.UseResponseFromFile(relativePath, baseDir);
                 return builder.GetOptions().GetSingleOrDefault<ResponseFromFileOption>();
             };
@@ -71,13 +87,13 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             {
                 () =>
                 {
-                    var builder = new MiddlewareOptionsBuilder();
+                    var builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
                     builder.UseResponse(response, contentType, encoding);
                     return builder.GetOptions().GetSingleOrDefault<ResponseOption>();
                 },
                 () =>
                 {
-                    var builder = new MiddlewareOptionsBuilder();
+                    var builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
                     builder.UseResponse(string.IsNullOrEmpty(response) 
                             ? null 
                             : encoding.GetBytes(response),
@@ -115,7 +131,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void UseDefaultResponse()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Action testAction = () =>
             {
                 // ensure that the UseDefaultResponse option is used
@@ -136,7 +152,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("userName1", null)]
         public void BypassUser(string userName, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<BypassUserNameOption> testFunc = () =>
             {
                 builder.BypassUser(userName);
@@ -162,7 +178,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { "userName1", "userName2" }, null)]
         public void BypassUsers(string[] userNames, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<IEnumerable<BypassUserNameOption>> testFunc = () =>
             {
                 builder.BypassUsers(userNames);
@@ -193,7 +209,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("role1", null)]
         public void BypassUserRole(string userRole, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<BypassUserRoleOption> testFunc = () =>
             {
                 builder.BypassUserRole(userRole);
@@ -219,7 +235,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { "role1", "role2" }, null)]
         public void BypassUserRoles(string[] userRoles, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<IEnumerable<BypassUserRoleOption>> testFunc = () =>
             {
                 builder.BypassUserRoles(userRoles);
@@ -247,7 +263,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void BypassAllAuthenticatedUsers()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Action testAction = () => builder.BypassAllAuthenticatedUsers();
 
             testAction.ShouldNotThrow();
@@ -260,7 +276,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void BypassUrlPath()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<BypassUrlPathOption> testFunc = () =>
             {
                 builder.BypassUrlPath(new PathString(), StringComparison.Ordinal);
@@ -277,7 +293,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [MemberData(nameof(GetBypassUrlPathsMembers))]
         public void BypassUrlPaths(PathString[] pathStrings, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<IEnumerable<BypassUrlPathOption>> testFunc = () =>
             {
                 builder.BypassUrlPaths(pathStrings, StringComparison.Ordinal);
@@ -338,7 +354,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(".txt", null)]
         public void BypassFileExtension(string extension, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<BypassFileExtensionOption> testFunc = () =>
             {
                 builder.BypassFileExtension(extension);
@@ -368,7 +384,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { "txt", "html" }, null)]
         public void BypassFileExtensions(string[] extensions, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Func<IEnumerable<BypassFileExtensionOption>> testFunc = () =>
             {
                 builder.BypassFileExtensions(extensions);
@@ -399,7 +415,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void UseNoDefaultValues()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Action testAction = () => builder.UseNoDefaultValues();
 
             testAction.ShouldNotThrow();
@@ -412,7 +428,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void FillEmptyOptionsWithDefault()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
 
             builder.GetOptions().ShouldNotBeNull()
                 .GetAll().ShouldNotBeEmpty();
@@ -421,7 +437,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void GetOptionsTwice_ShouldNotThrow()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Action testAction = () => 
             {
                 builder.GetOptions();
@@ -434,11 +450,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void When_DuplicateResponseOption_GetOption_Should_Throw()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             Action testAction = () =>
             {
                 builder.UseNoDefaultValues();
-                builder.UseResponseFromFile("test.txt", PathBaseDirectory.ContentRootPath);
+                builder.UseDefaultResponse();
                 builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
                 builder.GetOptions();
             };

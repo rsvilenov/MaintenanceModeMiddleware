@@ -3,9 +3,7 @@ using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Hosting;
 using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
@@ -15,26 +13,26 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         private readonly IWebHostEnvironment _webHostEnvironment = FakeWebHostEnvironment.Create();
 
         [Theory]
-        [InlineData("ContentRootPath;file.txt;5300", true, null)]
-        [InlineData("ContentRootPath;file.json;5300", true, null)]
-        [InlineData("ContentRootPath;file.html;5300", true, null)]
-        [InlineData("ContentRootPath;file.html;5300", false, typeof(FileNotFoundException))]
-        [InlineData("ContentRootPath;file.mp3;5300", true, typeof(InvalidOperationException))]
-        public void Test_ResponseFileOption_Verify(string input, bool createFile, Type expectedExceptionType)
+        [InlineData("ContentRootPath;file.txt;5300", "file.txt", true, null)]
+        [InlineData("ContentRootPath;file.json;5300", "file.json", true, null)]
+        [InlineData("ContentRootPath;file.html;5300", "file.html", true, null)]
+        [InlineData("ContentRootPath;file.mp3;5300", "file.mp3", true, typeof(ArgumentException))]
+        public void Test_ResponseFileOption_Verify(string input, 
+            string fileName,
+            bool createFile, 
+            Type expectedExceptionType)
         {
             var option = new ResponseFromFileOption();
             
             Action testAction = () =>
             {
-                option.LoadFromString(input);
-
                 if (createFile)
                 {
-                    string filePath = Path.Combine(_webHostEnvironment.ContentRootPath, option.Value.File.Path);
+                    string filePath = Path.Combine(_webHostEnvironment.ContentRootPath, fileName);
                     File.Create(filePath);
                 }
 
-                option.Verify(_webHostEnvironment);
+                option.LoadFromString(input);
             };
 
             if (expectedExceptionType != null)

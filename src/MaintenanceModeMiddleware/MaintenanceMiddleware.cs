@@ -23,19 +23,13 @@ namespace MaintenanceModeMiddleware
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
             IWebHostEnvironment webHostEnvironment,
-            Action<MiddlewareOptionsBuilder> options)
+            Action<MiddlewareOptionsBuilder> optionsBuilderDelegate)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
 
-            var optionsBuilder = new MiddlewareOptionsBuilder();
-            options?.Invoke(optionsBuilder);
-            _startupOptions = optionsBuilder.GetOptions();
-
-            _startupOptions
-                .GetSingleOrDefault<IResponseHolder>()
-                .Verify(webHostEnvironment);
+            _startupOptions = GetStartupOptions(optionsBuilderDelegate);
         }
 
         public async Task Invoke(HttpContext context)
@@ -100,6 +94,14 @@ namespace MaintenanceModeMiddleware
                 .Response
                 .WriteAsync(responseStr,
                     response.ContentEncoding);
+        }
+
+
+        private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)
+        {
+            var optionsBuilder = new MiddlewareOptionsBuilder(_webHostEnvironment);
+            builderDelegate?.Invoke(optionsBuilder);
+            return optionsBuilder.GetOptions();
         }
     }
 }

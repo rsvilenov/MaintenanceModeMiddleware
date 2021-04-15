@@ -462,7 +462,7 @@ namespace MaintenanceModeMiddleware.Tests
             OptionCollection middlewareOptions = null;
             if (optionsOverrideSetup != null)
             {
-                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder();
+                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(FakeWebHostEnvironment.Create());
                 optionsOverrideSetup.Invoke(optionOverrideBuilder);
                 middlewareOptions = optionOverrideBuilder.GetOptions();
             }

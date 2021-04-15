@@ -45,6 +45,12 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         private void SetValue(string filePath, PathBaseDirectory baseDir, int code503RetryInterval)
         {
+            if (!TryGetContentType(filePath, out _))
+            {
+                string fileName = Path.GetFileName(filePath);
+                throw new ArgumentException($"The file, specified in {filePath} must have one of the following extensions: .txt, .html or .json.");
+            }
+
             Value = new FileMaintenanceResponse
             {
                 File = new FileDescriptor(filePath, baseDir),
@@ -64,39 +70,32 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             using (StreamReader sr = new StreamReader(fullPath,
                 detectEncodingFromByteOrderMarks: true))
             {
-                ContentType contentType = GetContentType(fullPath);
+                TryGetContentType(fullPath, out ContentType? contentType);
 
                 return new MaintenanceResponse
                 {
                     ContentBytes = sr.CurrentEncoding.GetBytes(sr.ReadToEnd()),
                     ContentEncoding = sr.CurrentEncoding,
-                    ContentType = contentType,
+                    ContentType = contentType.Value,
                     Code503RetryInterval = Value.Code503RetryInterval
                 };
             }
         }
 
-        public override void Verify(IWebHostEnvironment webHostEnv)
+        private bool TryGetContentType(string filePath, out ContentType? contentType)
         {
-            string fullPath = GetFileFullPath(webHostEnv);
-            if (!File.Exists(fullPath))
-            {
-                throw new FileNotFoundException($"Could not find file {Value.File.Path}. Expected absolute path: {fullPath}.");
-            }
+            string extension = Path.GetExtension(filePath)
+                .ToLower();
 
-            // should not throw
-            GetContentType(fullPath);
-        }
-
-        private ContentType GetContentType(string fullPath)
-        {
-            return Path.GetExtension(fullPath) switch
+            contentType = extension switch
             {
                 ".txt" => ContentType.Text,
                 ".html" => ContentType.Html,
                 ".json" => ContentType.Json,
-                _ => throw new InvalidOperationException($"Path {fullPath} is not in any of the supported formats."),
+                _ => null,
             };
+
+            return contentType.HasValue;
         }
 
         private string GetFileFullPath(IWebHostEnvironment webHostEnv)

@@ -34,7 +34,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             IStateStoreService svc = new StateStoreService(_svcProvider);
             svc.SetStateStore(new InMemoryStateStore());
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(FakeWebHostEnvironment.Create());
             builder.BypassAllAuthenticatedUsers();
 
             Action testAction = () => svc.SetState(new MaintenanceState

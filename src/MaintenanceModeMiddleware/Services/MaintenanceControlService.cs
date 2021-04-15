@@ -3,11 +3,10 @@ using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.State;
 using Microsoft.AspNetCore.Hosting;
 using System;
-using System.Linq;
 
 namespace MaintenanceModeMiddleware.Services
 {
-    internal class MaintenanceControlService : 
+    internal class MaintenanceControlService :
         IMaintenanceControlService
     {
         private readonly IStateStoreService _stateStoreService;
@@ -39,7 +38,6 @@ namespace MaintenanceModeMiddleware.Services
             if (middlewareOptionsBuilder != null)
             {
                 newMiddlewareOptions = GetMiddlewareOptions(middlewareOptionsBuilder);
-                VerifyResponseOption(newMiddlewareOptions);
             }
 
             _stateStoreService.SetState(new MaintenanceState
@@ -77,22 +75,10 @@ namespace MaintenanceModeMiddleware.Services
 
         private OptionCollection GetMiddlewareOptions(Action<MiddlewareOptionsBuilder> middlewareOptionsBuilder)
         {
-            var optionsBuilder = new MiddlewareOptionsBuilder();
+            var optionsBuilder = new MiddlewareOptionsBuilder(_webHostEnvironment);
             middlewareOptionsBuilder?.Invoke(optionsBuilder);
 
             return optionsBuilder.GetOptions();
-        }
-
-        private void VerifyResponseOption(OptionCollection optionCollection)
-        {
-            IResponseHolder responseHolder = optionCollection
-                            .GetAll<IResponseHolder>()
-                            .FirstOrDefault();
-
-            if (responseHolder != null)
-            {
-                responseHolder.Verify(_webHostEnvironment);
-            }
         }
     }
 }

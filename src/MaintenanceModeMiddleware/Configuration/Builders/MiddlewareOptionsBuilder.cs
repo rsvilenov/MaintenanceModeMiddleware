@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -18,11 +19,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         private const int DEFAULT_503_RETRY_INTERVAL = 5300;
 
         private readonly OptionCollection _options;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private bool _areDefaultOptionsFilledIn;
         
-        internal MiddlewareOptionsBuilder()
+        internal MiddlewareOptionsBuilder(IWebHostEnvironment webHostEnvironment)
         {
             _options = new OptionCollection();
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -39,10 +42,15 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
-            string fileExtension = Path.GetExtension(relativePath);
-            if (!new string[] { ".txt", ".html", ".json" }.Contains(fileExtension))
+            string baseDirStr = baseDir ==  PathBaseDirectory.WebRootPath
+                               ? _webHostEnvironment.WebRootPath
+                               : _webHostEnvironment.ContentRootPath;
+
+            string fullFilePath = Path.Combine(baseDirStr, relativePath);
+
+            if (!File.Exists(fullFilePath))
             {
-                throw new ArgumentException($"The file, specified in {relativePath} must have one of the following extensions: .txt, .html or .json.");
+                throw new FileNotFoundException($"Could not find file {relativePath}. Expected absolute path: {fullFilePath}.");
             }
 
             _options.Add(new ResponseFromFileOption(relativePath, baseDir, code503RetryInterval));
