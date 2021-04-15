@@ -46,7 +46,7 @@ PM> Install-Package MaintenanceModeMiddleware
 * Register the middleware in Startup.cs:
 
 ```csharp
-using MaintenanceModeMiddleware;
+using MaintenanceModeMiddleware.Extensions;
 
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
@@ -80,6 +80,8 @@ You can pass options to the control service as well. For example, you can specif
 Inject the control service in the controller, from which you want to trigger the maintenance mode:
 
 ```csharp
+using MaintenanceModeMiddleware.Services;
+
 private readonly IMaintenanceControlService _maintenanceCtrlSvc;
 
 public AdminController(IMaintenanceControlService maintenanceCtrlSvc)

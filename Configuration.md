@@ -56,6 +56,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         options.BypassUser("Demo");
         options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
         //... some other options
+
         // You can configure it using the fluid interface the configuration methods provide. Like this:
         // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
     });
@@ -97,7 +98,6 @@ app.UseMaintenance(options =>
     options.BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
     options.BypassUrlPath("/Identity");
     options.BypassUserRoles(new string[] { "Admin", "Administrator"});
-    options.Set503RetryAfterInterval(5300);
     options.UseDefaultResponse();
 });
 ```
@@ -112,9 +112,8 @@ app.UseMaintenance(options =>
     options.UseNoDefaultValues(); // this will cause BypassUserRoles(new [] {'Admin'... not to be applied.
     options.BypassUser("John");
     
-    // the following two options are mandatory and if they are not specified,
-    // the middleware will throw an exception.
-    options.Set503RetryAfterInterval(5300);
+    // a response should be specified or the
+    // middleware will throw an exception.
     options.UseDefaultResponse();
 });
 ```
@@ -219,6 +218,13 @@ Customize the maintenance message to the users.
 ```csharp
     options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8);
 ```
+
+If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
+
+```csharp
+    options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8, 10000);
+```
+
 If the option is not specified, a default html response is served.
 
 ### UseResponseFile
@@ -227,6 +233,12 @@ Specify a file, containing the maintenance response. This file can be placed eit
 
 ```csharp
     options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath);
+```
+
+If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
+
+```csharp
+    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath, 10000);
 ```
 
 If the option is not specified, a default html response is served.
