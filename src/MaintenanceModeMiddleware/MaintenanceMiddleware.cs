@@ -41,14 +41,7 @@ namespace MaintenanceModeMiddleware
                 .GetSingleOrDefault<IResponseHolder>()
                 .Verify(webHostEnvironment);
 
-            // We should try to restore the state after all dependecies have been registered,
-            // because some implementation of IStateStore may rely on a dependency, such is the case
-            // with FileStateStore - it relies on a resolvable instance of IWebHostEnvironment.
-            // That's why we are doing this here and not, for example, in the service's constructor.
-            if (_maintenanceCtrlSev is ICanRestoreState iCanRestoreState)
-            {
-                iCanRestoreState.RestoreState();
-            }
+            RestoreMaintenanceState();
         }
 
         public async Task Invoke(HttpContext context)
@@ -99,8 +92,7 @@ namespace MaintenanceModeMiddleware
                 .Response
                 .ContentType = response.GetContentTypeString();
 
-            string responseStr =
-                response
+            string responseStr = response
                 .ContentEncoding
                 .GetString(response.ContentBytes);
 
@@ -108,6 +100,14 @@ namespace MaintenanceModeMiddleware
                 .Response
                 .WriteAsync(responseStr,
                     response.ContentEncoding);
+        }
+
+        private void RestoreMaintenanceState()
+        {
+            if (_maintenanceCtrlSev is ICanRestoreState iCanRestoreState)
+            {
+                iCanRestoreState.RestoreState();
+            }
         }
     }
 }

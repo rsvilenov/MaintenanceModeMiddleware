@@ -35,6 +35,9 @@ namespace MaintenanceModeMiddleware
 
     internal interface ICanRestoreState
     {
+        /// <summary>
+        /// Call me thwn the dependency graph is fully built.
+        /// </summary>
         void RestoreState();
     }
 
