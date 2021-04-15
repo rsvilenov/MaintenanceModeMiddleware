@@ -11,7 +11,7 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 ### Table of Contents  
 
 - [General](#General)
-- Installation(#Installation)
+- [Installation](#Installation)
 - [Registration](#Registration)
 - [Basic use](#Basic-use)
 - [Options](#Options)
