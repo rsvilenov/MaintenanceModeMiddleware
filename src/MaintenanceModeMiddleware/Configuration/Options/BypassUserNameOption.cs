@@ -3,7 +3,7 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class BypassUserNameOption : Option<string>, IContextMatcher
+    internal class BypassUserNameOption : Option<string>, IAllowedRequestMatcher
     {
         public override void LoadFromString(string str)
         {

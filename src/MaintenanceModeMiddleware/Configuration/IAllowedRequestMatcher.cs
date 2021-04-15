@@ -2,7 +2,7 @@
 
 namespace MaintenanceModeMiddleware.Configuration
 {
-    interface IContextMatcher : IOption
+    interface IAllowedRequestMatcher : IOption
     {
         bool IsMatch(HttpContext context);
     }

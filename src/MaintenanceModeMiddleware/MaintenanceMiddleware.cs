@@ -33,7 +33,7 @@ namespace MaintenanceModeMiddleware
                 _optionsOverriderSvc = overriderSvc;
             }
 
-            MiddlewareOptionsBuilder optionsBuilder = new MiddlewareOptionsBuilder();
+            var optionsBuilder = new MiddlewareOptionsBuilder();
             options?.Invoke(optionsBuilder);
             _startupOptions = optionsBuilder.GetOptions();
 
@@ -63,24 +63,50 @@ namespace MaintenanceModeMiddleware
                 ?.GetOptionsToOverride()
                 ?? _startupOptions;
 
-            MaintenanceResponse response = options
-                .GetSingleOrDefault<IResponseHolder>()
-                .GetResponse(_webHostEnvironment);
-
-            if (options.GetAll<IContextMatcher>()
+            if (options.GetAll<IAllowedRequestMatcher>()
                 .Any(matcher => matcher.IsMatch(context)))
             {
                 await _next.Invoke(context);
                 return;
             }
 
-            context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-            context.Response.Headers.Add("Retry-After", options.GetSingleOrDefault<Code503RetryIntervalOption>().Value.ToString());
-            context.Response.ContentType = response.GetContentTypeString();
+            int retryAfterInterval = options
+                .GetSingleOrDefault<Code503RetryIntervalOption>()
+                .Value;
+
+            MaintenanceResponse response = options
+                .GetSingleOrDefault<IResponseHolder>()
+                .GetResponse(_webHostEnvironment);
+
+            await WriteMaintenanceResponse(context, retryAfterInterval, response);
+        }
+
+        private async Task WriteMaintenanceResponse(HttpContext context, 
+            int retryAfterInterval, 
+            MaintenanceResponse response)
+        {
+
+            context
+                .Response
+                .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+
+            context
+                .Response
+                .Headers
+                .Add("Retry-After", retryAfterInterval.ToString());
+
+            context
+                .Response
+                .ContentType = response.GetContentTypeString();
+
+            string responseStr =
+                response
+                .ContentEncoding
+                .GetString(response.ContentBytes);
 
             await context
                 .Response
-                .WriteAsync(response.ContentEncoding.GetString(response.ContentBytes),
+                .WriteAsync(responseStr,
                     response.ContentEncoding);
         }
     }

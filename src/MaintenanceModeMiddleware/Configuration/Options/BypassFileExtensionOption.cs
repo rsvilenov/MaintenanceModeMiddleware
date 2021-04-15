@@ -3,7 +3,7 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class BypassFileExtensionOption : Option<string>, IContextMatcher
+    internal class BypassFileExtensionOption : Option<string>, IAllowedRequestMatcher
     {
         public override void LoadFromString(string str)
         {

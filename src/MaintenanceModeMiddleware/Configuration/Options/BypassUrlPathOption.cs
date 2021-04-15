@@ -4,7 +4,7 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class BypassUrlPathOption : Option<UrlPath>, IContextMatcher
+    internal class BypassUrlPathOption : Option<UrlPath>, IAllowedRequestMatcher
     {
         internal const char PARTS_SEPARATOR = ';';
 
