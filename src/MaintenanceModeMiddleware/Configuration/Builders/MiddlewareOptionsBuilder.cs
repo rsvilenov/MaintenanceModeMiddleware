@@ -15,6 +15,8 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
     /// </summary>
     public class MiddlewareOptionsBuilder
     {
+        private const int DEFAULT_503_RETRY_INTERVAL = 5300;
+
         private readonly OptionCollection _options;
         private bool _areDefaultOptionsFilledIn;
         
@@ -30,7 +32,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="relativePath">File path, relative to the location, specified in the second parameter.</param>
         /// <param name="baseDir">Either ContentRootPath, or WWWRootPath.</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponseFile(string relativePath, PathBaseDirectory baseDir)
+        public MiddlewareOptionsBuilder UseResponseFromFile(string relativePath, PathBaseDirectory baseDir, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -43,11 +45,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentException($"The file, specified in {relativePath} must have one of the following extensions: .txt, .html or .json.");
             }
 
-            FileDescriptor responseFile = new FileDescriptor(relativePath, baseDir);
-            _options.Add(new ResponseFileOption
-            {
-                Value = responseFile
-            });
+            _options.Add(new ResponseFromFileOption(relativePath, baseDir, code503RetryInterval));
 
             return this;
         }
@@ -60,14 +58,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="contentType">The type of the content: text, html or json</param>
         /// <param name="encoding">The encoding of the content</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponse(string response, ContentType contentType, Encoding encoding)
+        public MiddlewareOptionsBuilder UseResponse(string response, ContentType contentType, Encoding encoding, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(response))
             {
                 throw new ArgumentNullException(nameof(response));
             }
 
-            return UseResponse(encoding.GetBytes(response), contentType, encoding);
+            return UseResponse(encoding.GetBytes(response), contentType, encoding, code503RetryInterval);
         }
 
         /// <summary>
@@ -78,7 +76,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="contentType">The type of the content: text, html or json</param>
         /// <param name="encoding">The encoding of the content</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, ContentType contentType, Encoding encoding)
+        public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, ContentType contentType, Encoding encoding, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (responseBytes == null)
             {
@@ -87,11 +85,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
             MaintenanceResponse response 
                 = new MaintenanceResponse
-            {
-                ContentBytes = responseBytes,
-                ContentEncoding = encoding,
-                ContentType = contentType
-            };
+                {
+                    ContentBytes = responseBytes,
+                    ContentEncoding = encoding,
+                    ContentType = contentType,
+                    Code503RetryInterval = code503RetryInterval
+                };
 
             _options.Add(new ResponseOption
             {
@@ -112,23 +111,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             _options.Add(new UseDefaultResponseOption
             {
                 Value = true
-            });
-
-            return this;
-        }
-
-        /// <summary>
-        /// Specify the value of 'Retry-After' header of the 503 http response.
-        /// The value is in seconds. If no other value is specified, the value of
-        /// 5300 seconds (roughly an hour and a half) is used.
-        /// </summary>
-        /// <param name="interval">Seconds</param>
-        /// <returns></returns>
-        public MiddlewareOptionsBuilder Set503RetryAfterInterval(int interval)
-        {
-            _options.Add(new Code503RetryIntervalOption
-            { 
-                Value = interval
             });
 
             return this;
@@ -398,7 +380,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
-            if (!_options.GetAll<ResponseFileOption>().Any()
+            if (!_options.GetAll<ResponseFromFileOption>().Any()
                 && !_options.GetAll<ResponseOption>().Any())
             {
                 UseDefaultResponse();
@@ -416,12 +398,6 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             }
 
             VerifyResponseOptions();
-            
-            // this option is mandatory
-            if (!_options.GetAll<Code503RetryIntervalOption>().Any())
-            {
-                Set503RetryAfterInterval(5300);
-            }
 
             return _options;
         }

@@ -15,7 +15,7 @@ namespace MaintenanceModeMiddleware.StateStore
             File = file;
         }
 
-        public MaintenanceState GetState()
+        public StorableMaintenanceState GetState()
         {
             string filePath = GetFileFullPath();
             if (!IO.File.Exists(filePath))
@@ -29,10 +29,10 @@ namespace MaintenanceModeMiddleware.StateStore
                 return null;
             }
 
-            return JsonSerializer.Deserialize<MaintenanceState>(serialized);
+            return JsonSerializer.Deserialize<StorableMaintenanceState>(serialized);
         }
 
-        public void SetState(MaintenanceState state)
+        public void SetState(StorableMaintenanceState state)
         {
             string filePath = GetFileFullPath();
 
@@ -58,17 +58,17 @@ namespace MaintenanceModeMiddleware.StateStore
 
             if (File.BaseDir == null)
             {
-                return File.FilePath;
+                return File.Path;
             }
 
             string fullFilePath;
             switch (File.BaseDir)
             {
                 case PathBaseDirectory.ContentRootPath:
-                    fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.FilePath);
+                    fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.Path);
                     break;
                 case PathBaseDirectory.WebRootPath:
-                    fullFilePath = IO.Path.Combine(webHostEnv.WebRootPath, File.FilePath);
+                    fullFilePath = IO.Path.Combine(webHostEnv.WebRootPath, File.Path);
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown base dir type: {File.BaseDir}.");

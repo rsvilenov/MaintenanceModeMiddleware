@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.TestApp.Models;
+﻿using MaintenanceModeMiddleware.Services;
+using MaintenanceModeMiddleware.TestApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -27,13 +28,14 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
 
         public IActionResult Index()
         {
+            var maintenanceState = _maintenanceCtrlSvc.GetState(); 
             return View(new HomeViewModel
             {
-                IsMaintenanceOn = _maintenanceCtrlSvc.IsMaintenanceModeOn,
-                IsEndsOnSpecified = _maintenanceCtrlSvc.EndsOn != null,
+                IsMaintenanceOn = maintenanceState.IsMaintenanceOn,
+                IsEndsOnSpecified = maintenanceState.ExpirationDate != null,
 
-                EndsOn = _maintenanceCtrlSvc.EndsOn != null 
-                    ? _maintenanceCtrlSvc.EndsOn 
+                EndsOn = maintenanceState.ExpirationDate != null 
+                    ? maintenanceState.ExpirationDate
                     : DateTime.Now.AddMinutes(5)
             });
         }

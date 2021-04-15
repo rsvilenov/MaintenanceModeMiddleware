@@ -8,6 +8,8 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class UseDefaultResponseOption : Option<bool>, IResponseHolder
     {
+        private const int DEFAULT_503_RETRY_INTERVAL = 5300;
+
         public override void LoadFromString(string str)
         {
             Value = bool.Parse(str);
@@ -29,7 +31,8 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 {
                     ContentBytes = resSr.CurrentEncoding.GetBytes(resSr.ReadToEnd()),
                     ContentEncoding = resSr.CurrentEncoding,
-                    ContentType = ContentType.Html
+                    ContentType = ContentType.Html,
+                    Code503RetryInterval = DEFAULT_503_RETRY_INTERVAL
                 };
             }
         }

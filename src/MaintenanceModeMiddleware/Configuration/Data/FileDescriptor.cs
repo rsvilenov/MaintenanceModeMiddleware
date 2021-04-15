@@ -13,12 +13,12 @@ namespace MaintenanceModeMiddleware.Configuration.Data
                 throw new ArgumentNullException("The path is null or empty");
             }
 
-            if (!Path.IsPathRooted(fullPath))
+            if (!System.IO.Path.IsPathRooted(fullPath))
             {
                 throw new ArgumentException("The path is not a rooted one.");
             }
 
-            FilePath = fullPath;
+            Path = fullPath;
         }
 
         public FileDescriptor(string relativePath, PathBaseDirectory baseDir)
@@ -28,16 +28,16 @@ namespace MaintenanceModeMiddleware.Configuration.Data
                 throw new ArgumentNullException("The path is null or empty");
             }
 
-            if (Path.IsPathRooted(relativePath))
+            if (System.IO.Path.IsPathRooted(relativePath))
             {
                 throw new ArgumentException("The path is not a relative one.");
             }
 
-            FilePath = relativePath;
+            Path = relativePath;
             BaseDir = baseDir;
         }
 
-        public string FilePath { get; set; }
+        public string Path { get; set; }
         public PathBaseDirectory? BaseDir { get; }
     }
 }

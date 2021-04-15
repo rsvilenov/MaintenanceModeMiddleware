@@ -2,6 +2,8 @@
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Configuration.State;
+using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -15,7 +17,6 @@ namespace MaintenanceModeMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSev;
-        private readonly ICanOverrideMiddlewareOptions _optionsOverriderSvc;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly OptionCollection _startupOptions;
 
@@ -28,11 +29,6 @@ namespace MaintenanceModeMiddleware
             _maintenanceCtrlSev = maintenanceCtrlSev;
             _webHostEnvironment = webHostEnvironment;
 
-            if (maintenanceCtrlSev is ICanOverrideMiddlewareOptions overriderSvc)
-            {
-                _optionsOverriderSvc = overriderSvc;
-            }
-
             var optionsBuilder = new MiddlewareOptionsBuilder();
             options?.Invoke(optionsBuilder);
             _startupOptions = optionsBuilder.GetOptions();
@@ -40,44 +36,48 @@ namespace MaintenanceModeMiddleware
             _startupOptions
                 .GetSingleOrDefault<IResponseHolder>()
                 .Verify(webHostEnvironment);
-
-            RestoreMaintenanceState();
         }
 
         public async Task Invoke(HttpContext context)
         {
-            if (!_maintenanceCtrlSev.IsMaintenanceModeOn)
+            if (ShouldAllowRequest(context))
             {
                 await _next.Invoke(context);
                 return;
             }
 
-            OptionCollection options = _optionsOverriderSvc
-                ?.GetOptionsToOverride()
-                ?? _startupOptions;
-
-            if (options.GetAll<IAllowedRequestMatcher>()
-                .Any(matcher => matcher.IsMatch(context)))
-            {
-                await _next.Invoke(context);
-                return;
-            }
-
-            int retryAfterInterval = options
-                .GetSingleOrDefault<Code503RetryIntervalOption>()
-                .Value;
-
-            MaintenanceResponse response = options
-                .GetSingleOrDefault<IResponseHolder>()
-                .GetResponse(_webHostEnvironment);
-
-            await WriteMaintenanceResponse(context, retryAfterInterval, response);
+            await WriteMaintenanceResponse(context);
         }
 
-        private async Task WriteMaintenanceResponse(HttpContext context, 
-            int retryAfterInterval, 
-            MaintenanceResponse response)
+        private bool ShouldAllowRequest(HttpContext context)
         {
+            MaintenanceState maintenanceState = _maintenanceCtrlSev
+                .GetState();
+
+            if (maintenanceState.IsMaintenanceOn)
+            {
+                OptionCollection options = GetCurrentOptions();
+
+                return options.GetAll<IAllowedRequestMatcher>()
+                    .Any(matcher => matcher.IsMatch(context));
+            }
+
+            return true;
+        }
+
+        private OptionCollection GetCurrentOptions()
+        {
+            return _maintenanceCtrlSev
+                .GetState()
+                .MiddlewareOptions
+                ?? _startupOptions;
+        }
+
+        private async Task WriteMaintenanceResponse(HttpContext context)
+        {
+            MaintenanceResponse response = GetCurrentOptions()
+                   .GetSingleOrDefault<IResponseHolder>()
+                   .GetResponse(_webHostEnvironment);
 
             context
                 .Response
@@ -86,7 +86,7 @@ namespace MaintenanceModeMiddleware
             context
                 .Response
                 .Headers
-                .Add("Retry-After", retryAfterInterval.ToString());
+                .Add("Retry-After", response.Code503RetryInterval.ToString());
 
             context
                 .Response
@@ -100,14 +100,6 @@ namespace MaintenanceModeMiddleware
                 .Response
                 .WriteAsync(responseStr,
                     response.ContentEncoding);
-        }
-
-        private void RestoreMaintenanceState()
-        {
-            if (_maintenanceCtrlSev is ICanRestoreState iCanRestoreState)
-            {
-                iCanRestoreState.RestoreState();
-            }
         }
     }
 }

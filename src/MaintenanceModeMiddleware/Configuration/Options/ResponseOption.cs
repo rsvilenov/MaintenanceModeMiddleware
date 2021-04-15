@@ -8,7 +8,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 {
     internal class ResponseOption : Option<MaintenanceResponse>, IResponseHolder
     {
-        internal const char PARTS_SEPARATOR = ';';
+        private const char PARTS_SEPARATOR = ';';
 
         public override void LoadFromString(string str)
         {
@@ -18,7 +18,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             }
 
             string[] parts = str.Split(PARTS_SEPARATOR);
-            if (parts.Length != 3)
+            if (parts.Length != 4)
             {
                 throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
@@ -33,20 +33,26 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new FormatException($"The code page {parts[1]} is not a valid integer.");
             }
 
+            if (!int.TryParse(parts[2], out int code503RetryInterval))
+            {
+                throw new ArgumentException("Unable to parse the code 503 retry interval.");
+            }
+
             Encoding encoding = Encoding.GetEncoding(codePage);
-            byte[] contentBytes = encoding.GetBytes(parts[2]);
+            byte[] contentBytes = encoding.GetBytes(parts[3]);
 
             Value = new MaintenanceResponse
             {
                 ContentBytes = contentBytes,
                 ContentEncoding = encoding,
-                ContentType = contentType
+                ContentType = contentType,
+                Code503RetryInterval = code503RetryInterval
             };
         }
 
         public override string GetStringValue()
         {
-            return $"{Value.ContentType};{Value.ContentEncoding.CodePage};{Value.ContentEncoding.GetString(Value.ContentBytes)}";
+            return $"{Value.ContentType}{PARTS_SEPARATOR}{Value.ContentEncoding.CodePage}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.ContentEncoding.GetString(Value.ContentBytes)}";
         }
 
         public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)

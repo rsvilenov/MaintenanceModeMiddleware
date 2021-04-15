@@ -34,21 +34,21 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void UseResponseFile(string relativePath, PathBaseDirectory baseDir, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Func<ResponseFileOption> testFunc = () =>
+            Func<ResponseFromFileOption> testFunc = () =>
             {
-                builder.UseResponseFile(relativePath, baseDir);
-                return builder.GetOptions().GetSingleOrDefault<ResponseFileOption>();
+                builder.UseResponseFromFile(relativePath, baseDir);
+                return builder.GetOptions().GetSingleOrDefault<ResponseFromFileOption>();
             };
 
             if (expectedException == null)
             {
-                ResponseFileOption option = testFunc
+                ResponseFromFileOption option = testFunc
                     .ShouldNotThrow()
                     .ShouldNotBeNull();
 
                 option.Value.ShouldNotBeNull();
-                option.Value.FilePath.ShouldBe(relativePath);
-                option.Value.BaseDir.ShouldBe(baseDir);
+                option.Value.File.Path.ShouldBe(relativePath);
+                option.Value.File.BaseDir.ShouldBe(baseDir);
             }
             else
             {
@@ -128,25 +128,6 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             builder.GetOptions()
                 .GetSingleOrDefault<UseDefaultResponseOption>()
                 .ShouldNotBeNull();
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(5001)]
-        public void Set503RetryAfterInterval(int interval)
-        {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder();
-            Func<Code503RetryIntervalOption> testFunc = () =>
-            {
-                builder.Set503RetryAfterInterval(interval);
-                return builder.GetOptions().GetSingleOrDefault<Code503RetryIntervalOption>();
-            };
-
-            Code503RetryIntervalOption option = testFunc.ShouldNotThrow();
-
-            option
-                .ShouldNotBeNull()
-                .Value.ShouldBe(interval);
         }
 
         [Theory]
@@ -457,7 +438,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Action testAction = () =>
             {
                 builder.UseNoDefaultValues();
-                builder.UseResponseFile("test.txt", PathBaseDirectory.ContentRootPath);
+                builder.UseResponseFromFile("test.txt", PathBaseDirectory.ContentRootPath);
                 builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
                 builder.GetOptions();
             };

@@ -15,14 +15,14 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         private readonly IWebHostEnvironment _webHostEnvironment = FakeWebHostEnvironment.Create();
 
         [Theory]
-        [InlineData("ContentRootPath;file.txt", true, null)]
-        [InlineData("ContentRootPath;file.json", true, null)]
-        [InlineData("ContentRootPath;file.html", true, null)]
-        [InlineData("ContentRootPath;file.html", false, typeof(FileNotFoundException))]
-        [InlineData("ContentRootPath;file.mp3", true, typeof(InvalidOperationException))]
+        [InlineData("ContentRootPath;file.txt;5300", true, null)]
+        [InlineData("ContentRootPath;file.json;5300", true, null)]
+        [InlineData("ContentRootPath;file.html;5300", true, null)]
+        [InlineData("ContentRootPath;file.html;5300", false, typeof(FileNotFoundException))]
+        [InlineData("ContentRootPath;file.mp3;5300", true, typeof(InvalidOperationException))]
         public void Test_ResponseFileOption_Verify(string input, bool createFile, Type expectedExceptionType)
         {
-            var option = new ResponseFileOption();
+            var option = new ResponseFromFileOption();
             
             Action testAction = () =>
             {
@@ -30,7 +30,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
                 if (createFile)
                 {
-                    string filePath = Path.Combine(_webHostEnvironment.ContentRootPath, option.Value.FilePath);
+                    string filePath = Path.Combine(_webHostEnvironment.ContentRootPath, option.Value.File.Path);
                     File.Create(filePath);
                 }
 

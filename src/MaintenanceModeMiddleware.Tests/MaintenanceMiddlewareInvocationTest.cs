@@ -1,5 +1,8 @@
-﻿using MaintenanceModeMiddleware.Configuration.Builders;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Configuration.State;
+using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -359,7 +362,7 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 (optionBuilder) =>
                 {
-                    optionBuilder.UseResponseFile(safeTempFileName, baseDir);
+                    optionBuilder.UseResponseFromFile(safeTempFileName, baseDir);
                 },
                 null,
                 tempDir);
@@ -388,7 +391,10 @@ namespace MaintenanceModeMiddleware.Tests
             DefaultHttpContext httpContext = new DefaultHttpContext();
 
             IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
-            svc.IsMaintenanceModeOn.Returns(isOn);
+            svc.GetState().Returns(new MaintenanceState
+            {
+                IsMaintenanceOn = isOn
+            });
 
             bool isNextDelegateCalled = false;
 
@@ -453,18 +459,20 @@ namespace MaintenanceModeMiddleware.Tests
                 return Task.CompletedTask;
             };
 
-            IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService, ICanOverrideMiddlewareOptions>();
-            svc.IsMaintenanceModeOn.Returns(true);
-
+            OptionCollection middlewareOptions = null;
             if (optionsOverrideSetup != null)
             {
                 MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder();
                 optionsOverrideSetup.Invoke(optionOverrideBuilder);
-
-                (svc as ICanOverrideMiddlewareOptions)
-                    .GetOptionsToOverride()
-                    .Returns(optionOverrideBuilder.GetOptions());
+                middlewareOptions = optionOverrideBuilder.GetOptions();
             }
+
+            IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
+            svc.GetState().Returns(new MaintenanceState
+            {
+                IsMaintenanceOn = true,
+                MiddlewareOptions = middlewareOptions
+            });
 
             if (tempDir == null)
             {

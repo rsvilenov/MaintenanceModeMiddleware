@@ -24,14 +24,14 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void Store(bool isOn, bool storeDate, bool storeOptions)
         {
             FileStateStore store = GetStateStore();
-            var testState = new MaintenanceState
+            var testState = new StorableMaintenanceState
             {
                 IsMaintenanceOn = isOn
             };
 
             if (storeDate)
             {
-                testState.EndsOn = DateTime.Now;
+                testState.ExpirationDate = DateTime.Now;
             }
 
             if (storeOptions)
@@ -46,16 +46,16 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 };
             }
 
-            Func<MaintenanceState> testFunc = () =>
+            Func<StorableMaintenanceState> testFunc = () =>
             {
                 store.SetState(testState);
                 return store.GetState();
             };
 
-            MaintenanceState restoredState = testFunc.ShouldNotThrow();
+            StorableMaintenanceState restoredState = testFunc.ShouldNotThrow();
 
             restoredState.ShouldNotBeNull();
-            restoredState.EndsOn.ShouldBe(testState.EndsOn);
+            restoredState.ExpirationDate.ShouldBe(testState.ExpirationDate);
             restoredState.IsMaintenanceOn.ShouldBe(testState.IsMaintenanceOn);
 
             if (storeOptions)
@@ -77,23 +77,23 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         public void Store_In_Various_Paths(string file, PathBaseDirectory? baseDir)
         {
             FileStateStore store = GetStateStore(SafeTempPath.Create(file), baseDir);
-            var testState = new MaintenanceState
+            var testState = new StorableMaintenanceState
             {
                 IsMaintenanceOn = true,
-                EndsOn = DateTime.Now
+                ExpirationDate = DateTime.Now
             };
 
 
-            Func<MaintenanceState> testFunc = () =>
+            Func<StorableMaintenanceState> testFunc = () =>
             {
                 store.SetState(testState);
                 return store.GetState();
             };
 
-            MaintenanceState restoredState = testFunc.ShouldNotThrow();
+            StorableMaintenanceState restoredState = testFunc.ShouldNotThrow();
 
             restoredState.ShouldNotBeNull();
-            restoredState.EndsOn.ShouldBe(testState.EndsOn);
+            restoredState.ExpirationDate.ShouldBe(testState.ExpirationDate);
             restoredState.IsMaintenanceOn.ShouldBe(testState.IsMaintenanceOn);
         }
 
@@ -106,7 +106,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
             PathBaseDirectory baseDirRestore,
             bool shouldSucceed)
         {
-            var testState = new MaintenanceState();
+            var testState = new StorableMaintenanceState();
             string tempDir = Path.GetTempPath();
             string prefixedFileName = SafeTempPath.Create(file);
             Func<string> testFuncStore = () =>
@@ -121,13 +121,13 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
 
             string tempFilePath = testFuncStore.ShouldNotThrow();
 
-            Func<MaintenanceState> testFuncRestore = () =>
+            Func<StorableMaintenanceState> testFuncRestore = () =>
             {
                 FileStateStore storeRead = GetStateStore(prefixedFileName, baseDirRestore, null, tempDir);
                 return storeRead.GetState();
             };
 
-            MaintenanceState restoredState = testFuncRestore.ShouldNotThrow();
+            StorableMaintenanceState restoredState = testFuncRestore.ShouldNotThrow();
 
             if (shouldSucceed)
             {
@@ -148,7 +148,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 generatedFilePath = filePath;
             });
 
-            Func<MaintenanceState> testFunc = () =>
+            Func<StorableMaintenanceState> testFunc = () =>
             {
                 File.WriteAllText(generatedFilePath, "");
                 return store.GetState();
@@ -168,7 +168,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 generatedFilePath = filePath;
             });
 
-            Func<MaintenanceState> testFunc = () =>
+            Func<StorableMaintenanceState> testFunc = () =>
             {
                 if (File.Exists(generatedFilePath))
                 {
@@ -194,7 +194,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
 
             Action testAction = () =>
             {
-                store.SetState(new MaintenanceState());
+                store.SetState(new StorableMaintenanceState());
             };
 
             testAction
@@ -214,7 +214,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
 
             Action testAction = () =>
             {
-                store.SetState(new MaintenanceState());
+                store.SetState(new StorableMaintenanceState());
             };
 
             testAction

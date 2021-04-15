@@ -63,11 +63,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             if (shouldPathBeEqual)
             {
-                descriptor.FilePath.ShouldBe(result);
+                descriptor.Path.ShouldBe(result);
             }
             else
             {
-                descriptor.FilePath.ShouldNotBe(result);
+                descriptor.Path.ShouldNotBe(result);
             }
         }
 

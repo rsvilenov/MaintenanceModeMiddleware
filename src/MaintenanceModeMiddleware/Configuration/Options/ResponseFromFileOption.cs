@@ -6,9 +6,16 @@ using System.IO;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class ResponseFileOption : Option<FileDescriptor>, IResponseHolder
+    internal class ResponseFromFileOption : Option<FileMaintenanceResponse>, IResponseHolder
     {
-        internal const char PARTS_SEPARATOR = ';';
+        private const char PARTS_SEPARATOR = ';';
+
+        internal ResponseFromFileOption() { }
+
+        internal ResponseFromFileOption(string filePath, PathBaseDirectory baseDir, int code503RetryInterval)
+        {
+            SetValue(filePath, baseDir, code503RetryInterval);
+        }
 
         public override void LoadFromString(string str)
         {
@@ -18,7 +25,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             }
 
             string[] parts = str.Split(PARTS_SEPARATOR);
-            if (parts.Length != 2)
+            if (parts.Length != 3)
             {
                 throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
@@ -28,12 +35,26 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new ArgumentException($"Unknown base directory type {parts[0]}");
             }
 
-            Value = new FileDescriptor(parts[1], baseDir);
+            if (!int.TryParse(parts[2], out int code503RetryInterval))
+            {
+                throw new ArgumentException("Unable to parse the code 503 retry interval.");
+            }
+
+            SetValue(parts[1], baseDir, code503RetryInterval);
+        }
+
+        private void SetValue(string filePath, PathBaseDirectory baseDir, int code503RetryInterval)
+        {
+            Value = new FileMaintenanceResponse
+            {
+                File = new FileDescriptor(filePath, baseDir),
+                Code503RetryInterval = code503RetryInterval
+            };
         }
 
         public override string GetStringValue()
         {
-            return $"{Value.BaseDir}{PARTS_SEPARATOR}{Value.FilePath}";
+            return $"{Value.File.BaseDir}{PARTS_SEPARATOR}{Value.File.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}";
         }
 
         public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)
@@ -49,7 +70,8 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 {
                     ContentBytes = sr.CurrentEncoding.GetBytes(sr.ReadToEnd()),
                     ContentEncoding = sr.CurrentEncoding,
-                    ContentType = contentType
+                    ContentType = contentType,
+                    Code503RetryInterval = Value.Code503RetryInterval
                 };
             }
         }
@@ -59,12 +81,13 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             string fullPath = GetFileFullPath(webHostEnv);
             if (!File.Exists(fullPath))
             {
-                throw new FileNotFoundException($"Could not find file {Value.FilePath}. Expected absolute path: {fullPath}.");
+                throw new FileNotFoundException($"Could not find file {Value.File.Path}. Expected absolute path: {fullPath}.");
             }
 
             // should not throw
             GetContentType(fullPath);
         }
+
         private ContentType GetContentType(string fullPath)
         {
             return Path.GetExtension(fullPath) switch
@@ -78,11 +101,11 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         private string GetFileFullPath(IWebHostEnvironment webHostEnv)
         {
-            string baseDir = Value.BaseDir == PathBaseDirectory.WebRootPath
+            string baseDir = Value.File.BaseDir == PathBaseDirectory.WebRootPath
                                ? webHostEnv.WebRootPath
                                : webHostEnv.ContentRootPath;
 
-            string absPath = Path.Combine(baseDir, Value.FilePath);
+            string absPath = Path.Combine(baseDir, Value.File.Path);
             return absPath;
         }
     }

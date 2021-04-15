@@ -1,8 +1,8 @@
-﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.Configuration.Builders;
+﻿using MaintenanceModeMiddleware.Configuration.Builders;
+using MaintenanceModeMiddleware.Configuration.State;
 using System;
 
-namespace MaintenanceModeMiddleware
+namespace MaintenanceModeMiddleware.Services
 {
     /// <summary>
     /// An interface for the maintenance control service.
@@ -23,26 +23,9 @@ namespace MaintenanceModeMiddleware
         void LeaveMaintanence();
 
         /// <summary>
-        /// True if the web application is currently in maintenance mode.
+        /// Gets the current maintenance state.
         /// </summary>
-        bool IsMaintenanceModeOn { get; }
-
-        /// <summary>
-        /// The date (if specified) when the maintenance on will end automatically.
-        /// </summary>
-        public DateTime? EndsOn { get; }
-    }
-
-    internal interface ICanRestoreState
-    {
-        /// <summary>
-        /// Call me thwn the dependency graph is fully built.
-        /// </summary>
-        void RestoreState();
-    }
-
-    internal interface ICanOverrideMiddlewareOptions
-    {
-        OptionCollection GetOptionsToOverride();
+        /// <returns></returns>
+        MaintenanceState GetState();
     }
 }

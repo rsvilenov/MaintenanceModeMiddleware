@@ -175,36 +175,13 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("2300", null)]
-        [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData("not an integer", typeof(FormatException))]
-        [InlineData("2147483648" /* Int32.MaxValue + 1 */, typeof(OverflowException))]
-        public void Test_Code503RetryIntervalOption(string interval, Type expectedException)
-        {
-            var option = new Code503RetryIntervalOption();
-            Action testAction = () => option.LoadFromString(interval);
-
-            if (expectedException != null)
-            {
-                testAction.ShouldThrow(expectedException);
-            }
-            else
-            {
-                testAction.ShouldNotThrow();
-
-                option.Value.ToString().ShouldBe(interval);
-                option.GetStringValue().ShouldBe(interval);
-            }
-        }
-
-        [Theory]
-        [InlineData("ContentRootPath;file.txt", null)]
+        [InlineData("ContentRootPath;file.txt;5300", null)]
         [InlineData("ContentRootPath", typeof(FormatException))]
-        [InlineData("RootPath_NotInEnum;File.TXT", typeof(ArgumentException))]
+        [InlineData("RootPath_NotInEnum;File.TXT;5300", typeof(ArgumentException))]
         [InlineData(null, typeof(ArgumentNullException))]
         public void Test_ResponseFileOption(string input, Type expectedException)
         {
-            var option = new ResponseFileOption();
+            var option = new ResponseFromFileOption();
             Action testAction = () => option.LoadFromString(input);
 
             if (expectedException != null)
@@ -220,12 +197,12 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("ContentRootPath;file.txt", "file.txt", true)]
-        [InlineData("ContentRootPath;file.txt", "file2.txt", false)]
-        [InlineData("ContentRootPath;File.TXT", "file.txt", false)]
+        [InlineData("ContentRootPath;file.txt;5300", "file.txt", true)]
+        [InlineData("ContentRootPath;file.txt;5300", "file2.txt", false)]
+        [InlineData("ContentRootPath;File.TXT;5300", "file.txt", false)]
         public void Test_ResponseFileOption_FilePath(string input, string path, bool shouldBeEqual)
         {
-            var option = new ResponseFileOption();
+            var option = new ResponseFromFileOption();
             Action testAction = () => option.LoadFromString(input);
 
             testAction.ShouldNotThrow();
@@ -233,20 +210,20 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             if (shouldBeEqual)
             {
-                option.Value.FilePath.ShouldBe(path);
+                option.Value.File.Path.ShouldBe(path);
             }
             else
             {
-                option.Value.FilePath.ShouldNotBe(path);
+                option.Value.File.Path.ShouldNotBe(path);
             }
         }
 
         [Theory]
-        [InlineData("ContentRootPath;file.txt", PathBaseDirectory.ContentRootPath, true)]
-        [InlineData("ContentRootPath;file.txt", PathBaseDirectory.WebRootPath, false)]
+        [InlineData("ContentRootPath;file.txt;5300", PathBaseDirectory.ContentRootPath, true)]
+        [InlineData("ContentRootPath;file.txt;5300", PathBaseDirectory.WebRootPath, false)]
         public void Test_ResponseFileOption_BaseDir(string input, PathBaseDirectory baseDir, bool shouldBeEqual)
         {
-            var option = new ResponseFileOption();
+            var option = new ResponseFromFileOption();
             Action testAction = () => option.LoadFromString(input);
 
             testAction.ShouldNotThrow();
@@ -254,20 +231,38 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             if (shouldBeEqual)
             {
-                option.Value.BaseDir.ShouldBe(baseDir);
+                option.Value.File.BaseDir.ShouldBe(baseDir);
             }
             else
             {
-                option.Value.BaseDir.ShouldNotBe(baseDir);
+                option.Value.File.BaseDir.ShouldNotBe(baseDir);
             }
         }
 
+        [Fact]
+        public void Test_ResponseFileOption_ParamConstructor()
+        {
+            string filePath = "some.txt";
+            PathBaseDirectory baseDir = PathBaseDirectory.ContentRootPath;
+            int code503RetryInterval = 2000;
+
+            Func<ResponseFromFileOption> testFunc = () 
+                => new ResponseFromFileOption(filePath, baseDir, code503RetryInterval);
+
+            ResponseFromFileOption opt = testFunc.ShouldNotThrow();
+
+            opt.Value.ShouldNotBeNull();
+            opt.Value.File.Path.ShouldBe(filePath);
+            opt.Value.File.BaseDir.ShouldBe(baseDir);
+            opt.Value.Code503RetryInterval.ShouldBe(code503RetryInterval);
+        }
+
         [Theory]
-        [InlineData("Text;65001;maintenance mode", null)]
-        [InlineData("Html;65002;maintenance mode", typeof(NotSupportedException))] /* there is no encoding with code page 65002 */
-        [InlineData("Music;65001;maintenance mode", typeof(ArgumentException))] /* music is not a valid content type */
-        [InlineData("Text;10v10s54;maintenance mode", typeof(FormatException))] /* 10v10s54 is not a valid integer */
-        [InlineData("Text;101054;maintenance mode", typeof(ArgumentOutOfRangeException))] /* 101054 is not a valid code page */
+        [InlineData("Text;65001;5300;maintenance mode", null)]
+        [InlineData("Html;65002;5300;maintenance mode", typeof(NotSupportedException))] /* there is no encoding with code page 65002 */
+        [InlineData("Music;65001;5300;maintenance mode", typeof(ArgumentException))] /* music is not a valid content type */
+        [InlineData("Text;10v10s54;5300;maintenance mode", typeof(FormatException))] /* 10v10s54 is not a valid integer */
+        [InlineData("Text;101054;5300;maintenance mode", typeof(ArgumentOutOfRangeException))] /* 101054 is not a valid code page */
         [InlineData(null, typeof(ArgumentNullException))]
         [InlineData("string in wrong format", typeof(FormatException))]
         public void Test_ResponseOption(string input, Type expectedException)
@@ -288,9 +283,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("Text;65001;maintenance mode", ContentType.Text, true)]
-        [InlineData("Html;65001;maintenance mode", ContentType.Text, false)]
-        [InlineData("Html;65001;<html><head></head><body>maintenance mode</body></html>", ContentType.Html, true)]
+        [InlineData("Text;65001;5300;maintenance mode", ContentType.Text, true)]
+        [InlineData("Html;65001;5300;maintenance mode", ContentType.Text, false)]
+        [InlineData("Html;65001;5300;<html><head></head><body>maintenance mode</body></html>", ContentType.Html, true)]
         public void Test_ResponseOption_ContentType(string input, ContentType contentType, bool shouldBeEqual)
         {
             var option = new ResponseOption();
@@ -310,8 +305,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("Text;65001;maintenance mode", 65001, true)]
-        [InlineData("Text;65001;maintenance mode", 12000, false)]
+        [InlineData("Text;65001;5300;maintenance mode", 65001, true)]
+        [InlineData("Text;65001;5300;maintenance mode", 12000, false)]
         public void Test_ResponseOption_Encoding(string input, int codePage, bool shouldBeEqual)
         {
             var option = new ResponseOption();
@@ -333,8 +328,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("Text;65001;maintenance mode", 65001, "maintenance mode", true)]
-        [InlineData("Text;65001;maintenance mode", 65001, "not in maintenance mode", false)]
+        [InlineData("Text;65001;5300;maintenance mode", 65001, "maintenance mode", true)]
+        [InlineData("Text;65001;5300;maintenance mode", 65001, "not in maintenance mode", false)]
         public void Test_ResponseOption_Content(string input, int codePage, string content, bool shouldBeEqual)
         {
             var option = new ResponseOption();
@@ -352,6 +347,27 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             else
             {
                 option.Value.ContentBytes.ShouldNotBe(encoding.GetBytes(content));
+            }
+        }
+
+        [Theory]
+        [InlineData("Text;65001;5300;maintenance mode", 5300, null)]
+        [InlineData("Text;65001;abc;maintenance mode", 5300, typeof(ArgumentException))]
+        public void Test_ResponseOption_RetryAfter(string input, int retryAfter, Type expectedExceptionType)
+        {
+            var option = new ResponseOption();
+            Action testAction = () => option.LoadFromString(input);
+
+            if (expectedExceptionType != null)
+            {
+                testAction.ShouldThrow(expectedExceptionType);
+            }
+            else
+            {
+                testAction
+                    .ShouldNotThrow();
+                option.Value.Code503RetryInterval
+                    .ShouldBe(retryAfter);
             }
         }
 
