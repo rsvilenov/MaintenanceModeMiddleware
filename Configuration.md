@@ -56,6 +56,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         options.BypassUser("Demo");
         options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
         //... some other options
+
         // You can configure it using the fluid interface the configuration methods provide. Like this:
         // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
     });
