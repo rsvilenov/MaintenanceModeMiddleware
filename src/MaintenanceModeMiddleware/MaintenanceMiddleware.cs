@@ -1,7 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Data;
-using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Hosting;

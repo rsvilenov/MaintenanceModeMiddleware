@@ -1,6 +1,5 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Enums;
 using System;
-using System.IO;
 
 namespace MaintenanceModeMiddleware.Configuration.Data
 {

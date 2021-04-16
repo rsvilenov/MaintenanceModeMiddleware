@@ -2,7 +2,6 @@
 using MaintenanceModeMiddleware.Configuration.Enums;
 using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 using Shouldly;
 using System;
 using System.IO;

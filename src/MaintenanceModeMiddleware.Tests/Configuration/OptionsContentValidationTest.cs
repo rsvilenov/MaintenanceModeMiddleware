@@ -8,7 +8,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
 {
-    public class OptionsVerificationTest
+    public class OptionsContentValidationTest
     {
         private readonly IWebHostEnvironment _webHostEnvironment = FakeWebHostEnvironment.Create();
 
@@ -17,7 +17,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("ContentRootPath;file.json;5300", "file.json", true, null)]
         [InlineData("ContentRootPath;file.html;5300", "file.html", true, null)]
         [InlineData("ContentRootPath;file.mp3;5300", "file.mp3", true, typeof(ArgumentException))]
-        public void Test_ResponseFileOption_Verify(string input, 
+        public void Test_ResponseFileOption_ValidateFile(string input, 
             string fileName,
             bool createFile, 
             Type expectedExceptionType)
