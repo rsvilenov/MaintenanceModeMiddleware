@@ -111,26 +111,5 @@ namespace MaintenanceModeMiddleware.Tests
                 File.Delete(Path.Combine(webHostEnv.ContentRootPath, testFileNameCaseExists));
             }
         }
-
-        //[Fact]
-        //public void Constructor_RestoreSvcOptions()
-        //{
-        //    IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService, ICanRestoreState>();
-
-        //    Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) => { };
-
-        //    Action testAction = () =>
-        //        new MaintenanceMiddleware(null,
-        //            svc,
-        //            null,
-        //            optionBuilderDelegate);
-
-
-        //    testAction.ShouldNotThrow();
-
-
-        //    (svc as ICanRestoreState).Received(1)
-        //                             .RestoreState();
-        //}
     }
 }

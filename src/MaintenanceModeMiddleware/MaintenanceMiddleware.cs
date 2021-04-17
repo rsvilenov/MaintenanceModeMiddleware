@@ -58,14 +58,6 @@ namespace MaintenanceModeMiddleware
             return true;
         }
 
-        private OptionCollection GetCurrentOptions()
-        {
-            return _maintenanceCtrlSev
-                .GetState()
-                .MiddlewareOptions
-                ?? _startupOptions;
-        }
-
         private async Task WriteMaintenanceResponse(HttpContext context)
         {
             MaintenanceResponse response = GetCurrentOptions()
@@ -95,6 +87,13 @@ namespace MaintenanceModeMiddleware
                     response.ContentEncoding);
         }
 
+        private OptionCollection GetCurrentOptions()
+        {
+            return _maintenanceCtrlSev
+                .GetState()
+                .MiddlewareOptions
+                ?? _startupOptions;
+        }
 
         private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)
         {

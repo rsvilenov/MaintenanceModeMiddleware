@@ -1,8 +1,8 @@
 ﻿namespace MaintenanceModeMiddleware.Configuration.Enums
 {
     /// <summary>
-    /// Contains the signifiers of the available directories,
-    /// where files can be stored.
+    /// Contains the signifiers of the available directories
+    /// in the web hosting environment.
     /// </summary>
     public enum PathBaseDirectory
     {

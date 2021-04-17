@@ -34,8 +34,11 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// </summary>
         /// <param name="relativePath">File path, relative to the location, specified in the second parameter.</param>
         /// <param name="baseDir">Either ContentRootPath, or WWWRootPath.</param>
+        /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponseFromFile(string relativePath, PathBaseDirectory baseDir, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
+        public MiddlewareOptionsBuilder UseResponseFromFile(string relativePath, 
+            PathBaseDirectory baseDir, 
+            int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -65,8 +68,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="response">The content of the response.</param>
         /// <param name="contentType">The type of the content: text, html or json</param>
         /// <param name="encoding">The encoding of the content</param>
+        /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponse(string response, ContentType contentType, Encoding encoding, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
+        public MiddlewareOptionsBuilder UseResponse(string response, 
+            ContentType contentType, 
+            Encoding encoding, 
+            int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(response))
             {
@@ -83,8 +90,12 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="responseBytes">The content of the response, encoded with the encoding, specified in the third parameter.</param>
         /// <param name="contentType">The type of the content: text, html or json</param>
         /// <param name="encoding">The encoding of the content</param>
+        /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
-        public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, ContentType contentType, Encoding encoding, int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
+        public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, 
+            ContentType contentType, 
+            Encoding encoding, 
+            int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (responseBytes == null)
             {
