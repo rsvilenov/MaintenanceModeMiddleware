@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
@@ -28,6 +29,8 @@ namespace MaintenanceModeMiddleware.Tests
             // TODO: check the parameters and that the registration actually happened
 
             ServiceCollection svcCollection = new ServiceCollection();
+            svcCollection.AddSingleton(Substitute.For<IWebHostEnvironment>());
+
             svcCollection.AddMaintenance();
             ServiceProvider serviceProvider = svcCollection.BuildServiceProvider();
             ApplicationBuilder appBuilder = new ApplicationBuilder(serviceProvider);

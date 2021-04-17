@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
+using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Hosting;
@@ -72,9 +73,9 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
 
         [Theory]
         [InlineData("test1.json", null)]
-        [InlineData("test2.json", PathBaseDirectory.ContentRootPath)]
-        [InlineData("test3.json", PathBaseDirectory.WebRootPath)]
-        public void Store_In_Various_Paths(string file, PathBaseDirectory? baseDir)
+        [InlineData("test2.json", EnvDirectory.ContentRootPath)]
+        [InlineData("test3.json", EnvDirectory.WebRootPath)]
+        public void Store_In_Various_Paths(string file, EnvDirectory? baseDir)
         {
             FileStateStore store = GetStateStore(SafeTempPath.Create(file), baseDir);
             var testState = new StorableMaintenanceState
@@ -98,12 +99,12 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         }
 
         [Theory]
-        [InlineData("test2.json", PathBaseDirectory.ContentRootPath, PathBaseDirectory.ContentRootPath, true)]
-        [InlineData("test2.json", PathBaseDirectory.WebRootPath, PathBaseDirectory.WebRootPath, true)]
-        [InlineData("test2.json", PathBaseDirectory.ContentRootPath, PathBaseDirectory.WebRootPath, false)]
+        [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.ContentRootPath, true)]
+        [InlineData("test2.json", EnvDirectory.WebRootPath, EnvDirectory.WebRootPath, true)]
+        [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.WebRootPath, false)]
         public void Store_In_Various_Paths_Match_Mismatch(string file, 
-            PathBaseDirectory baseDirStore, 
-            PathBaseDirectory baseDirRestore,
+            EnvDirectory baseDirStore, 
+            EnvDirectory baseDirRestore,
             bool shouldSucceed)
         {
             var testState = new StorableMaintenanceState();
@@ -201,28 +202,8 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 .ShouldNotThrow();
         }
 
-        [Fact]
-        public void SetState_PathBaseDirectory_Invalid_Enum_Value()
-        {
-            string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempPath.Create("invalid_basedir.json"),
-                (PathBaseDirectory)(-1),
-                (filePath) =>
-            {
-                generatedFilePath = filePath;
-            });
-
-            Action testAction = () =>
-            {
-                store.SetState(new StorableMaintenanceState());
-            };
-
-            testAction
-                .ShouldThrow<InvalidOperationException>();
-        }
-
         private FileStateStore GetStateStore(string file = "test.json",
-            PathBaseDirectory? baseDir = PathBaseDirectory.ContentRootPath,
+            EnvDirectory? baseDir = EnvDirectory.ContentRootPath,
             Action<string> onFileGenerated = null,
             string tempDir = null)
         {
@@ -231,12 +212,12 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 tempDir = Path.GetTempPath();
             }
 
-            var webHostEnv = FakeWebHostEnvironment.Create(tempDir);
+            var pathMapperSvc = FakePathMapperService.Create(tempDir);
 
             var serviceProvider = Substitute.For<IServiceProvider>();
             serviceProvider
-                .GetService(typeof(IWebHostEnvironment))
-                .Returns(webHostEnv);
+                .GetService(typeof(IPathMapperService))
+                .Returns(pathMapperSvc);
 
             FileDescriptor fileDescriptor = baseDir.HasValue
                 ? new FileDescriptor(file, baseDir.Value)

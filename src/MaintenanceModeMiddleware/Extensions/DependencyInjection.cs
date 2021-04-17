@@ -16,11 +16,13 @@ namespace MaintenanceModeMiddleware.Extensions
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
             Action<ServiceOptionsBuilder> optionBuilderDelegate = null)
         {
+            services.AddSingleton<IPathMapperService, PathMapperService>();
+
             services.AddSingleton<IStateStoreService, StateStoreService>();
 
             services.AddSingleton<IMaintenanceControlService>(svcProvider =>
                 new MaintenanceControlService(
-                    svcProvider.GetService<IWebHostEnvironment>(),
+                    svcProvider.GetService<IPathMapperService>(),
                     svcProvider.GetService<IStateStoreService>(),
                     optionBuilderDelegate));
 

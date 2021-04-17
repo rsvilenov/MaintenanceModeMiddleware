@@ -1,6 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
-using Microsoft.AspNetCore.Hosting;
+using MaintenanceModeMiddleware.Services;
 using System.IO;
 using System.Text;
 
@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value.ToString();
         }
 
-        public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)
+        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
         {
             using (Stream resStream = GetType()
                     .Assembly

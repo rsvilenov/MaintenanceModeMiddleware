@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
 using Shouldly;
@@ -76,8 +77,12 @@ namespace MaintenanceModeMiddleware.Tests
             Type expectedException,
             string expectedExMsgStart)
         {
+            string tempPath = Path.GetTempPath();
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
-            webHostEnv.ContentRootPath.Returns(Path.GetTempPath());
+            webHostEnv.ContentRootPath.Returns(tempPath);
+            IPathMapperService pathMappingSvc = Substitute.For<IPathMapperService>();
+            pathMappingSvc.GetPath(Arg.Any<EnvDirectory>()).Returns(tempPath);
+
             File.Create(Path.Combine(webHostEnv.ContentRootPath, testFileNameCaseExists))
                 .Dispose();
 
@@ -85,7 +90,7 @@ namespace MaintenanceModeMiddleware.Tests
             {
                 Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
                 {
-                    options.UseResponseFromFile(filePath, PathBaseDirectory.ContentRootPath);
+                    options.UseResponseFromFile(filePath, EnvDirectory.ContentRootPath);
                 // prevent other exceptions due to missing required options
                 options.FillEmptyOptionsWithDefault();
                 };
@@ -93,7 +98,7 @@ namespace MaintenanceModeMiddleware.Tests
                 Action testAction = () =>
                     new MaintenanceMiddleware(null,
                         null,
-                        webHostEnv,
+                        pathMappingSvc,
                         optionBuilderDelegate);
 
                 if (expectedException == null)

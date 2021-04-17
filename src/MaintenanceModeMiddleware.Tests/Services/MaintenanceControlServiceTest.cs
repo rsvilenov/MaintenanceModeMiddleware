@@ -16,7 +16,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
     public class MaintenanceControlServiceTest
     {
         private const string testUserName = "testUser";
-        private readonly IWebHostEnvironment _webHostEnv = FakeWebHostEnvironment.Create();
+        private readonly IPathMapperService _pathMapperSvc = FakePathMapperService.Create();
 
         [Fact]
         public void Constructor()
@@ -26,7 +26,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) => delegateCalled = true;
             Action testAction = () => 
                 new MaintenanceControlService(
-                    _webHostEnv,
+                    _pathMapperSvc,
                     stateStoreSvc,
                     optionBuilderDelegate);
 
@@ -43,7 +43,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate);
             Action testAction = () => svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
@@ -68,7 +68,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate); 
             Action testAction = () => svc.EnterMaintanence();
@@ -88,7 +88,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate); 
             Action testAction = () => svc.EnterMaintanence();
@@ -107,7 +107,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate);
             Func<OptionCollection> testFunc = () =>
@@ -141,7 +141,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate);
             Func<OptionCollection> testFunc = () =>
@@ -164,7 +164,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 options.UseNoStateStore();
             };
             MaintenanceControlService svc = new MaintenanceControlService(
-                _webHostEnv,
+                _pathMapperSvc,
                 FakeStateStoreService.Create(),
                 optionBuilderDelegate);
             Func<bool[]> testAction = () =>

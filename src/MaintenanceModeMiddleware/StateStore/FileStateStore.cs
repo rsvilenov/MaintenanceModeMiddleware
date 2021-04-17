@@ -1,7 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
-using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
-using Microsoft.AspNetCore.Hosting;
+using MaintenanceModeMiddleware.Services;
 using System;
 using System.Text.Json;
 using IO = System.IO;
@@ -54,33 +53,22 @@ namespace MaintenanceModeMiddleware.StateStore
 
         private string GetFileFullPath()
         {
-            IWebHostEnvironment webHostEnv = GetWebHostEnvironment();
-
             if (File.BaseDir == null)
             {
                 return File.Path;
             }
 
-            string fullFilePath;
-            switch (File.BaseDir)
-            {
-                case PathBaseDirectory.ContentRootPath:
-                    fullFilePath = IO.Path.Combine(webHostEnv.ContentRootPath, File.Path);
-                    break;
-                case PathBaseDirectory.WebRootPath:
-                    fullFilePath = IO.Path.Combine(webHostEnv.WebRootPath, File.Path);
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unknown base dir type: {File.BaseDir}.");
-            }
-            
-            return fullFilePath;
+            IPathMapperService pathMapperSvc = GetPathMapperService();
+
+            string envPath = pathMapperSvc.GetPath(File.BaseDir.Value);
+
+            return IO.Path.Combine(envPath, File.Path);
         }
 
-        private IWebHostEnvironment GetWebHostEnvironment()
+        private IPathMapperService GetPathMapperService()
         {
             IServiceProvider svcProvider = ((IServiceConsumer)this).ServiceProvider;
-            return (IWebHostEnvironment)svcProvider.GetService(typeof(IWebHostEnvironment));
+            return (IPathMapperService)svcProvider.GetService(typeof(IPathMapperService));
         }
 
         IServiceProvider IServiceConsumer.ServiceProvider

@@ -34,7 +34,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(null, typeof(ArgumentNullException))]
         public void FileDescriptor_SecondConstructor(string path, Type expectedException)
         {
-            Action testAction = () => new FileDescriptor(path, PathBaseDirectory.ContentRootPath);
+            Action testAction = () => new FileDescriptor(path, EnvDirectory.ContentRootPath);
 
             if (expectedException != null)
             {
@@ -49,9 +49,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Theory]
         [InlineData("/test/file.txt", "/test/file.txt", null, true)]
         [InlineData("/test/file.txt", "/test/npFile.txt", null, false)]
-        [InlineData("test/file.txt", "test/file.txt", PathBaseDirectory.ContentRootPath, true)]
-        [InlineData("test/file.txt", "test/noFile.txt", PathBaseDirectory.WebRootPath, false)]
-        public void FileDescriptor_Path(string path, string result, PathBaseDirectory? baseDir, bool shouldPathBeEqual)
+        [InlineData("test/file.txt", "test/file.txt", EnvDirectory.ContentRootPath, true)]
+        [InlineData("test/file.txt", "test/noFile.txt", EnvDirectory.WebRootPath, false)]
+        public void FileDescriptor_Path(string path, string result, EnvDirectory? baseDir, bool shouldPathBeEqual)
         {
             FileDescriptor descriptor = null;
             Action testAction = () => descriptor = baseDir.HasValue 

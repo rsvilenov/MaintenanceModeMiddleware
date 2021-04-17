@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
+using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Text;
@@ -55,7 +56,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.ContentType}{PARTS_SEPARATOR}{Value.ContentEncoding.CodePage}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.ContentEncoding.GetString(Value.ContentBytes)}";
         }
 
-        public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)
+        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
         {
             return Value;
         }

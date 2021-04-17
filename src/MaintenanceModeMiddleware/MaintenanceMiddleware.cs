@@ -16,17 +16,17 @@ namespace MaintenanceModeMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSev;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPathMapperService _pathMapperSvc;
         private readonly OptionCollection _startupOptions;
 
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
-            IWebHostEnvironment webHostEnvironment,
+            IPathMapperService pathMapperSvc,
             Action<MiddlewareOptionsBuilder> optionsBuilderDelegate)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;
-            _webHostEnvironment = webHostEnvironment;
+            _pathMapperSvc = pathMapperSvc;
 
             _startupOptions = GetStartupOptions(optionsBuilderDelegate);
         }
@@ -62,7 +62,7 @@ namespace MaintenanceModeMiddleware
         {
             MaintenanceResponse response = GetCurrentOptions()
                    .GetSingleOrDefault<IResponseHolder>()
-                   .GetResponse(_webHostEnvironment);
+                   .GetResponse(_pathMapperSvc);
 
             context
                 .Response
@@ -97,7 +97,7 @@ namespace MaintenanceModeMiddleware
 
         private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)
         {
-            var optionsBuilder = new MiddlewareOptionsBuilder(_webHostEnvironment);
+            var optionsBuilder = new MiddlewareOptionsBuilder(_pathMapperSvc);
             builderDelegate?.Invoke(optionsBuilder);
             return optionsBuilder.GetOptions();
         }

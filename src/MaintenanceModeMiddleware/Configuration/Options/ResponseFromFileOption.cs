@@ -1,6 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
-using Microsoft.AspNetCore.Hosting;
+using MaintenanceModeMiddleware.Services;
 using System;
 using System.IO;
 
@@ -12,7 +12,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         internal ResponseFromFileOption() { }
 
-        internal ResponseFromFileOption(string filePath, PathBaseDirectory baseDir, int code503RetryInterval)
+        internal ResponseFromFileOption(string filePath, EnvDirectory baseDir, int code503RetryInterval)
         {
             SetValue(filePath, baseDir, code503RetryInterval);
         }
@@ -30,7 +30,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
 
-            if (!Enum.TryParse(parts[0], out PathBaseDirectory baseDir))
+            if (!Enum.TryParse(parts[0], out EnvDirectory baseDir))
             {
                 throw new ArgumentException($"Unknown base directory type {parts[0]}");
             }
@@ -43,7 +43,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             SetValue(parts[1], baseDir, code503RetryInterval);
         }
 
-        private void SetValue(string filePath, PathBaseDirectory baseDir, int code503RetryInterval)
+        private void SetValue(string filePath, EnvDirectory baseDir, int code503RetryInterval)
         {
             if (!TryGetContentType(filePath, out _))
             {
@@ -63,9 +63,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.File.BaseDir}{PARTS_SEPARATOR}{Value.File.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}";
         }
 
-        public MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv)
+        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
         {
-            string fullPath = GetFileFullPath(webHostEnv);
+            string fullPath = GetFileFullPath(pathMapperSvc);
 
             using (StreamReader sr = new StreamReader(fullPath,
                 detectEncodingFromByteOrderMarks: true))
@@ -98,13 +98,11 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return contentType.HasValue;
         }
 
-        private string GetFileFullPath(IWebHostEnvironment webHostEnv)
+        private string GetFileFullPath(IPathMapperService pathMapperSvc)
         {
-            string baseDir = Value.File.BaseDir == PathBaseDirectory.WebRootPath
-                               ? webHostEnv.WebRootPath
-                               : webHostEnv.ContentRootPath;
+            string envDir = pathMapperSvc.GetPath(Value.File.BaseDir.Value);
 
-            string absPath = Path.Combine(baseDir, Value.File.Path);
+            string absPath = Path.Combine(envDir, Value.File.Path);
             return absPath;
         }
     }

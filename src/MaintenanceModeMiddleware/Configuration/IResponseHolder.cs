@@ -1,10 +1,10 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
-using Microsoft.AspNetCore.Hosting;
+using MaintenanceModeMiddleware.Services;
 
 namespace MaintenanceModeMiddleware.Configuration
 {
     internal interface IResponseHolder : IOption
     {
-        MaintenanceResponse GetResponse(IWebHostEnvironment webHostEnv);
+        MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc);
     }
 }

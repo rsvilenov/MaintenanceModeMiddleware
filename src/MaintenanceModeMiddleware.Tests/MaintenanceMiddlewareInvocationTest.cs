@@ -337,15 +337,15 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Theory]
-        [InlineData("test.txt", "text/plain", PathBaseDirectory.ContentRootPath)]
-        [InlineData("test.html", "text/html", PathBaseDirectory.ContentRootPath)]
-        [InlineData("test.json", "application/json", PathBaseDirectory.ContentRootPath)]
-        [InlineData("test.txt", "text/plain", PathBaseDirectory.WebRootPath)]
-        public async void Invoke_With_UseResponseFile(string fileName, string expectedContentType, PathBaseDirectory baseDir)
+        [InlineData("test.txt", "text/plain", EnvDirectory.ContentRootPath)]
+        [InlineData("test.html", "text/html", EnvDirectory.ContentRootPath)]
+        [InlineData("test.json", "application/json", EnvDirectory.ContentRootPath)]
+        [InlineData("test.txt", "text/plain", EnvDirectory.WebRootPath)]
+        public async void Invoke_With_UseResponseFile(string fileName, string expectedContentType, EnvDirectory baseDir)
         {
             string tempDir = Path.GetTempPath();
             string rootDir;
-            if (baseDir == PathBaseDirectory.ContentRootPath)
+            if (baseDir == EnvDirectory.ContentRootPath)
             {
                 rootDir = Path.Combine(tempDir, "contentRoot");
             }
@@ -459,10 +459,17 @@ namespace MaintenanceModeMiddleware.Tests
                 return Task.CompletedTask;
             };
 
+            if (tempDir == null)
+            {
+                tempDir = Path.GetTempPath();
+            }
+
+            IPathMapperService pathMapperSvc = FakePathMapperService.Create(tempDir);
+
             OptionCollection middlewareOptions = null;
             if (optionsOverrideSetup != null)
             {
-                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(FakeWebHostEnvironment.Create());
+                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(pathMapperSvc);
                 optionsOverrideSetup.Invoke(optionOverrideBuilder);
                 middlewareOptions = optionOverrideBuilder.GetOptions();
             }
@@ -474,17 +481,10 @@ namespace MaintenanceModeMiddleware.Tests
                 MiddlewareOptions = middlewareOptions
             });
 
-            if (tempDir == null)
-            {
-                tempDir = Path.GetTempPath();
-            }
-
-            IWebHostEnvironment webHostEnv = FakeWebHostEnvironment.Create(tempDir);
-
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,
                 svc,
-                webHostEnv,
+                pathMapperSvc,
                 optionsSetup);
 
             return new MiddlewareTestDesk

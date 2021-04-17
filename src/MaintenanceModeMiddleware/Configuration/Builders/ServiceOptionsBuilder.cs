@@ -50,7 +50,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         private IStateStore GetDefaultStateStore()
         {
             return new FileStateStore(new FileDescriptor("maintenanceState.json",
-                PathBaseDirectory.ContentRootPath));
+                EnvDirectory.ContentRootPath));
         }
     }
 }

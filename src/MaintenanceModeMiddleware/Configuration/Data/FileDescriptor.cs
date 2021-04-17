@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration.Data
             Path = fullPath;
         }
 
-        public FileDescriptor(string relativePath, PathBaseDirectory baseDir)
+        public FileDescriptor(string relativePath, EnvDirectory baseDir)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -37,6 +37,6 @@ namespace MaintenanceModeMiddleware.Configuration.Data
         }
 
         public string Path { get; set; }
-        public PathBaseDirectory? BaseDir { get; }
+        public EnvDirectory? BaseDir { get; }
     }
 }

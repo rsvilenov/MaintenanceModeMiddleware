@@ -10,14 +10,14 @@ namespace MaintenanceModeMiddleware.Services
         IMaintenanceControlService
     {
         private readonly IStateStoreService _stateStoreService;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPathMapperService _pathMapperSvc;
 
         public MaintenanceControlService(
-            IWebHostEnvironment webHostEnvironment,
+            IPathMapperService pathMapperSvc,
             IStateStoreService stateStoreService,
             Action<ServiceOptionsBuilder> optionBuilderDelegate)
         {
-            _webHostEnvironment = webHostEnvironment;
+            _pathMapperSvc = pathMapperSvc;
             _stateStoreService = stateStoreService;
 
             ServiceOptionsBuilder optionsBuilder = new ServiceOptionsBuilder();
@@ -75,7 +75,7 @@ namespace MaintenanceModeMiddleware.Services
 
         private OptionCollection GetMiddlewareOptions(Action<MiddlewareOptionsBuilder> middlewareOptionsBuilder)
         {
-            var optionsBuilder = new MiddlewareOptionsBuilder(_webHostEnvironment);
+            var optionsBuilder = new MiddlewareOptionsBuilder(_pathMapperSvc);
             middlewareOptionsBuilder?.Invoke(optionsBuilder);
 
             return optionsBuilder.GetOptions();

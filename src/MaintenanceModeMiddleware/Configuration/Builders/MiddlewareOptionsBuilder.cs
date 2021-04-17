@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -19,13 +20,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         private const int DEFAULT_503_RETRY_INTERVAL = 5300;
 
         private readonly OptionCollection _options;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPathMapperService _pathMapperSvc;
         private bool _areDefaultOptionsFilledIn;
         
-        internal MiddlewareOptionsBuilder(IWebHostEnvironment webHostEnvironment)
+        internal MiddlewareOptionsBuilder(IPathMapperService pathMapperSvc)
         {
             _options = new OptionCollection();
-            _webHostEnvironment = webHostEnvironment;
+            _pathMapperSvc = pathMapperSvc;
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponseFromFile(string relativePath, 
-            PathBaseDirectory baseDir, 
+            EnvDirectory baseDir, 
             int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(relativePath))
@@ -45,11 +46,8 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
-            string baseDirStr = baseDir ==  PathBaseDirectory.WebRootPath
-                               ? _webHostEnvironment.WebRootPath
-                               : _webHostEnvironment.ContentRootPath;
-
-            string fullFilePath = Path.Combine(baseDirStr, relativePath);
+            string envDir = _pathMapperSvc.GetPath(baseDir);
+            string fullFilePath = Path.Combine(envDir, relativePath);
 
             if (!File.Exists(fullFilePath))
             {

@@ -4,7 +4,7 @@
     /// Contains the signifiers of the available directories
     /// in the web hosting environment.
     /// </summary>
-    public enum PathBaseDirectory
+    public enum EnvDirectory
     {
         /// <summary>
         /// Corresponds to the absolute path to the directory 

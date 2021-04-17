@@ -32,12 +32,13 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Order(1)]
         public void SetState()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
-            svc.SetStateStore(new InMemoryStateStore());
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(FakeWebHostEnvironment.Create());
+            IStateStoreService stateStoreSvc = new StateStoreService(_svcProvider);
+            stateStoreSvc.SetStateStore(new InMemoryStateStore());
+            IPathMapperService pathMapperSvc = FakePathMapperService.Create();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
             builder.BypassAllAuthenticatedUsers();
 
-            Action testAction = () => svc.SetState(new MaintenanceState
+            Action testAction = () => stateStoreSvc.SetState(new MaintenanceState
             {
                 IsMaintenanceOn = true,
                 MiddlewareOptions = builder.GetOptions()

@@ -219,9 +219,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("ContentRootPath;file.txt;5300", PathBaseDirectory.ContentRootPath, true)]
-        [InlineData("ContentRootPath;file.txt;5300", PathBaseDirectory.WebRootPath, false)]
-        public void Test_ResponseFileOption_BaseDir(string input, PathBaseDirectory baseDir, bool shouldBeEqual)
+        [InlineData("ContentRootPath;file.txt;5300", EnvDirectory.ContentRootPath, true)]
+        [InlineData("ContentRootPath;file.txt;5300", EnvDirectory.WebRootPath, false)]
+        public void Test_ResponseFileOption_BaseDir(string input, EnvDirectory baseDir, bool shouldBeEqual)
         {
             var option = new ResponseFromFileOption();
             Action testAction = () => option.LoadFromString(input);
@@ -263,7 +263,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void Test_ResponseFileOption_ParamConstructor()
         {
             string filePath = "some.txt";
-            PathBaseDirectory baseDir = PathBaseDirectory.ContentRootPath;
+            EnvDirectory baseDir = EnvDirectory.ContentRootPath;
             int code503RetryInterval = 2000;
 
             Func<ResponseFromFileOption> testFunc = () 
