@@ -19,182 +19,205 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         private readonly IPathMapperService _pathMapperSvc = FakePathMapperService.Create();
 
         [Fact]
-        public void Constructor()
+        public void Constructor_Default_ShouldAddDefaultOptions()
         {
             MiddlewareOptionsBuilder builder = null;
-            Action testAction = () => builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-
-            testAction.ShouldNotThrow();
+            
+            builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
 
             builder.GetOptions()
                 .ShouldNotBeNull();
+        }
+
+        [Theory]
+        [InlineData("test.txt", EnvDirectory.ContentRootPath)]
+        [InlineData("test.txt", EnvDirectory.WebRootPath)]
+        public void UseResponseFile_WithValidData_GetOptionsValueShouldEqualInput(string relativePath,
+            EnvDirectory baseDir)
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            string filePath = Path.Combine(_pathMapperSvc.GetPath(baseDir), relativePath);
+            File.Create(filePath);
+
+            builder.UseResponseFromFile(relativePath, baseDir);
+
+            ResponseFromFileOption option = builder
+                 .GetOptions()
+                 .GetSingleOrDefault<ResponseFromFileOption>();
+            option.Value.ShouldNotBeNull();
+            option.Value.File.Path.ShouldBe(relativePath);
+            option.Value.File.BaseDir.ShouldBe(baseDir);
         }
 
         [Theory]
         [InlineData(null, default(EnvDirectory), false, typeof(ArgumentNullException))]
         [InlineData("", default(EnvDirectory), false, typeof(ArgumentNullException))]
         [InlineData("test" /* file name without an extension */, default(EnvDirectory), true, typeof(ArgumentException))]
-        [InlineData("test.txt", EnvDirectory.ContentRootPath, true, null)]
-        [InlineData("test.txt", EnvDirectory.WebRootPath, true, null)]
-        public void UseResponseFile(string relativePath, 
-            EnvDirectory baseDir, 
+        public void UseResponseFile_WithInvalidData_ShouldThrow(string relativePath,
+            EnvDirectory baseDir,
             bool createFile,
             Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<ResponseFromFileOption> testFunc = () =>
+            if (createFile)
             {
-                if (createFile)
-                {
-                    string filePath = Path.Combine(_pathMapperSvc.GetPath(baseDir), relativePath);
-                    File.Create(filePath);
-                }
-
+                string filePath = Path.Combine(_pathMapperSvc.GetPath(baseDir), relativePath);
+                File.Create(filePath);
+            }
+            Action testAction = () =>
+            {
                 builder.UseResponseFromFile(relativePath, baseDir);
-                return builder.GetOptions().GetSingleOrDefault<ResponseFromFileOption>();
             };
 
-            if (expectedException == null)
-            {
-                ResponseFromFileOption option = testFunc
-                    .ShouldNotThrow()
-                    .ShouldNotBeNull();
+            testAction.ShouldThrow(expectedException);
+        }
 
-                option.Value.ShouldNotBeNull();
-                option.Value.File.Path.ShouldBe(relativePath);
-                option.Value.File.BaseDir.ShouldBe(baseDir);
-            }
-            else
-            {
-                testFunc.ShouldThrow(expectedException);
-            }
+        [Theory]
+        [InlineData("maintenance mode", ContentType.Text, 65001)]
+        [InlineData("<p>maintenance mode</p>", ContentType.Html, 65001)]
+        public void UseResponseStringOverload_WithValidData_ValueShouldEqualInput(string response,
+            ContentType contentType,
+            int codePage)
+        {
+            Encoding encoding = Encoding.GetEncoding(codePage);
+            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+            
+            builder.UseResponse(response, contentType, encoding);
+
+
+            var option = builder
+                .GetOptions()
+                .GetSingleOrDefault<ResponseOption>();
+            option.Value.ShouldNotBeNull();
+            option.Value.ContentBytes.ShouldBe(encoding.GetBytes(response));
+            option.Value.ContentType.ShouldBe(contentType);
+            option.Value.ContentEncoding.ShouldBe(encoding);
+        }
+
+        [Theory]
+        [InlineData("maintenance mode", ContentType.Text, 65001)]
+        [InlineData("<p>maintenance mode</p>", ContentType.Html, 65001)]
+        public void UseResponseBytesOverload_WithValidData_ValueShouldEqualInput(string response,
+            ContentType contentType,
+            int codePage)
+        {
+            Encoding encoding = Encoding.GetEncoding(codePage);
+            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+
+
+            builder.UseResponse(encoding.GetBytes(response), contentType, encoding);
+
+
+            var option = builder
+                .GetOptions()
+                .GetSingleOrDefault<ResponseOption>();
+            option.Value.ShouldNotBeNull();
+            option.Value.ContentBytes.ShouldBe(encoding.GetBytes(response));
+            option.Value.ContentType.ShouldBe(contentType);
+            option.Value.ContentEncoding.ShouldBe(encoding);
         }
 
         [Theory]
         [InlineData("", ContentType.Text, 65001, typeof(ArgumentNullException))]
         [InlineData(null, ContentType.Text, 65001, typeof(ArgumentNullException))]
-        [InlineData("maintenance mode", ContentType.Text, 65001, null)]
-        [InlineData("<p>maintenance mode</p>", ContentType.Html, 65001, null)]
-        public void UseResponse(string response, 
-            ContentType contentType, 
+        public void UseResponseStringOverload_WithInvalidData_ShouldThrow(string response,
+            ContentType contentType,
             int codePage,
             Type expectedException)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
-            Func<ResponseOption>[] testFunctions = new Func<ResponseOption>[]
+            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            Action testAction = () =>
             {
-                () =>
-                {
-                    var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-                    builder.UseResponse(response, contentType, encoding);
-                    return builder.GetOptions().GetSingleOrDefault<ResponseOption>();
-                },
-                () =>
-                {
-                    var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-                    builder.UseResponse(string.IsNullOrEmpty(response) 
-                            ? null 
-                            : encoding.GetBytes(response),
-                        contentType, 
-                        encoding);
-
-                    return builder.GetOptions().GetSingleOrDefault<ResponseOption>();
-                }
+                builder.UseResponse(response, contentType, encoding);
             };
 
-            if (expectedException == null)
-            {
-                foreach (Func<ResponseOption> func in testFunctions)
-                {
-                    var option = func
-                        .ShouldNotThrow()
-                        .ShouldNotBeNull();
 
-                    option.Value.ShouldNotBeNull();
-                    option.Value.ContentBytes.ShouldBe(encoding.GetBytes(response));
-                    option.Value.ContentType.ShouldBe(contentType);
-                    option.Value.ContentEncoding.ShouldBe(encoding);
-                }
-                
-            }
-            else
+            testAction.ShouldThrow(expectedException);
+        }
+
+        [Theory]
+        [InlineData("", ContentType.Text, 65001, typeof(ArgumentNullException))]
+        [InlineData(null, ContentType.Text, 65001, typeof(ArgumentNullException))]
+        public void UseResponseBytesOverload_WithInvalidData_ShouldThrow(string response,
+            ContentType contentType,
+            int codePage,
+            Type expectedException)
+        {
+            Encoding encoding = Encoding.GetEncoding(codePage);
+            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            Action testAction = () =>
             {
-                foreach (Func<ResponseOption> func in testFunctions)
-                {
-                    func.ShouldThrow(expectedException);
-                }
-            }
+                builder.UseResponse(string.IsNullOrEmpty(response)
+                            ? null
+                            : encoding.GetBytes(response),
+                        contentType,
+                        encoding);
+            };
+
+
+            testAction.ShouldThrow(expectedException);
         }
 
         [Fact]
-        public void UseDefaultResponse()
+        public void UseDefaultResponse_WhenCalled_ShouldSucceed()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Action testAction = () =>
-            {
                 // ensure that the UseDefaultResponse option is used
-                builder.UseNoDefaultValues();
-                builder.UseDefaultResponse();
-            };
+            builder.UseNoDefaultValues();
 
-            testAction.ShouldNotThrow();
-
+            builder.UseDefaultResponse();
+            
             builder.GetOptions()
                 .GetSingleOrDefault<UseDefaultResponseOption>()
                 .ShouldNotBeNull();
         }
 
-        [Theory]
-        [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData("", typeof(ArgumentNullException))]
-        [InlineData("userName1", null)]
-        public void BypassUser(string userName, Type expectedException)
+        [Fact]
+        public void BypassUser_WithUser_ShouldSucceed()
         {
+            const string userName = "userName1";
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<BypassUserNameOption> testFunc = () =>
-            {
-                builder.BypassUser(userName);
-                return builder.GetOptions().GetSingleOrDefault<BypassUserNameOption>();
-            };
+            
+            builder.BypassUser(userName);
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-                return;
-            }
-
-            BypassUserNameOption option = testFunc.ShouldNotThrow();
-
-            option
+            builder
+                .GetOptions()
+                .GetSingleOrDefault<BypassUserNameOption>()
                 .ShouldNotBeNull()
                 .Value.ShouldBe(userName);
         }
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData(new string[] { }, typeof(ArgumentException))]
-        [InlineData(new string[] { "userName1", "userName2" }, null)]
-        public void BypassUsers(string[] userNames, Type expectedException)
+        [InlineData("", typeof(ArgumentNullException))]
+        public void BypassUser_WithNullOrEmptyUsername_ShouldThrow(string userName, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<IEnumerable<BypassUserNameOption>> testFunc = () =>
+            Action testAction = () =>
             {
-                builder.BypassUsers(userNames);
-                return builder.GetOptions().GetAll<BypassUserNameOption>();
+                builder.BypassUser(userName);
             };
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-                return;
-            }
 
-            IEnumerable<BypassUserNameOption> options = testFunc.ShouldNotThrow();
+            testAction.ShouldThrow(expectedException);
+        }
 
+        [Fact]
+        public void BypassUsers_WithValidUsers_ShouldSucceed()
+        {
+            string[] userNames = new string[] { "userName1", "userName2" };
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+
+            builder.BypassUsers(userNames);
+
+            IEnumerable<BypassUserNameOption> options = builder
+                .GetOptions()
+                .GetAll<BypassUserNameOption>();
             options
                 .ShouldNotBeNull()
-                .ShouldNotBeEmpty();
-            options
                 .Count()
                 .ShouldBe(userNames.Count());
             userNames
@@ -203,25 +226,28 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData("", typeof(ArgumentNullException))]
-        [InlineData("role1", null)]
-        public void BypassUserRole(string userRole, Type expectedException)
+        [InlineData(new string[] { }, typeof(ArgumentException))]
+        public void BypassUsers_WithNullOrEmptyArray_ShouldThrow(string[] userNames, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<BypassUserRoleOption> testFunc = () =>
+            Action testAction = () =>
             {
-                builder.BypassUserRole(userRole);
-                return builder.GetOptions().GetSingleOrDefault<BypassUserRoleOption>();
+                builder.BypassUsers(userNames);
             };
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-                return;
-            }
+            testAction.ShouldThrow(expectedException);
+        }
 
-            BypassUserRoleOption option = testFunc.ShouldNotThrow();
+        [Fact]
+        public void BypassUserRole_WithRole_ValueShouldBeEqualToTheInput()
+        {
+            const string userRole = "role1";
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+            builder.BypassUserRole(userRole);
 
+            BypassUserRoleOption option = builder.GetOptions()
+                .GetSingleOrDefault<BypassUserRoleOption>();
             option
                 .ShouldNotBeNull()
                 .Value.ShouldBe(userRole);
@@ -229,42 +255,57 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData(new string[] { }, typeof(ArgumentException))]
-        [InlineData(new string[] { "role1", "role2" }, null)]
-        public void BypassUserRoles(string[] userRoles, Type expectedException)
+        [InlineData("", typeof(ArgumentNullException))]
+        public void BypassUserRole_WithNullOrEmptyRole_ShouldThrow(string userRole, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<IEnumerable<BypassUserRoleOption>> testFunc = () =>
+            Action testAction = () =>
             {
-                builder.BypassUserRoles(userRoles);
-                return builder.GetOptions().GetAll<BypassUserRoleOption>();
+                builder.BypassUserRole(userRole);
             };
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-                return;
-            }
+            testAction.ShouldThrow(expectedException);
+        }
 
-            IEnumerable<BypassUserRoleOption> options = testFunc.ShouldNotThrow();
+        [Fact]
+        public void BypassUserRoles_WithRoles_ShouldSucceed()
+        {
+            string[] userRoles = new string[] { "role1", "role2" };
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+            builder.BypassUserRoles(userRoles);
 
+            IEnumerable<BypassUserRoleOption> options = builder.GetOptions()
+                .GetAll<BypassUserRoleOption>();
             options
                 .ShouldNotBeNull()
-                .ShouldNotBeEmpty();
-            options
                 .Count()
                 .ShouldBe(userRoles.Count());
             userRoles
                 .ShouldContain(options.First().Value);
         }
 
-        [Fact]
-        public void BypassAllAuthenticatedUsers()
+        [Theory]
+        [InlineData(null, typeof(ArgumentNullException))]
+        [InlineData(new string[] { }, typeof(ArgumentException))]
+        public void BypassUserRoles_WithNullOrEmptyArray_ShouldThrow(string[] userRoles, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Action testAction = () => builder.BypassAllAuthenticatedUsers();
+            Action testAction = () =>
+            {
+                builder.BypassUserRoles(userRoles);
+            };
 
-            testAction.ShouldNotThrow();
+
+            testAction.ShouldThrow(expectedException);
+        }
+
+        [Fact]
+        public void BypassAllAuthenticatedUsers_Default_ShouldSucceed()
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+            builder.BypassAllAuthenticatedUsers();
 
             builder.GetOptions()
                 .GetSingleOrDefault<BypassAllAuthenticatedUsersOption>()
@@ -272,19 +313,30 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void BypassUrlPath()
+        public void BypassUrlPath_WithEmptyPath_ShouldThrowArgumentException()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<BypassUrlPathOption> testFunc = () =>
+            Action testAction = () =>
             {
-                builder.BypassUrlPath(new PathString(), StringComparison.Ordinal);
-                return builder.GetOptions().GetSingleOrDefault<BypassUrlPathOption>();
+                builder.BypassUrlPath(new PathString(), StringComparison.Ordinal);;
             };
 
+            testAction.ShouldThrow<ArgumentException>();
+        }
 
-            testFunc
-                .ShouldNotThrow()
-                .ShouldNotBeNull();
+        [Fact]
+        public void BypassUrlPath_WithNonEmptyPath_ValueShouldEqualInput()
+        {
+            const string urlPath = "/path";
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            
+            builder.BypassUrlPath(new PathString(urlPath), StringComparison.Ordinal);
+               
+            builder.GetOptions()
+                .GetSingleOrDefault<BypassUrlPathOption>()
+                .ShouldNotBeNull()
+                .Value.PathString.Value
+                .ShouldBe(urlPath);
         }
 
         [Theory]
@@ -346,85 +398,83 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData(null, typeof(ArgumentNullException))]
-        [InlineData("", typeof(ArgumentNullException))]
-        [InlineData("txt", null)]
-        [InlineData(".txt", null)]
-        public void BypassFileExtension(string extension, Type expectedException)
+        [InlineData("txt")]
+        [InlineData(".txt")]
+        public void BypassFileExtension_WithValidExtension_ValueShouldEqualInput(string extension)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<BypassFileExtensionOption> testFunc = () =>
+            
+            builder.BypassFileExtension(extension);
+                
+
+            builder.GetOptions()
+                .GetSingleOrDefault<BypassFileExtensionOption>()
+                .ShouldNotBeNull()
+                // the method BypassFileExtension removes the dots of the extensions
+                .Value.ShouldBe(extension.StartsWith('.')
+                    ? extension.Substring(1)
+                    : extension);
+        }
+
+        [Theory]
+        [InlineData(null, typeof(ArgumentNullException))]
+        [InlineData("", typeof(ArgumentNullException))]
+        public void BypassFileExtension_WithNullOrEmptyInput_ShouldThrow(string extension, Type expectedException)
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            Action testAction = () =>
             {
                 builder.BypassFileExtension(extension);
-                return builder.GetOptions().GetSingleOrDefault<BypassFileExtensionOption>();
             };
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-            }
-            else
-            {
-                testFunc
-                    .ShouldNotThrow()
-                    .ShouldNotBeNull()
-                    // the method BypassFileExtension removes the dots of the extensions
-                    .Value.ShouldBe(extension.StartsWith('.') 
-                        ? extension.Substring(1) 
-                        : extension);
-            }
+
+            testAction.ShouldThrow(expectedException);
+        }
+
+        [Fact]
+        public void BypassFileExtensions_WithValidExtensions_ShouldSucceed()
+        {
+            string[] extensions = new string[] { "txt", "html" };
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+
+            builder.BypassFileExtensions(extensions);
+
+            IEnumerable<BypassFileExtensionOption> options = 
+                builder.GetOptions().GetAll<BypassFileExtensionOption>();
+            options.ShouldNotBeEmpty();
+            options.Count()
+                .ShouldBe(extensions.Length);
+            extensions
+                .ShouldContain(options.First().Value);
         }
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
         [InlineData(new string[] { }, typeof(ArgumentException))]
-        [InlineData(new string[] { "txt" }, null)]
-        [InlineData(new string[] { "txt", "html" }, null)]
-        public void BypassFileExtensions(string[] extensions, Type expectedException)
+        public void BypassFileExtensions_WithNullOrEmptyArray_ShouldThrow(string[] extensions, Type expectedException)
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Func<IEnumerable<BypassFileExtensionOption>> testFunc = () =>
+            Action testAction = () =>
             {
                 builder.BypassFileExtensions(extensions);
-                return builder.GetOptions().GetAll<BypassFileExtensionOption>();
             };
 
-            if (expectedException != null)
-            {
-                testFunc.ShouldThrow(expectedException);
-            }
-            else
-            {
-                IEnumerable<BypassFileExtensionOption> options = testFunc
-                    .ShouldNotThrow()
-                    .ShouldNotBeNull();
-                options.ShouldNotBeEmpty();
-
-                if (extensions != null)
-                {
-                    options.Count()
-                        .ShouldBe(extensions.Length);
-                    extensions
-                        .ShouldContain(options.First().Value);
-                }
-            }
+            testAction.ShouldThrow(expectedException);
         }
 
         [Fact]
-        public void UseNoDefaultValues()
+        public void UseNoDefaultValues_Default_GetOptionsShouldThrow()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            Action testAction = () => builder.UseNoDefaultValues();
-
-            testAction.ShouldNotThrow();
-
+            builder.UseNoDefaultValues();
             Action assertAction = () => builder.GetOptions();
+
             assertAction.ShouldThrow<ArgumentException>()
                 .Message.ShouldStartWith("No response was specified.");
         }
 
         [Fact]
-        public void FillEmptyOptionsWithDefault()
+        public void FillEmptyOptionsWithDefault_Default_ShouldAddOptions()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
 
@@ -433,7 +483,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void GetOptionsTwice_ShouldNotThrow()
+        public void MiddlewareOptionsBuilder_WhenGetOptionsIsCalledTwice_ShouldNotThrow()
         {
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
             Action testAction = () => 
@@ -446,14 +496,15 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void When_DuplicateResponseOption_GetOption_Should_Throw()
+        public void MiddlewareOptionsBuilder_WhenDuplicateResponseOptionIsSet_GetOptionShouldThrow()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc); 
+            builder.UseNoDefaultValues();
+            builder.UseDefaultResponse();
+            builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+
             Action testAction = () =>
             {
-                builder.UseNoDefaultValues();
-                builder.UseDefaultResponse();
-                builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
                 builder.GetOptions();
             };
 

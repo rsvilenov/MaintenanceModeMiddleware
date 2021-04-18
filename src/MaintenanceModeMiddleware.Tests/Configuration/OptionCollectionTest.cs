@@ -10,7 +10,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
     public class OptionCollectionTest
     {
         [Fact]
-        public void ConstructEmpty()
+        public void DefaultConstructor_Call_ShouldNotThrow()
         {
             Action testAction = () => new OptionCollection();
 
@@ -18,7 +18,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void ConstructNotEmpty()
+        public void ParametrizedConstructor_CallWithOptionList_ShouldNotThrow()
         {
             Action testAction = () => new OptionCollection(new List<ISerializableOption>
             {
@@ -29,7 +29,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void Add()
+        public void Add_WithAnOption_ShouldNotThrow()
         {
             OptionCollection collection = new OptionCollection();
             ISerializableOption testOption = Substitute.For<ISerializableOption>();
@@ -38,47 +38,48 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             testAction.ShouldNotThrow();
         }
 
-        [Theory]
-        [InlineData(1, null)]
-        [InlineData(2, typeof(InvalidOperationException))]
-        public void GetSingleOrDefault(int numberOfSameEntries, Type expectedException)
+        [Fact]
+        public void GetSingleOrDefault_WithOnePresentEntry_ShouldSucceed()
         {
+            const int numberOfSameEntries = 1;
+            OptionCollection collection = GetOptionCollection(numberOfSameEntries);
+
+            ISerializableOption option = collection.GetSingleOrDefault<ISerializableOption>();
+
+            option
+                .ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void GetSingleOrDefault_WithTwoPresentEntriesOfAType_ShouldThrowInvalidOperationException()
+        {
+            const int numberOfSameEntries = 2;
             OptionCollection collection = GetOptionCollection(numberOfSameEntries);
             Func<ISerializableOption> testFunc = () => collection.GetSingleOrDefault<ISerializableOption>();
 
-            if (expectedException == null)
-            {
-                testFunc
-                    .ShouldNotThrow()
-                    .ShouldNotBeNull();
-            }
-            else
-            {
-                testFunc.ShouldThrow(expectedException);
-            }
+            testFunc.ShouldThrow<InvalidOperationException>();
         }
 
         [Fact]
-        public void GetAll()
+        public void GetAll_Call_ShouldSucceed()
         {
             OptionCollection collection = GetOptionCollection(2);
-            Func<IEnumerable<IOption>> testFunc = () => collection.GetAll();
+            
+            IEnumerable<IOption> options = collection.GetAll();
 
-            testFunc
-                .ShouldNotThrow()
+            options
                 .ShouldNotBeNull()
                 .ShouldNotBeEmpty();
         }
 
         [Fact]
-        public void GetAllT()
+        public void GetAllT_Call_ShouldSucceed()
         {
             OptionCollection collection = GetOptionCollection(2);
-            ISerializableOption testOption = Substitute.For<ISerializableOption>();
-            Func<IEnumerable<ISerializableOption>> testFunc = () => collection.GetAll<ISerializableOption>();
+            
+            IEnumerable<IOption> options = collection.GetAll<ISerializableOption>();
 
-            testFunc
-                .ShouldNotThrow()
+            options
                 .ShouldNotBeNull()
                 .ShouldNotBeEmpty();
         }
@@ -86,61 +87,59 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
 
         [Fact]
-        public void Clear()
+        public void Clear_Call_ShouldSucceed()
         {
             OptionCollection collection = GetOptionCollection(2);
-            Action testAction = () => collection.Clear();
+            
+            collection.Clear();
 
-            testAction.ShouldNotThrow();
-
-            collection.GetAll<ISerializableOption>().ShouldBeEmpty();
+            collection.GetAll<ISerializableOption>()
+                .ShouldBeEmpty();
         }
 
         [Fact]
-        public void AddClearT()
+        public void AddClearT_Call_ShouldSucceed()
         {
             OptionCollection collection = GetOptionCollection(2);
-            Action testAction = () => collection.Clear<ISerializableOption>();
+            
+            collection.Clear<ISerializableOption>();
 
-            testAction.ShouldNotThrow();
-
-            collection.GetAll<ISerializableOption>().ShouldBeEmpty();
+            collection.GetAll<ISerializableOption>()
+                .ShouldBeEmpty();
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void Any(bool empty)
+        [Fact]
+        public void Any_WhenEntriesAreNotPresent_ShouldReturnFalse()
         {
-            OptionCollection collection = GetOptionCollection(empty ? 0 : 1);
-            Action testAction = () =>
-            {
-                if (empty)
-                {
-                    collection.Any<ISerializableOption>().ShouldBeFalse();
-                }
-                else
-                {
+            OptionCollection collection = GetOptionCollection(0);
 
-                    collection.Any<ISerializableOption>().ShouldBeTrue();
-                }
-            };
+            bool result = collection.Any<ISerializableOption>();
 
-            testAction.ShouldNotThrow();
+            result
+                .ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Any_WhenEntriesArePresent_ShouldReturnTrue()
+        {
+            OptionCollection collection = GetOptionCollection(1);
+            
+            bool result = collection.Any<ISerializableOption>();
+
+            result
+                .ShouldBeTrue();
         }
 
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
-        public void Count(int numberOfEntries)
+        public void Count_Call_ShouldReturnCorrectCount(int numberOfEntries)
         {
             OptionCollection collection = GetOptionCollection(numberOfEntries);
-            Action testAction = () =>
-            {
-                    collection.Count.ShouldBe(numberOfEntries);
-            };
+            
+            int count = collection.Count;
 
-            testAction.ShouldNotThrow();
+            count.ShouldBe(numberOfEntries);
         }
 
         private OptionCollection GetOptionCollection(int numOfEntries = 1)

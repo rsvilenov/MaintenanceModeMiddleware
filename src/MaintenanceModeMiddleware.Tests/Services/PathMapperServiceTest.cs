@@ -10,12 +10,12 @@ namespace MaintenanceModeMiddleware.Tests.Services
 {
     public class PathMapperServiceTest
     {
-        private readonly IWebHostEnvironment _webHostEnv;
         private readonly IPathMapperService _mapperSvc;
+        
         public PathMapperServiceTest()
         {
-            _webHostEnv = FakeWebHostEnvironment.Create();
-            _mapperSvc = new PathMapperService(_webHostEnv);
+            IWebHostEnvironment webHostEnv = FakeWebHostEnvironment.Create();
+            _mapperSvc = new PathMapperService(webHostEnv);
         }
 
         [Theory]

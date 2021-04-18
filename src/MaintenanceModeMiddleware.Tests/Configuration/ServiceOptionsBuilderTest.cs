@@ -10,66 +10,53 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
     public class ServiceOptionsBuilderTest
     {
         [Fact]
-        public void ServiceOptionsBuilder_NoStateStore()
+        public void UseNoStateStore_WhenCalled_GetStateStoreShouldReturnNull()
         {
             ServiceOptionsBuilder builder = new ServiceOptionsBuilder();
-            IStateStore stateStore = null;
-            Action testAction = () =>
-            {
-                builder.UseNoStateStore();
-                stateStore = builder.GetStateStore();
-            };
 
-            testAction.ShouldNotThrow();
+            builder.UseNoStateStore();
 
-            stateStore.ShouldBeNull();
+            builder.GetStateStore()
+                .ShouldBeNull();
         }
 
         [Fact]
-        public void ServiceOptionsBuilder_DefaultStateStore()
+        public void UseDefaultStateStore_WhenCalled_GetStateStoreShouldBeDefault()
         {
             ServiceOptionsBuilder builder = new ServiceOptionsBuilder();
-            IStateStore stateStore = null;
-            Action testAction = () =>
-            {
-                builder.UseDefaultStateStore();
-                stateStore = builder.GetStateStore();
-            };
 
-            testAction.ShouldNotThrow();
+            builder.UseDefaultStateStore();
 
-            stateStore.ShouldNotBeNull();
-            stateStore.ShouldBeOfType<FileStateStore>();
+            builder.GetStateStore()
+                .ShouldNotBeNull()
+                .ShouldBeOfType<FileStateStore>();
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ServiceOptionsBuilder_CustomStateStore(bool passNull)
+        [Fact]
+        public void CustomStateStore_WithStateStore_GetStateStoreShouldEqualPassed()
+        {
+            ServiceOptionsBuilder builder = new ServiceOptionsBuilder();
+            IStateStore storeSubstitute = Substitute.For<IStateStore>();
+
+            builder.UseStateStore(storeSubstitute);
+
+            builder.GetStateStore()
+                .ShouldNotBeNull()
+                .ShouldBeOfType(storeSubstitute.GetType());
+        }
+
+        [Fact]
+        public void CustomStateStore_WithNull_ShouldThrowArgumentNullException()
         {
             ServiceOptionsBuilder builder = new ServiceOptionsBuilder();
             IStateStore stateStore = null;
-            IStateStore storeSubstitute = passNull 
-                ? null 
-                : Substitute.For<IStateStore>();
 
             Action testAction = () =>
             {
-                builder.UseStateStore(storeSubstitute);
-                stateStore = builder.GetStateStore();
+                builder.UseStateStore(stateStore);
             };
 
-            if (passNull)
-            {
-                testAction.ShouldThrow<ArgumentNullException>();
-            }
-            else
-            {
-                testAction.ShouldNotThrow();
-
-                stateStore.ShouldNotBeNull();
-                stateStore.ShouldBe(storeSubstitute);
-            }
+            testAction.ShouldThrow<ArgumentNullException>();
         }
     }
 }

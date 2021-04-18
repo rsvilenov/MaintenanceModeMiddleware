@@ -261,6 +261,11 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <returns></returns>
         public MiddlewareOptionsBuilder BypassUrlPath(PathString path, StringComparison comparison = StringComparison.Ordinal)
         {
+            if (string.IsNullOrEmpty(path.Value))
+            {
+                throw new ArgumentException($"The path specified in argument {nameof(path)} is null or empty.");
+            }
+
             UrlPath urlPath = 
                 new UrlPath
             {
