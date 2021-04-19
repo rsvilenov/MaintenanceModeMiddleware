@@ -24,7 +24,7 @@ This component consists of a middleware, which does the actual handling of reque
 
 Key features:
   * Enter and exit maintenance mode by using the injectable control service.
-  * Specify an expiration date, after which maintenance mode will automatically end.
+  * Specify an expiration date on which maintenance mode should automatically be turned off.
   * Let certain parts of the site remain accessibe while maintenance mode is on.
   * Let certain users (e.g. admins) still be able to access the entire site.
   * Configure the component globally (in Startup.cs), or...
