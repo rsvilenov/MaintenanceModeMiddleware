@@ -30,7 +30,7 @@ Key features:
   * Configure the component globally (in Startup.cs), or...
   * Specify a different configuration every time the application enters maintenance mode.
   * Customize your maintenance mode response (html, text and json files/data are supported).
-  * Don't worry about SEO problems - the component relies on response code 503 with a "Retry-After" interval.
+  * Don't worry about SEO problems - the component sends response code 503 with a "Retry-After" interval.
 
 ### Installation
 
