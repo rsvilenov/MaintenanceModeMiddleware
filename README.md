@@ -23,7 +23,7 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
 
 Key features:
-  * Enter and exit maintenance mode by using the injectable control service.
+  * Enter and exit maintenance mode by using an injectable control service.
   * Specify an expiration date on which maintenance mode should turn off automatically.
   * Let certain parts of the site remain accessibe while maintenance mode is on.
   * Let certain users (e.g. admins) still be able to access the entire site.
