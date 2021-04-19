@@ -5,6 +5,7 @@ using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using Shouldly;
 using System;
 using Xunit;
@@ -104,11 +105,24 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void RestoreState_WhenStateStoreIsNotSet_ShouldNotThrow()
         {
             IStateStoreService svc = new StateStoreService(_svcProvider);
-            IStateStore svcConsumer = Substitute.For<IStateStore>();
+            IStateStore stateStore = Substitute.For<IStateStore>();
 
-            Action testAction = () => svc.SetStateStore(svcConsumer);
+            Action testAction = () => svc.SetStateStore(stateStore);
 
             testAction.ShouldNotThrow();
+        }
+
+        [Fact]
+        public void RestoreState_WhenStateStoreReturnsNull_ShouldNotReturnNull()
+        {
+            IStateStoreService svc = new StateStoreService(_svcProvider);
+            IStateStore stateStore = Substitute.For<IStateStore>();
+            stateStore.GetState().ReturnsNull();
+            svc.SetStateStore(stateStore);
+
+            MaintenanceState state = svc.GetState();
+
+            state.ShouldNotBeNull();
         }
     }
 }

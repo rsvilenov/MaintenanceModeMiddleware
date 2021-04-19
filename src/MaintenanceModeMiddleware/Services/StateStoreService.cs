@@ -67,17 +67,24 @@ namespace MaintenanceModeMiddleware.Services
         {
             StorableMaintenanceState restored = _stateStore.GetState();
 
-            _state = new MaintenanceState
+            if (restored != null)
             {
-                ExpirationDate = restored.ExpirationDate,
-                IsMaintenanceOn = restored.IsMaintenanceOn
-            };
+                _state = new MaintenanceState
+                {
+                    ExpirationDate = restored.ExpirationDate,
+                    IsMaintenanceOn = restored.IsMaintenanceOn
+                };
 
-            if (restored.MiddlewareOptions != null)
+                if (restored.MiddlewareOptions != null)
+                {
+                    _state.MiddlewareOptions = new OptionCollection(
+                        restored.MiddlewareOptions
+                        .Select(o => RestoreOption(o)));
+                }
+            }
+            else
             {
-                _state.MiddlewareOptions = new OptionCollection(
-                    restored.MiddlewareOptions
-                    .Select(o => RestoreOption(o)));
+                _state = new MaintenanceState();
             }
         }
 
