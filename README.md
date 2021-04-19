@@ -1,6 +1,6 @@
 # Maintenance Mode Middleware
 
-[![build workflow](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml)   [![Coverage Status](https://coveralls.io/repos/github/rsvilenov/MaintenanceModeMiddleware/badge.svg?branch=master)](https://coveralls.io/github/rsvilenov/MaintenanceModeMiddleware?branch=master)   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)   [![nuget](https://img.shields.io/nuget/v/MaintenanceModeMiddleware/1.0.1)](https://www.nuget.org/packages/MaintenanceModeMiddleware/1.0.1)
+[![build workflow](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/rsvilenov/MaintenanceModeMiddleware/actions/workflows/dotnet.yml)   [![Coverage Status](https://coveralls.io/repos/github/rsvilenov/MaintenanceModeMiddleware/badge.svg?branch=master)](https://coveralls.io/github/rsvilenov/MaintenanceModeMiddleware?branch=master)   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)   [![nuget](https://img.shields.io/nuget/v/MaintenanceModeMiddleware)](https://www.nuget.org/packages/MaintenanceModeMiddleware)
 
 ### Enables maintenance mode in your ASP.NET Core application
 
@@ -23,12 +23,12 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
 
 Key features:
-  * Enter and exit maintenance mode by using the injectable control service.
+  * Enter and exit maintenance mode by using an injectable control service.
   * Specify an expiration date on which maintenance mode should turn off automatically.
   * Let certain parts of the site remain accessibe while maintenance mode is on.
   * Let certain users (e.g. admins) still be able to access the entire site.
   * Configure the component globally (in Startup.cs), or...
-  * Specify a different configuration every time the application enters maintenance mode.
+  * Specify a different configuration every time you put the application in maintenance mode.
   * Customize your maintenance mode response (html, text and json files/data are supported).
   * Don't worry about SEO problems - the component sends response code 503 with a "Retry-After" interval.
 
