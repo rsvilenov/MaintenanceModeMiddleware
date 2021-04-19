@@ -32,7 +32,7 @@ namespace MaintenanceModeMiddleware
 
         public async Task Invoke(HttpContext context)
         {
-            if (CheckShouldRequestBeAllowed(context))
+            if (ShouldAllowRequest(context))
             {
                 await _next.Invoke(context);
                 return;
@@ -41,26 +41,21 @@ namespace MaintenanceModeMiddleware
             await WriteMaintenanceResponse(context);
         }
 
-        private bool CheckShouldRequestBeAllowed(HttpContext context)
+        private bool ShouldAllowRequest(HttpContext context)
         {
             MaintenanceState maintenanceState = _maintenanceCtrlSev
                 .GetState();
 
             if (maintenanceState.IsMaintenanceOn)
             {
-                return CheckIfAnyAllowingOptionMatches(context);
+                OptionCollection options = GetLatestOptions();
+
+                return options
+                    .GetAll<IAllowedRequestMatcher>()
+                    .Any(matcher => matcher.IsMatch(context));
             }
 
             return true;
-        }
-
-        private bool CheckIfAnyAllowingOptionMatches(HttpContext context)
-        {
-            OptionCollection options = GetLatestOptions();
-
-            return options
-                .GetAll<IAllowedRequestMatcher>()
-                .Any(matcher => matcher.IsMatch(context));
         }
 
         private async Task WriteMaintenanceResponse(HttpContext context)
