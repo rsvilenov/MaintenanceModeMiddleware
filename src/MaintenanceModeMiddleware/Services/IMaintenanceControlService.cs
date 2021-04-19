@@ -12,9 +12,9 @@ namespace MaintenanceModeMiddleware.Services
         /// <summary>
         /// Puts the web application in maintenance mode.
         /// </summary>
-        /// <param name="endsOn">Optional: specify the date when the maintenance mode will automatically end</param>
+        /// <param name="expirationDate">Optional: specify the date and time when the maintenance mode will automatically end</param>
         /// <param name="middlewareOptions">Optional: specify middleware options.</param>
-        void EnterMaintanence(DateTime? endsOn = null,
+        void EnterMaintanence(DateTime? expirationDate = null,
             Action<MiddlewareOptionsBuilder> middlewareOptions = null);
 
         /// <summary>

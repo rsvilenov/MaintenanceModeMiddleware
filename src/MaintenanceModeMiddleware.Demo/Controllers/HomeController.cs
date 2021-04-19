@@ -32,9 +32,9 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             return View(new HomeViewModel
             {
                 IsMaintenanceOn = maintenanceState.IsMaintenanceOn,
-                IsEndsOnSpecified = maintenanceState.ExpirationDate != null,
+                IsExpirationDateSpecified = maintenanceState.ExpirationDate != null,
 
-                EndsOn = maintenanceState.ExpirationDate != null 
+                ExpirationDate = maintenanceState.ExpirationDate != null 
                     ? maintenanceState.ExpirationDate
                     : DateTime.Now.AddMinutes(5)
             });
@@ -49,7 +49,7 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintanence(vm.IsEndsOnSpecified ? vm.EndsOn : null);
+                _maintenanceCtrlSvc.EnterMaintanence(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null);
             }
 
             return RedirectToAction(nameof(Index));

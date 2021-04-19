@@ -25,7 +25,7 @@ namespace MaintenanceModeMiddleware.Services
             _stateStoreService.SetStateStore(optionsBuilder.GetStateStore());
         }
 
-        public void EnterMaintanence(DateTime? endsOn = null,
+        public void EnterMaintanence(DateTime? expirationDate = null,
             Action<MiddlewareOptionsBuilder> middlewareOptionsBuilder = null)
         {
             if (_stateStoreService.GetState()
@@ -42,7 +42,7 @@ namespace MaintenanceModeMiddleware.Services
 
             _stateStoreService.SetState(new MaintenanceState
             {
-                ExpirationDate = endsOn,
+                ExpirationDate = expirationDate,
                 IsMaintenanceOn = true,
                 MiddlewareOptions = newMiddlewareOptions
             });

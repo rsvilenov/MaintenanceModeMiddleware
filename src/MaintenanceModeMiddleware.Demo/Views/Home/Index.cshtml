@@ -9,9 +9,9 @@
         <div class="col-12">
             <div class="alert alert-success">
                 <strong>Maintenance mode is on.</strong>
-                @if (Model.IsEndsOnSpecified)
+                @if (Model.IsExpirationDateSpecified)
                 {
-                    <p>It will automatically end on @Model.EndsOn</p>
+                    <p>It will automatically end on @Model.ExpirationDate</p>
                 }
             </div>
         </div>
@@ -66,14 +66,14 @@ else
                     }
                     else
                     { <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="IsEndsOnSpecified" id="cbTimedLeave">
+                            <input class="form-check-input" type="checkbox" asp-for="IsExpirationDateSpecified" id="cbTimedLeave">
                             <label class="form-check-label" for="cbTimedLeave">
                                 Automatically leave maintenance after a specified time period
                             </label>
                         </div>
                         <div class="form-group mt-3" id="timePicker" style="display: none;">
-                            <label for="endsOn">Automatically leave maintenance mode on</label>
-                            <input type="datetime-local" asp-for="EndsOn" id="endsOn" class="form-control" />
+                            <label for="expirationDate">Automatically leave maintenance mode on</label>
+                            <input type="datetime-local" asp-for="ExpirationDate" id="expirationDate" class="form-control" />
                             <small class="text-muted">Preloaded: 5 minutes from now.</small>
                         </div>
 

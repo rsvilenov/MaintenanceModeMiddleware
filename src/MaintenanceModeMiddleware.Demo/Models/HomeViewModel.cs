@@ -6,7 +6,7 @@ namespace MaintenanceModeMiddleware.TestApp.Models
     {
         public bool IsMaintenanceOn { get; set; }
 
-        public DateTime? EndsOn { get; set; }
-        public bool IsEndsOnSpecified { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public bool IsExpirationDateSpecified { get; set; }
     }
 }
