@@ -23,13 +23,14 @@ For the cases when "app_offline.htm" and the staging environment are just not en
 This component consists of a middleware, which does the actual handling of requests, and a control service, which is used to turn the maintenance mode on and off.
 
 Key features:
-  * Enter and exit maintenance mode by calling the control service from a controller action or view method
-  * Specify the time for which the maintenance mode should be on
-  * Let certain parts of the site remain accessibe while in maintenance mode
-  * Let certain users (e.g. admins) still be able to access the entire site
-  * Configure the maintenance mode globally (in Startup.cs) or for each call (in the controller or view action)
-  * Customize your maintenance mode response (html, text and json files/data are supported)
-  * SEO friendly, as it relies on response code 503 with a "Retry-After" interval
+  * Enter and exit maintenance mode by using the injectable control service.
+  * Specify an expiration date on which maintenance mode should turn off automatically.
+  * Let certain parts of the site remain accessibe while maintenance mode is on.
+  * Let certain users (e.g. admins) still be able to access the entire site.
+  * Configure the component globally (in Startup.cs), or...
+  * Specify a different configuration every time the application enters maintenance mode.
+  * Customize your maintenance mode response (html, text and json files/data are supported).
+  * Don't worry about SEO problems - the component sends response code 503 with a "Retry-After" interval.
 
 ### Installation
 
