@@ -3,7 +3,6 @@ using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
@@ -33,7 +32,7 @@ namespace MaintenanceModeMiddleware
 
         public async Task Invoke(HttpContext context)
         {
-            if (ShouldAllowRequest(context))
+            if (CheckShouldRequestBeAllowed(context))
             {
                 await _next.Invoke(context);
                 return;
@@ -42,25 +41,31 @@ namespace MaintenanceModeMiddleware
             await WriteMaintenanceResponse(context);
         }
 
-        private bool ShouldAllowRequest(HttpContext context)
+        private bool CheckShouldRequestBeAllowed(HttpContext context)
         {
             MaintenanceState maintenanceState = _maintenanceCtrlSev
                 .GetState();
 
             if (maintenanceState.IsMaintenanceOn)
             {
-                OptionCollection options = GetCurrentOptions();
-
-                return options.GetAll<IAllowedRequestMatcher>()
-                    .Any(matcher => matcher.IsMatch(context));
+                return CheckIfAnyAllowingOptionMatches(context);
             }
 
             return true;
         }
 
+        private bool CheckIfAnyAllowingOptionMatches(HttpContext context)
+        {
+            OptionCollection options = GetLatestOptions();
+
+            return options
+                .GetAll<IAllowedRequestMatcher>()
+                .Any(matcher => matcher.IsMatch(context));
+        }
+
         private async Task WriteMaintenanceResponse(HttpContext context)
         {
-            MaintenanceResponse response = GetCurrentOptions()
+            MaintenanceResponse response = GetLatestOptions()
                    .GetSingleOrDefault<IResponseHolder>()
                    .GetResponse(_pathMapperSvc);
 
@@ -87,7 +92,7 @@ namespace MaintenanceModeMiddleware
                     response.ContentEncoding);
         }
 
-        private OptionCollection GetCurrentOptions()
+        private OptionCollection GetLatestOptions()
         {
             return _maintenanceCtrlSev
                 .GetState()
