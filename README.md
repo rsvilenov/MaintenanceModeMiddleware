@@ -28,7 +28,7 @@ Key features:
   * Let certain parts of the site remain accessibe while maintenance mode is on.
   * Let certain users (e.g. admins) still be able to access the entire site.
   * Configure the component globally (in Startup.cs), or...
-  * Specify a different configuration every time the application enters maintenance mode.
+  * Specify a different configuration every time you put the application in maintenance mode.
   * Customize your maintenance mode response (html, text and json files/data are supported).
   * Don't worry about SEO problems - the component sends response code 503 with a "Retry-After" interval.
 
