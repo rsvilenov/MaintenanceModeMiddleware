@@ -17,12 +17,21 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
 {
     public class FileStateStoreTest
     {
+
+        [Fact]
+        public void Store_WithEmptyState_ShouldNotThrow()
+        {
+            FileStateStore store = GetStateStore();
+            Action testAction = () 
+                => store.SetState(new StorableMaintenanceState());
+
+            testAction.ShouldNotThrow();
+        }
+
         [Theory]
-        [InlineData(true, true, true)]
-        [InlineData(false, true, true)]
-        [InlineData(true, true, false)]
-        [InlineData(true, false, false)]
-        public void Store(bool isOn, bool storeDate, bool storeOptions)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Store_WithStateState_StateShouldEqualInput(bool isOn)
         {
             FileStateStore store = GetStateStore();
             var testState = new StorableMaintenanceState
@@ -30,52 +39,60 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 IsMaintenanceOn = isOn
             };
 
-            if (storeDate)
-            {
-                testState.ExpirationDate = DateTime.Now;
-            }
+            store.SetState(testState);
 
-            if (storeOptions)
-            {
-                testState.MiddlewareOptions = new List<StorableOption>
-                {
-                    new StorableOption
-                    {
-                        StringValue = "test",
-                        TypeName = "testType"
-                    }
-                };
-            }
+            store.GetState().IsMaintenanceOn
+                .ShouldBe(isOn);
+        }
 
-            Func<StorableMaintenanceState> testFunc = () =>
+        [Fact]
+        public void Store_WithStateStateWithDate_DateShouldEqualInput()
+        {
+            FileStateStore store = GetStateStore();
+            var testState = new StorableMaintenanceState
             {
-                store.SetState(testState);
-                return store.GetState();
+                ExpirationDate = DateTime.Now
             };
 
-            StorableMaintenanceState restoredState = testFunc.ShouldNotThrow();
+            store.SetState(testState);
 
-            restoredState.ShouldNotBeNull();
-            restoredState.ExpirationDate.ShouldBe(testState.ExpirationDate);
-            restoredState.IsMaintenanceOn.ShouldBe(testState.IsMaintenanceOn);
+            store.GetState().ExpirationDate
+                .ShouldBe(testState.ExpirationDate);
+        }
 
-            if (storeOptions)
+        [Fact]
+        public void Store_WithStateStateWithOptions_OptionsShouldEqualInput()
+        {
+            FileStateStore store = GetStateStore();
+            var testState = new StorableMaintenanceState();
+            StorableOption testOption = new StorableOption
             {
-                restoredState.MiddlewareOptions
-                    .ShouldNotBeNull()
-                    .ShouldNotBeEmpty();
+                StringValue = "test",
+                TypeName = "testType"
+            };
+            testState.MiddlewareOptions = new List<StorableOption>
+            {
+                testOption
+            };
 
-                StorableOption firstOption = restoredState.MiddlewareOptions.First();
-                firstOption.StringValue.ShouldBe("test");
-                firstOption.TypeName.ShouldBe("testType");
-            }
+            store.SetState(testState);
+
+            store.GetState().MiddlewareOptions
+                .ShouldNotBeNull()
+                .ShouldNotBeEmpty();
+            StorableOption firstOption = store.GetState()
+                .MiddlewareOptions.First();
+            firstOption.StringValue
+                .ShouldBe(testOption.StringValue);
+            firstOption.TypeName
+                .ShouldBe(testOption.TypeName);
         }
 
         [Theory]
         [InlineData("test1.json", null)]
         [InlineData("test2.json", EnvDirectory.ContentRootPath)]
         [InlineData("test3.json", EnvDirectory.WebRootPath)]
-        public void Store_In_Various_Paths(string file, EnvDirectory? baseDir)
+        public void SetStore_InVariousPaths_ShouldStoreAndRestoreCorrectData(string file, EnvDirectory? baseDir)
         {
             FileStateStore store = GetStateStore(SafeTempPath.Create(file), baseDir);
             var testState = new StorableMaintenanceState
@@ -83,8 +100,6 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 IsMaintenanceOn = true,
                 ExpirationDate = DateTime.Now
             };
-
-
             Func<StorableMaintenanceState> testFunc = () =>
             {
                 store.SetState(testState);
@@ -102,29 +117,31 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.ContentRootPath, true)]
         [InlineData("test2.json", EnvDirectory.WebRootPath, EnvDirectory.WebRootPath, true)]
         [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.WebRootPath, false)]
-        public void Store_In_Various_Paths_Match_Mismatch(string file, 
+        public void SetStore_InVariousPathsWithMismatch_WhenMismatchShouldRestoreNull(string file, 
             EnvDirectory baseDirStore, 
             EnvDirectory baseDirRestore,
             bool shouldSucceed)
         {
             var testState = new StorableMaintenanceState();
             string tempDir = Path.GetTempPath();
-            string prefixedFileName = SafeTempPath.Create(file);
-            Func<string> testFuncStore = () =>
+            string prefixedFileName = SafeTempPath.Create(file); 
+            string tempPath = null;
+
+            // store
+            FileStateStore storeWrite = GetStateStore(prefixedFileName, baseDirStore,
+                (tf) => tempPath = tf,
+                tempDir);
+            Action testActionStore = () =>
             {
-                string tempPath = null;
-                FileStateStore storeWrite = GetStateStore(prefixedFileName, baseDirStore, 
-                    (tf) => tempPath = tf, 
-                    tempDir);
                 storeWrite.SetState(testState);
-                return tempPath;
             };
 
-            string tempFilePath = testFuncStore.ShouldNotThrow();
+            testActionStore.ShouldNotThrow();
 
+            // restore
+            FileStateStore storeRead = GetStateStore(prefixedFileName, baseDirRestore, null, tempDir);
             Func<StorableMaintenanceState> testFuncRestore = () =>
             {
-                FileStateStore storeRead = GetStateStore(prefixedFileName, baseDirRestore, null, tempDir);
                 return storeRead.GetState();
             };
 
@@ -141,17 +158,17 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         }
 
         [Fact]
-        public void GetState_File_Is_Empty()
+        public void GetState_WhenFileIsEmpty_ShouldReturnNull()
         {
             string generatedFilePath = null;
             FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_emptied.json"), null, (filePath) =>
             {
                 generatedFilePath = filePath;
             });
+            File.WriteAllText(generatedFilePath, "");
 
             Func<StorableMaintenanceState> testFunc = () =>
             {
-                File.WriteAllText(generatedFilePath, "");
                 return store.GetState();
             };
 
@@ -161,21 +178,20 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         }
 
         [Fact]
-        public void GetState_File_Does_Not_Exist()
+        public void GetState_WhenFileDoesNotExist_ShouldReturnNull()
         {
             string generatedFilePath = null;
             FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_deleted.json"), null, (filePath) =>
             {
                 generatedFilePath = filePath;
             });
+            if (File.Exists(generatedFilePath))
+            {
+                File.Delete(generatedFilePath);
+            }
 
             Func<StorableMaintenanceState> testFunc = () =>
             {
-                if (File.Exists(generatedFilePath))
-                {
-                    File.Delete(generatedFilePath);
-                }
-
                 return store.GetState();
             };
 
@@ -185,7 +201,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         }
 
         [Fact]
-        public void SetState_Directory_Does_Not_Exist()
+        public void SetState_WhenDirectoryDoesNotExist_ShouldNotThrow()
         {
             string generatedFilePath = null;
             FileStateStore store = GetStateStore(SafeTempPath.Create("test_dir/test_to_be_deleted.json"), null, (filePath) =>

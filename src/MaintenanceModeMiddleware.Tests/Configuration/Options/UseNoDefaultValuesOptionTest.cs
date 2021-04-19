@@ -21,9 +21,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         }
 
         [Theory]
-        [InlineData("True", true)]
-        [InlineData("False", false)]
-        public void LoadFromString_WithValidInput_StringValueShouldEqualInput(string str, bool isSet)
+        [InlineData("True")]
+        [InlineData("False")]
+        public void LoadFromString_WithValidInput_StringValueShouldEqualInput(string str)
         {
             var option = new UseNoDefaultValuesOption();
 

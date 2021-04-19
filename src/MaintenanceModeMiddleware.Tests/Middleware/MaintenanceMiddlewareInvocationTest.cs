@@ -4,7 +4,6 @@ using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Shouldly;
@@ -25,7 +24,7 @@ namespace MaintenanceModeMiddleware.Tests
         [InlineData("/somePath", "/SOMEPath", StringComparison.OrdinalIgnoreCase, 200)]
         [InlineData("/somePath", "/SOMEPath", StringComparison.Ordinal, 503)]
         [InlineData("/somePath", "/someOtherPath", StringComparison.Ordinal, 503)]
-        public async void Invoke_With_BypassUrlPath(string requestPath,
+        public async void Invoke_WithBypassUrlPath_WhenMatchResponseCodeShouldBeAppropriate(string requestPath,
             string bypassPath,
             StringComparison comparison,
             int expectedStatusCode)
@@ -54,7 +53,7 @@ namespace MaintenanceModeMiddleware.Tests
         [InlineData("/somePath", new string[] { "/SOMEPath", "/otherPath" }, StringComparison.OrdinalIgnoreCase, 200)]
         [InlineData("/somePath", new string[] { "/SOMEPath", "/otherPath" }, StringComparison.Ordinal, 503)]
         [InlineData("/somePath", new string[] { "/someOtherPath", "/stillOtherPath" }, StringComparison.Ordinal, 503)]
-        public async void Invoke_With_BypassUrlPaths(string requestPath, string[] bypassPaths, StringComparison comparison, int expectedStatusCode)
+        public async void Invoke_WithBypassUrlPaths_WhenMatchResponseCodeShouldBeAppropriate(string requestPath, string[] bypassPaths, StringComparison comparison, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -80,7 +79,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData("/somePath", "/someOverriden", "/somePath", 200)]
         [InlineData("/somePath", "/someOverriden", "/someOverriden", 503)]
-        public async void Invoke_With_BypassUrlPath_SvcOverride(string requestPath,
+        public async void Invoke_WithBypassUrlPathAndSvcOverride_WhenMatchResponseCodeShouldBeAppropriate(string requestPath,
             string bypassPath,
             string overridenPath,
             int expectedStatusCode)
@@ -113,7 +112,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData(".txt", "/path/file.txt", 200)]
         [InlineData(".jpg", "/path/file.txt", 503)]
-        public async void Invoke_With_BypassFileExtension(string extension, string requestPath, int expectedStatusCode)
+        public async void Invoke_WithBypassFileExtension_WhenMatchResponseCodeShouldBeAppropriate(string extension, string requestPath, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -137,7 +136,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData(new string[] {".txt", ".jpg" }, "/path/file.txt", 200)]
         [InlineData(new string[] { ".png", ".jpg" }, "/path/file.txt", 503)]
-        public async void Invoke_With_BypassFileExtensions(string[] extensions, string requestPath, int expectedStatusCode)
+        public async void Invoke_WithBypassFileExtensions_WhenMatchResponseCodeShouldBeAppropriate(string[] extensions, string requestPath, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -161,7 +160,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData(true, 200)]
         [InlineData(false, 503)]
-        public async void Invoke_With_BypassAllAuthenticatedUsers(bool isUserAuthenticated, int expectedStatusCode)
+        public async void Invoke_WithBypassAllAuthenticatedUsers_WhenMatchResponseCodeShouldBeAppropriate(bool isUserAuthenticated, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -185,7 +184,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData("testUser", "testUser", 200)]
         [InlineData("testUser", "otherUser", 503)]
-        public async void Invoke_With_BypassUser(string requestUser, string bypassUser, int expectedStatusCode)
+        public async void Invoke_WithBypassUser_WhenMatchResponseCodeShouldBeAppropriate(string requestUser, string bypassUser, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -210,7 +209,7 @@ namespace MaintenanceModeMiddleware.Tests
         [InlineData("firstUser", new string[] { "firstUser", "secondUser" }, 200)]
         [InlineData("secondUser", new string[] { "firstUser", "secondUser" }, 200)]
         [InlineData("otherUser", new string[] { "firstUser", "secondUser" }, 503)]
-        public async void Invoke_With_BypassUsers(string requestUser, string[] bypassUsers, int expectedStatusCode)
+        public async void Invoke_WithBypassUsers_ResponseCodeShouldBeAppropriate(string requestUser, string[] bypassUsers, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -234,7 +233,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Theory]
         [InlineData("testRole", "testRole", 200)]
         [InlineData("testRole", "otherRole", 503)]
-        public async void Invoke_With_BypassUserRole(string requestUserRole, string bypassUserRole, int expectedStatusCode)
+        public async void Invoke_WithBypassUserRole_ResponseCodeShouldBeAppropriate(string requestUserRole, string bypassUserRole, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -259,7 +258,7 @@ namespace MaintenanceModeMiddleware.Tests
         [InlineData("firstRole", new string[] { "firstRole", "secondRole" }, 200)]
         [InlineData("secondRole", new string[] { "firstRole", "secondRole" }, 200)]
         [InlineData("otherRole", new string[] { "firstRole", "secondRole" }, 503)]
-        public async void Invoke_With_BypassUserRoles(string requestUserRole, string[] bypassUserRoles, int expectedStatusCode)
+        public async void Invoke_WithBypassUserRoles_ResponseCodeShouldBeAppropriate(string requestUserRole, string[] bypassUserRoles, int expectedStatusCode)
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -281,7 +280,7 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Fact]
-        public async void Invoke_With_UseDefaultResponse()
+        public async void Invoke_WithUseDefaultResponse_ResponseShouldBeAppropriate()
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -309,7 +308,7 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Fact]
-        public async void Invoke_With_UseResponse()
+        public async void Invoke_WithUseResponse_ResponseShouldBeAppropriate()
         {
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
@@ -341,7 +340,7 @@ namespace MaintenanceModeMiddleware.Tests
         [InlineData("test.html", "text/html", EnvDirectory.ContentRootPath)]
         [InlineData("test.json", "application/json", EnvDirectory.ContentRootPath)]
         [InlineData("test.txt", "text/plain", EnvDirectory.WebRootPath)]
-        public async void Invoke_With_UseResponseFile(string fileName, string expectedContentType, EnvDirectory baseDir)
+        public async void Invoke_WithUseResponseFile_ResponseShouldBeAppropriate(string fileName, string expectedContentType, EnvDirectory baseDir)
         {
             string tempDir = Path.GetTempPath();
             string rootDir;
@@ -383,10 +382,39 @@ namespace MaintenanceModeMiddleware.Tests
                 .ShouldBe("test");
         }
 
+
+        [Fact]
+        public void Invoke_WhenMaintenanceModeIsOn_ShouldNotThrow()
+        {
+            DefaultHttpContext httpContext = new DefaultHttpContext();
+
+            IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
+            svc.GetState().Returns(new MaintenanceState
+            {
+                IsMaintenanceOn = true
+            });
+
+            MaintenanceMiddleware middleware = new MaintenanceMiddleware(
+                (hc) =>
+                {
+                    return Task.CompletedTask;
+                },
+                svc,
+                null,
+                (options) => { });
+
+
+            Action testAction = async ()
+                => await middleware.Invoke(httpContext);
+
+
+            testAction.ShouldNotThrow();
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Invoke_MaintenanceModeOn(bool isOn)
+        public async void Invoke_WithMaintenanceStateSet_NextDelegateShouldBeCalledOnlyWhenMaintenanceIsOn(bool isOn)
         {
             DefaultHttpContext httpContext = new DefaultHttpContext();
 
@@ -409,11 +437,8 @@ namespace MaintenanceModeMiddleware.Tests
                 (options) => { });
 
 
-            Action testAction = async ()
-                => await middleware.Invoke(httpContext);
+            await middleware.Invoke(httpContext);
 
-
-            testAction.ShouldNotThrow();
             isNextDelegateCalled.ShouldBe(!isOn);
         }
 

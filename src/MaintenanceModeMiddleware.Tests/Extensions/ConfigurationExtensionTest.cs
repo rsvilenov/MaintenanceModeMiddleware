@@ -1,18 +1,19 @@
 ﻿using MaintenanceModeMiddleware.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using System;
 using Xunit;
 
-namespace MaintenanceModeMiddleware.Tests
+namespace MaintenanceModeMiddleware.Tests.Extensions
 {
-    public class ExtensionsTest
+    public class ConfigurationExtensionTest
     {
         [Fact]
-        public void IApplicationBuilder_UseMaintenance_NoService()
+        public void UseMaintenance_WhenServiceIsNotRegistered_ShouldThrow()
         {
             var appBuilder = Substitute.For<IApplicationBuilder>();
             appBuilder.ApplicationServices
@@ -24,29 +25,19 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Fact]
-        public void IApplicationBuilder_UseMaintenance()
+        public void UseMaintenance_WhenServiceIsRegistered_AppBuilderUseMethodShouldBeCalled()
         {
-            // TODO: check the parameters and that the registration actually happened
-
             ServiceCollection svcCollection = new ServiceCollection();
             svcCollection.AddSingleton(Substitute.For<IWebHostEnvironment>());
-
             svcCollection.AddMaintenance();
             ServiceProvider serviceProvider = svcCollection.BuildServiceProvider();
-            ApplicationBuilder appBuilder = new ApplicationBuilder(serviceProvider);
-            Action testAction = () => appBuilder.UseMaintenance();
+            IApplicationBuilder appBuilder = Substitute.For<IApplicationBuilder>();
+            appBuilder.ApplicationServices.Returns(serviceProvider);
 
-            testAction.ShouldNotThrow();
-        }
+            appBuilder.UseMaintenance();
 
-        [Fact]
-        public void IServiceCollection_AddMaintenance()
-        {
-            var svcCollection = new ServiceCollection();
-
-            svcCollection.AddMaintenance();
-
-            svcCollection.ShouldNotBeEmpty();
+            appBuilder.Use(Arg.Any<Func<RequestDelegate, RequestDelegate>>())
+                .Received(1);
         }
     }
 }

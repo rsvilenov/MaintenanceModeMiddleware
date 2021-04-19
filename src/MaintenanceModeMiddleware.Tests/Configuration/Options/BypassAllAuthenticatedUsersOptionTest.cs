@@ -22,9 +22,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         }
 
         [Theory]
-        [InlineData("True", true)]
-        [InlineData("False", false)]
-        public void LoadFromString_WithValidInput_StringValueShouldMatchInput(string inputStr, bool expectedValue)
+        [InlineData("True")]
+        [InlineData("False")]
+        public void LoadFromString_WithValidInput_StringValueShouldMatchInput(string inputStr)
         {
             var option = new BypassAllAuthenticatedUsersOption();
             
@@ -44,6 +44,5 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
 
             testAction.ShouldThrow(expectedExceptionType);
         }
-
     }
 }
