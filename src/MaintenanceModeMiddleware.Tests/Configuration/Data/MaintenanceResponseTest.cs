@@ -9,10 +9,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Data
     public class MaintenanceResponseTest
     {
         [Theory]
-        [InlineData(ContentType.Html, "text/html")]
-        [InlineData(ContentType.Text, "text/plain")]
-        [InlineData(ContentType.Json, "application/json")]
-        public void GetContentTypeString_WithValidEnumValue_ShouldReturnValidContentType(ContentType contentType, string contentTypeString)
+        [InlineData(ResponseContentType.Html, "text/html")]
+        [InlineData(ResponseContentType.Text, "text/plain")]
+        [InlineData(ResponseContentType.Json, "application/json")]
+        public void GetContentTypeString_WithValidEnumValue_ShouldReturnValidContentType(ResponseContentType contentType, string contentTypeString)
         {
             MaintenanceResponse response = new MaintenanceResponse
             {
@@ -28,7 +28,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Data
         [Fact]
         public void GetContentTypeString_WithInalidEnumValue_ShouldThrow()
         {
-            ContentType invalidEnumValue = (ContentType)(-1);
+            ResponseContentType invalidEnumValue = (ResponseContentType)(-1);
             MaintenanceResponse response = new MaintenanceResponse
             {
                 ContentType = invalidEnumValue

@@ -24,7 +24,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new FormatException($"{nameof(str)} is in incorrect format.");
             }
             
-            if (!Enum.TryParse(parts[0], out ContentType contentType))
+            if (!Enum.TryParse(parts[0], out ResponseContentType contentType))
             {
                 throw new ArgumentException($"Unknown content type {parts[0]}");
             }

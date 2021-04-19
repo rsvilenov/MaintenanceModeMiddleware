@@ -11,7 +11,7 @@ namespace MaintenanceModeMiddleware.Extensions
         /// Adds the maintenance middleware to the middleware chain.
         /// </summary>
         /// <param name="options">Optional configuration.</param>
-        /// <returns></returns>
+        /// <returns>The same <see cref="IApplicationBuilder"/> instance so that multiple calls can be chained.</returns>
         public static IApplicationBuilder UseMaintenance(this IApplicationBuilder builder, 
             Action<MiddlewareOptionsBuilder> options = null)
         {

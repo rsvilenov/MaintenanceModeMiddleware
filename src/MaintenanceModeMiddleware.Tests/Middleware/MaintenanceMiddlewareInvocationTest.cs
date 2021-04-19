@@ -316,7 +316,7 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 (optionBuilder) =>
                 {
-                    optionBuilder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+                    optionBuilder.UseResponse(Encoding.UTF8.GetBytes("test"), ResponseContentType.Text, Encoding.UTF8);
                 });
 
 

@@ -69,7 +69,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponse(string response, 
-            ContentType contentType, 
+            ResponseContentType contentType, 
             Encoding encoding, 
             int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {
@@ -91,7 +91,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="code503RetryInterval">The time in seconds for the Retry-After header</param>
         /// <returns></returns>
         public MiddlewareOptionsBuilder UseResponse(byte[] responseBytes, 
-            ContentType contentType, 
+            ResponseContentType contentType, 
             Encoding encoding, 
             int code503RetryInterval = DEFAULT_503_RETRY_INTERVAL)
         {

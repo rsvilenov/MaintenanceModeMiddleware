@@ -70,7 +70,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             using (StreamReader sr = new StreamReader(fullPath,
                 detectEncodingFromByteOrderMarks: true))
             {
-                TryGetContentType(fullPath, out ContentType? contentType);
+                TryGetContentType(fullPath, out ResponseContentType? contentType);
 
                 return new MaintenanceResponse
                 {
@@ -82,16 +82,16 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             }
         }
 
-        private bool TryGetContentType(string filePath, out ContentType? contentType)
+        private bool TryGetContentType(string filePath, out ResponseContentType? contentType)
         {
             string extension = Path.GetExtension(filePath)
                 .ToLower();
 
             contentType = extension switch
             {
-                ".txt" => ContentType.Text,
-                ".html" => ContentType.Html,
-                ".json" => ContentType.Json,
+                ".txt" => ResponseContentType.Text,
+                ".html" => ResponseContentType.Html,
+                ".json" => ResponseContentType.Json,
                 _ => null,
             };
 

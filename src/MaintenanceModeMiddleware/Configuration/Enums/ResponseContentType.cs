@@ -1,6 +1,6 @@
 ﻿namespace MaintenanceModeMiddleware.Configuration.Enums
 {
-    public enum ContentType
+    public enum ResponseContentType
     {
         Text,
         Html,

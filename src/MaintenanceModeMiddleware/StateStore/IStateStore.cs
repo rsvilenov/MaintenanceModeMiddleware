@@ -3,7 +3,8 @@
 namespace MaintenanceModeMiddleware.StateStore
 {
     /// <summary>
-    /// An interface for 
+    /// An interface whose implementations provide the logic
+    /// for persisting the maintenance state.
     /// </summary>
     public interface IStateStore
     {

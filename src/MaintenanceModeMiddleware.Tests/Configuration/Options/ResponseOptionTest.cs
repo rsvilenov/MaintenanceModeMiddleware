@@ -51,10 +51,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         }
 
         [Theory]
-        [InlineData("Text;65001;5300;maintenance mode", ContentType.Text)]
-        [InlineData("Json;65001;5300;maintenance mode", ContentType.Json)]
-        [InlineData("Html;65001;5300;<html><head></head><body>maintenance mode</body></html>", ContentType.Html)]
-        public void LoadFromString_WithVariousContentTypes_ContentTypeInValueShouldMatchInput(string input, ContentType contentType)
+        [InlineData("Text;65001;5300;maintenance mode", ResponseContentType.Text)]
+        [InlineData("Json;65001;5300;maintenance mode", ResponseContentType.Json)]
+        [InlineData("Html;65001;5300;<html><head></head><body>maintenance mode</body></html>", ResponseContentType.Html)]
+        public void LoadFromString_WithVariousContentTypes_ContentTypeInValueShouldMatchInput(string input, ResponseContentType contentType)
         {
             var option = new ResponseOption();
             

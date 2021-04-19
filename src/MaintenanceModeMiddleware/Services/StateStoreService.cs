@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace MaintenanceModeMiddleware.Services
 {
-    public class StateStoreService : IStateStoreService
+    internal class StateStoreService : IStateStoreService
     {
         private readonly IServiceProvider _svcProvider;
         private readonly List<Type> _optionTypes;

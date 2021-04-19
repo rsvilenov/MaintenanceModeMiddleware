@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace MaintenanceModeMiddleware.Configuration.State
 {
@@ -17,6 +18,7 @@ namespace MaintenanceModeMiddleware.Configuration.State
         /// </summary>
         public bool IsMaintenanceOn { get; internal set; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal OptionCollection MiddlewareOptions { get; set; }
     }
 }

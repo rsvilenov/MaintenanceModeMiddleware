@@ -73,10 +73,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("maintenance mode", ContentType.Text, 65001)]
-        [InlineData("<p>maintenance mode</p>", ContentType.Html, 65001)]
+        [InlineData("maintenance mode", ResponseContentType.Text, 65001)]
+        [InlineData("<p>maintenance mode</p>", ResponseContentType.Html, 65001)]
         public void UseResponseStringOverload_WithValidData_ValueShouldEqualInput(string response,
-            ContentType contentType,
+            ResponseContentType contentType,
             int codePage)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
@@ -96,10 +96,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("maintenance mode", ContentType.Text, 65001)]
-        [InlineData("<p>maintenance mode</p>", ContentType.Html, 65001)]
+        [InlineData("maintenance mode", ResponseContentType.Text, 65001)]
+        [InlineData("<p>maintenance mode</p>", ResponseContentType.Html, 65001)]
         public void UseResponseBytesOverload_WithValidData_ValueShouldEqualInput(string response,
-            ContentType contentType,
+            ResponseContentType contentType,
             int codePage)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
@@ -119,10 +119,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("", ContentType.Text, 65001, typeof(ArgumentNullException))]
-        [InlineData(null, ContentType.Text, 65001, typeof(ArgumentNullException))]
+        [InlineData("", ResponseContentType.Text, 65001, typeof(ArgumentNullException))]
+        [InlineData(null, ResponseContentType.Text, 65001, typeof(ArgumentNullException))]
         public void UseResponseStringOverload_WithInvalidData_ShouldThrow(string response,
-            ContentType contentType,
+            ResponseContentType contentType,
             int codePage,
             Type expectedException)
         {
@@ -138,10 +138,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
-        [InlineData("", ContentType.Text, 65001, typeof(ArgumentNullException))]
-        [InlineData(null, ContentType.Text, 65001, typeof(ArgumentNullException))]
+        [InlineData("", ResponseContentType.Text, 65001, typeof(ArgumentNullException))]
+        [InlineData(null, ResponseContentType.Text, 65001, typeof(ArgumentNullException))]
         public void UseResponseBytesOverload_WithInvalidData_ShouldThrow(string response,
-            ContentType contentType,
+            ResponseContentType contentType,
             int codePage,
             Type expectedException)
         {
@@ -501,7 +501,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc); 
             builder.UseNoDefaultValues();
             builder.UseDefaultResponse();
-            builder.UseResponse(Encoding.UTF8.GetBytes("test"), ContentType.Text, Encoding.UTF8);
+            builder.UseResponse(Encoding.UTF8.GetBytes("test"), ResponseContentType.Text, Encoding.UTF8);
 
             Action testAction = () =>
             {

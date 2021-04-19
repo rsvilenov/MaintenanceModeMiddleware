@@ -31,7 +31,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 {
                     ContentBytes = resSr.CurrentEncoding.GetBytes(resSr.ReadToEnd()),
                     ContentEncoding = resSr.CurrentEncoding,
-                    ContentType = ContentType.Html,
+                    ContentType = ResponseContentType.Html,
                     Code503RetryInterval = DEFAULT_503_RETRY_INTERVAL
                 };
             }

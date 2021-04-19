@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Authors>Rossen Svilenov</Authors>
+    <Authors>Rosen Svilenov</Authors>
     <Company />
     <Description>Middleware to enable maintenance mode in an ASP.NET Core application.</Description>
-    <Copyright>Copyright 2021 Rossen Svilenov</Copyright>
+    <Copyright>Copyright 2021 Rosen Svilenov</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rsvilenov/MaintenanceModeMiddleware</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rsvilenov/MaintenanceModeMiddleware</RepositoryUrl>

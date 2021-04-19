@@ -9,10 +9,10 @@ namespace MaintenanceModeMiddleware.Extensions
     public static class DependencyInjection
     {
         /// <summary>
-        /// Adds the maintenance control service in the DI container.
+        /// Adds the maintenance control service and its dependencies to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="optionBuilderDelegate">Optional configuraiton of the service.</param>
-        /// <returns></returns>
+        /// <returns>The same instance of the <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
             Action<ServiceOptionsBuilder> optionBuilderDelegate = null)
         {
