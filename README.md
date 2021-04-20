@@ -95,7 +95,7 @@ Then just call its methods from the controller actions:
 
 ```csharp
 [HttpPost]
-public IActionResult MaintenanceMode()
+public IActionResult ToggleMaintenanceMode()
 {
     var maintenanceState = _maintenanceCtrlSvc.GetState();
 
