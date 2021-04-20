@@ -1,7 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.State;
-using Microsoft.AspNetCore.Hosting;
 using System;
 
 namespace MaintenanceModeMiddleware.Services

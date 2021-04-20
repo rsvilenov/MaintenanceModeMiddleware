@@ -1,7 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Services;
-using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Text;
 

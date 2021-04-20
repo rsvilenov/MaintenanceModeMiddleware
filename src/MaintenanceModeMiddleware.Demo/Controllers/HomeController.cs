@@ -28,20 +28,23 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
 
         public IActionResult Index()
         {
-            var maintenanceState = _maintenanceCtrlSvc.GetState(); 
-            return View(new HomeViewModel
+            var maintenanceState = _maintenanceCtrlSvc.GetState();
+
+            var viewModel = new HomeViewModel
             {
                 IsMaintenanceOn = maintenanceState.IsMaintenanceOn,
                 IsExpirationDateSpecified = maintenanceState.ExpirationDate != null,
 
-                ExpirationDate = maintenanceState.ExpirationDate != null 
+                ExpirationDate = maintenanceState.ExpirationDate != null
                     ? maintenanceState.ExpirationDate
                     : DateTime.Now.AddMinutes(5)
-            });
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult MaintenanceMode(HomeViewModel vm)
+        public IActionResult ToggleMaintenanceMode(HomeViewModel vm)
         {
             if (vm.IsMaintenanceOn)
             {

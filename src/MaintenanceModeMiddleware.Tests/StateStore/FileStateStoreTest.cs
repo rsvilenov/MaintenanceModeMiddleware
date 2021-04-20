@@ -4,7 +4,6 @@ using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
-using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
 using Shouldly;
 using System;
