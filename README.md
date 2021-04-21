@@ -34,14 +34,17 @@ Key features:
 
 ### Installation
 
-You can view the [package page on NuGet](hhttps://www.nuget.org/packages/MaintenanceModeMiddleware/).
+You can view the [package page on NuGet](https://www.nuget.org/packages/MaintenanceModeMiddleware/).
 
 To install `MaintenanceModeMiddleware`, run the following command in the Package Manager Console:
 
 ```
 PM> Install-Package MaintenanceModeMiddleware
 ```
-
+Or use this command with the .NET CLI:
+```
+> dotnet add package MaintenanceModeMiddleware
+```
 ### Registration
 
 * Register the middleware in Startup.cs:
