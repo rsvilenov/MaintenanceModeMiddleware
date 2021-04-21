@@ -9,8 +9,8 @@ namespace MaintenanceModeMiddleware.StateStore
     public interface IServiceConsumer
     {
         /// <summary>
-        /// This property gets automatically populated with
-        /// the application's IServiceProvider. This provides 
+        /// This property gets automatically set to the
+        /// application's IServiceProvider. This provides 
         /// the implementations of IStateStore with the ability
         /// to fetch any service, registered in the applicaiton's DI
         /// container, by calling IServiceProvider.GetService(name).

@@ -36,11 +36,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
             builder.BypassAllAuthenticatedUsers();
 
-            Action testAction = () => stateStoreSvc.SetState(new MaintenanceState
-            {
-                IsMaintenanceOn = true,
-                MiddlewareOptions = builder.GetOptions()
-            });
+            Action testAction = () => stateStoreSvc.SetState(new MaintenanceState(null, isMaintenanceOn: true, builder.GetOptions()));
 
             testAction.ShouldNotThrow();
         }
@@ -55,11 +51,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
             builder.BypassAllAuthenticatedUsers();
 
-            stateStoreSvc1.SetState(new MaintenanceState
-            {
-                IsMaintenanceOn = true,
-                MiddlewareOptions = builder.GetOptions()
-            });
+            stateStoreSvc1.SetState(new MaintenanceState(null, isMaintenanceOn: true, builder.GetOptions()));
 
             // restore
             IStateStoreService stateStoreSvc2 = new StateStoreService(_svcProvider);
@@ -67,9 +59,11 @@ namespace MaintenanceModeMiddleware.Tests.Services
 
             Func<MaintenanceState> testFunc = () => stateStoreSvc2.GetState();
 
-            testFunc.ShouldNotThrow()
-                .ShouldNotBeNull()
-                .MiddlewareOptions
+            MaintenanceState state = testFunc.ShouldNotThrow()
+                .ShouldNotBeNull();
+            IMiddlewareOptionsContainer optionsContainer = state;
+
+            optionsContainer.MiddlewareOptions
                 .ShouldNotBeNull()
                 .Any<BypassAllAuthenticatedUsersOption>()
                 .ShouldBeTrue();

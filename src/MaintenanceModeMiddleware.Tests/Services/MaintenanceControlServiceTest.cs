@@ -46,7 +46,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
 
-            MaintenanceState state = svc.GetState()
+            IMaintenanceState state = svc.GetState()
                 .ShouldNotBeNull();
             state.IsMaintenanceOn.ShouldBeTrue();
             state.ExpirationDate.ShouldNotBeNull();
@@ -66,7 +66,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
 
-            MaintenanceState state = svc.GetState();
+            IMaintenanceState state = svc.GetState();
             TimeSpan delay = state.ExpirationDate.Value - DateTime.Now;
             Thread.Sleep((int)delay.TotalMilliseconds + 1000);
             svc.GetState().IsMaintenanceOn
@@ -87,7 +87,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             
             svc.EnterMaintanence();
 
-            MaintenanceState state = svc.GetState();
+            IMaintenanceState state = svc.GetState();
             state.IsMaintenanceOn.ShouldBeTrue();
             state.ExpirationDate.ShouldBeNull();
         }
@@ -129,8 +129,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
             });
 
             
-            OptionCollection overridenMiddlewareOpts = svc
-                .GetState()?.MiddlewareOptions;
+            OptionCollection overridenMiddlewareOpts = (svc
+                .GetState() as IMiddlewareOptionsContainer)?.MiddlewareOptions;
             overridenMiddlewareOpts
                 .ShouldNotBeNull()
                 .Any<ISerializableOption>()
@@ -155,7 +155,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 svc.EnterMaintanence();
 
 
-            svc.GetState()
+            IMaintenanceState state = svc.GetState();
+            IMiddlewareOptionsContainer optionsContainer = (IMiddlewareOptionsContainer)state;
+            optionsContainer
                 ?.MiddlewareOptions
                 .ShouldBeNull();
         }

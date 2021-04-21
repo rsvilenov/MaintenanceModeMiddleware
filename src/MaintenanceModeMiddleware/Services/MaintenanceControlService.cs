@@ -14,13 +14,13 @@ namespace MaintenanceModeMiddleware.Services
         public MaintenanceControlService(
             IPathMapperService pathMapperSvc,
             IStateStoreService stateStoreService,
-            Action<ServiceOptionsBuilder> optionBuilderDelegate)
+            Action<ServiceOptionsBuilder> middlewareOptions)
         {
             _pathMapperSvc = pathMapperSvc;
             _stateStoreService = stateStoreService;
 
             ServiceOptionsBuilder optionsBuilder = new ServiceOptionsBuilder();
-            optionBuilderDelegate?.Invoke(optionsBuilder);
+            middlewareOptions?.Invoke(optionsBuilder);
             _stateStoreService.SetStateStore(optionsBuilder.GetStateStore());
         }
 
@@ -39,33 +39,24 @@ namespace MaintenanceModeMiddleware.Services
                 newMiddlewareOptions = GetMiddlewareOptions(middlewareOptionsBuilder);
             }
 
-            _stateStoreService.SetState(new MaintenanceState
-            {
-                ExpirationDate = expirationDate,
-                IsMaintenanceOn = true,
-                MiddlewareOptions = newMiddlewareOptions
-            });
+            _stateStoreService.SetState(new MaintenanceState(expirationDate,
+                isMaintenanceOn: true,
+                newMiddlewareOptions));
         }
 
         public void LeaveMaintanence()
         {
-            _stateStoreService.SetState(new MaintenanceState
-            {
-                IsMaintenanceOn = false
-            });
+            _stateStoreService.SetState(new MaintenanceState(isMaintenanceOn: false));
         }
 
-        public MaintenanceState GetState()
+        public IMaintenanceState GetState()
         {
             MaintenanceState state = _stateStoreService.GetState();
             if (state.ExpirationDate <= DateTime.Now)
             {
                 LeaveMaintanence();
 
-                state = new MaintenanceState
-                {
-                    IsMaintenanceOn = false
-                };
+                state = new MaintenanceState(isMaintenanceOn: false);
             }
 
             return state;

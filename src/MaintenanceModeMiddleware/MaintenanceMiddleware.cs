@@ -43,7 +43,7 @@ namespace MaintenanceModeMiddleware
 
         private bool ShouldAllowRequest(HttpContext context)
         {
-            MaintenanceState maintenanceState = _maintenanceCtrlSev
+            IMaintenanceState maintenanceState = _maintenanceCtrlSev
                 .GetState();
 
             if (maintenanceState.IsMaintenanceOn)
@@ -89,10 +89,15 @@ namespace MaintenanceModeMiddleware
 
         private OptionCollection GetLatestOptions()
         {
-            return _maintenanceCtrlSev
-                .GetState()
-                .MiddlewareOptions
-                ?? _startupOptions;
+            OptionCollection latestOptions = null;
+
+            if (_maintenanceCtrlSev
+                .GetState() is IMiddlewareOptionsContainer optionsContainer)
+            {
+                latestOptions = optionsContainer.MiddlewareOptions;
+            }
+
+            return  latestOptions ?? _startupOptions;
         }
 
         private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)

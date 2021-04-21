@@ -26,6 +26,6 @@ namespace MaintenanceModeMiddleware.Services
         /// Gets the current maintenance state.
         /// </summary>
         /// <returns></returns>
-        MaintenanceState GetState();
+        IMaintenanceState GetState();
     }
 }

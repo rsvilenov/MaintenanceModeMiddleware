@@ -1,24 +1,30 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace MaintenanceModeMiddleware.Configuration.State
 {
-    public class MaintenanceState
+    internal class MaintenanceState : IMaintenanceState, IMiddlewareOptionsContainer
     {
+        private readonly OptionCollection _middlewareOptions;
+
         internal MaintenanceState() { }
 
-        /// <summary>
-        /// Gets the date and time when the maintenance mode will
-        /// automatically be switched off.
-        /// </summary>
+        internal MaintenanceState(bool isMaintenanceOn)
+        : this(null, isMaintenanceOn, null) 
+        { }
+
+        internal MaintenanceState(DateTime? expirationDate, 
+            bool isMaintenanceOn, 
+            OptionCollection middlewareOptions) 
+        {
+            ExpirationDate = expirationDate;
+            IsMaintenanceOn = isMaintenanceOn;
+            _middlewareOptions = middlewareOptions;
+        }
+
         public DateTime? ExpirationDate { get; internal set; }
 
-        /// <summary>
-        /// Checks whether the maintenance mode is on.
-        /// </summary>
         public bool IsMaintenanceOn { get; internal set; }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal OptionCollection MiddlewareOptions { get; set; }
+        OptionCollection IMiddlewareOptionsContainer.MiddlewareOptions => _middlewareOptions;
     }
 }

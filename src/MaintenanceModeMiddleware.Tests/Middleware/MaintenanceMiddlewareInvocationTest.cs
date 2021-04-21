@@ -500,11 +500,7 @@ namespace MaintenanceModeMiddleware.Tests
             }
 
             IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
-            svc.GetState().Returns(new MaintenanceState
-            {
-                IsMaintenanceOn = true,
-                MiddlewareOptions = middlewareOptions
-            });
+            svc.GetState().Returns(new MaintenanceState(null, isMaintenanceOn: true, middlewareOptions));
 
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,
