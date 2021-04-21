@@ -41,7 +41,10 @@ To install `MaintenanceModeMiddleware`, run the following command in the Package
 ```
 PM> Install-Package MaintenanceModeMiddleware
 ```
-
+Or use this command with the .NET CLI:
+```
+> dotnet add package MaintenanceModeMiddleware
+```
 ### Registration
 
 * Register the middleware in Startup.cs:
