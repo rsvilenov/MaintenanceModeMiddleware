@@ -34,7 +34,7 @@ Key features:
 
 ### Installation
 
-You can view the [package page on NuGet](hhttps://www.nuget.org/packages/MaintenanceModeMiddleware/).
+You can view the [package page on NuGet](https://www.nuget.org/packages/MaintenanceModeMiddleware/).
 
 To install `MaintenanceModeMiddleware`, run the following command in the Package Manager Console:
 
