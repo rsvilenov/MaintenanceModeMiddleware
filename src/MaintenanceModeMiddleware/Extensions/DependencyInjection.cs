@@ -10,10 +10,10 @@ namespace MaintenanceModeMiddleware.Extensions
         /// <summary>
         /// Adds the maintenance control service and its dependencies to the specified <see cref="IServiceCollection"/>.
         /// </summary>
-        /// <param name="optionBuilderDelegate">Optional configuraiton of the service.</param>
+        /// <param name="optionBuilderDelegate">Optional configuraiton for the service.</param>
         /// <returns>The same instance of the <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = null)
+            Action<IServiceOptionsBuilder> options = null)
         {
             services.AddSingleton<IPathMapperService, PathMapperService>();
 
@@ -23,7 +23,7 @@ namespace MaintenanceModeMiddleware.Extensions
                 new MaintenanceControlService(
                     svcProvider.GetService<IPathMapperService>(),
                     svcProvider.GetService<IStateStoreService>(),
-                    optionBuilderDelegate));
+                    options));
 
             return services;
         }

@@ -14,13 +14,13 @@ namespace MaintenanceModeMiddleware.Services
         public MaintenanceControlService(
             IPathMapperService pathMapperSvc,
             IStateStoreService stateStoreService,
-            Action<IServiceOptionsBuilder> middlewareOptions)
+            Action<IServiceOptionsBuilder> options)
         {
             _pathMapperSvc = pathMapperSvc;
             _stateStoreService = stateStoreService;
 
             ServiceOptionsBuilder optionsBuilder = new ServiceOptionsBuilder();
-            middlewareOptions?.Invoke(optionsBuilder);
+            options?.Invoke(optionsBuilder);
             _stateStoreService.SetStateStore(optionsBuilder.GetStateStore());
         }
 
