@@ -16,7 +16,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Fact]
         public void Constructor_WithDefaultOptions_ShouldNotThrow()
         {
-            Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) => { };
+            Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) => { };
 
             Action testAction = () =>
                 new MaintenanceMiddleware(null,
@@ -31,7 +31,7 @@ namespace MaintenanceModeMiddleware.Tests
         public void Constructor_WithDefaultOptions_ShouldCallBuilder()
         {
             bool isBuilderCalled = false;
-            Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 isBuilderCalled = true;
             };
@@ -47,7 +47,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Fact]
         public void Constructor_WithMissingResponseOption_ShouldThrowArgumentException()
         {
-            Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoDefaultValues();
             };
@@ -77,11 +77,11 @@ namespace MaintenanceModeMiddleware.Tests
 
             try
             {
-                Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+                Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
                 {
                     options.UseResponseFromFile(testFileNameCaseExists, EnvDirectory.ContentRootPath);
                     // prevent other exceptions due to missing required options
-                    options.FillEmptyOptionsWithDefault();
+                    ((MiddlewareOptionsBuilder)options).FillEmptyOptionsWithDefault();
                 };
 
                 Action testAction = () =>
@@ -108,11 +108,12 @@ namespace MaintenanceModeMiddleware.Tests
             IPathMapperService pathMappingSvc = Substitute.For<IPathMapperService>();
             pathMappingSvc.GetPath(Arg.Any<EnvDirectory>()).Returns(tempPath);
 
-            Action<MiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
+
+            Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseResponseFromFile(testFileNameCaseNotExists, EnvDirectory.ContentRootPath);
-                    // prevent other exceptions due to missing required options
-                    options.FillEmptyOptionsWithDefault();
+                // prevent other exceptions due to missing required options
+                ((MiddlewareOptionsBuilder)options).FillEmptyOptionsWithDefault();
             };
 
             Action testAction = () =>

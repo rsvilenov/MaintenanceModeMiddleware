@@ -8,7 +8,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
     /// <summary>
     /// A builder for the control service options.
     /// </summary>
-    public class ServiceOptionsBuilder
+    internal class ServiceOptionsBuilder : IServiceOptionsBuilder
     {
         private IStateStore _stateStore;
         private bool _stateStoreSelected;

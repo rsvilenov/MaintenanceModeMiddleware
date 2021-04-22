@@ -468,8 +468,8 @@ namespace MaintenanceModeMiddleware.Tests
 
         private MiddlewareTestDesk GetTestDesk(
             Action<HttpContext> contextSetup,
-            Action<MiddlewareOptionsBuilder> optionsSetup,
-            Action<MiddlewareOptionsBuilder> optionsOverrideSetup = null,
+            Action<IMiddlewareOptionsBuilder> optionsSetup,
+            Action<IMiddlewareOptionsBuilder> optionsOverrideSetup = null,
             string tempDir = null)
         {
             DefaultHttpContext httpContext = new DefaultHttpContext();

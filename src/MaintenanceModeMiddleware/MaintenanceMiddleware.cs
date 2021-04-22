@@ -21,7 +21,7 @@ namespace MaintenanceModeMiddleware
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSev,
             IPathMapperService pathMapperSvc,
-            Action<MiddlewareOptionsBuilder> optionsBuilderDelegate)
+            Action<IMiddlewareOptionsBuilder> optionsBuilderDelegate)
         {
             _next = next;
             _maintenanceCtrlSev = maintenanceCtrlSev;

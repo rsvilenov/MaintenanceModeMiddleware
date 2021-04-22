@@ -52,7 +52,8 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintanence(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null);
+                _maintenanceCtrlSvc.EnterMaintanence(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null,
+                    options => options.BypassAllAuthenticatedUsers());
             }
 
             return RedirectToAction(nameof(Index));

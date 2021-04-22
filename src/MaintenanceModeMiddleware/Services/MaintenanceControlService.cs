@@ -14,7 +14,7 @@ namespace MaintenanceModeMiddleware.Services
         public MaintenanceControlService(
             IPathMapperService pathMapperSvc,
             IStateStoreService stateStoreService,
-            Action<ServiceOptionsBuilder> middlewareOptions)
+            Action<IServiceOptionsBuilder> middlewareOptions)
         {
             _pathMapperSvc = pathMapperSvc;
             _stateStoreService = stateStoreService;
@@ -25,7 +25,7 @@ namespace MaintenanceModeMiddleware.Services
         }
 
         public void EnterMaintanence(DateTime? expirationDate = null,
-            Action<MiddlewareOptionsBuilder> middlewareOptionsBuilder = null)
+            Action<IMiddlewareOptionsBuilder> middlewareOptionsBuilder = null)
         {
             if (_stateStoreService.GetState()
                 .IsMaintenanceOn)

@@ -13,7 +13,7 @@ namespace MaintenanceModeMiddleware.Extensions
         /// <param name="optionBuilderDelegate">Optional configuraiton of the service.</param>
         /// <returns>The same instance of the <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = null)
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = null)
         {
             services.AddSingleton<IPathMapperService, PathMapperService>();
 

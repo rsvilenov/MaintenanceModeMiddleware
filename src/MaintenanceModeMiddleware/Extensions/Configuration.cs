@@ -13,7 +13,7 @@ namespace MaintenanceModeMiddleware.Extensions
         /// <param name="options">Optional configuration.</param>
         /// <returns>The same <see cref="IApplicationBuilder"/> instance so that multiple calls can be chained.</returns>
         public static IApplicationBuilder UseMaintenance(this IApplicationBuilder builder, 
-            Action<MiddlewareOptionsBuilder> options = null)
+            Action<IMiddlewareOptionsBuilder> options = null)
         {
             var maintenanceSvc = builder.ApplicationServices
                 .GetService(typeof(IMaintenanceControlService));

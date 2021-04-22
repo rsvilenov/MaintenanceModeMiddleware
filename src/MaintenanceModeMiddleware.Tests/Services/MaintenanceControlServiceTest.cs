@@ -22,7 +22,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             IStateStoreService stateStoreSvc = Substitute.For<IStateStoreService>();
             bool delegateCalled = false;
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) => delegateCalled = true;
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) => delegateCalled = true;
             
             new MaintenanceControlService(
                     _pathMapperSvc,
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithExpirationDate_ShouldSucceed()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -55,7 +55,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithExpirationDate_ShouldEndMaintenanceAutomatically()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -76,7 +76,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithNoParams_ShouldSucceed()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -95,7 +95,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WhenCalledTwice_SecondTimeShouldThrow()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -114,7 +114,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithMiddlewareOptions_ShouldSetMiddlewareOptionsToState()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -143,7 +143,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithNoMiddlewareOptions_GetOptionsToOverrideShouldReturnNull()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
@@ -165,7 +165,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void LeaveMaintenance_WhenMaintenanceIsOn_ShouldTurnMaintenanceOff()
         {
-            Action<ServiceOptionsBuilder> optionBuilderDelegate = (options) =>
+            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
             {
                 options.UseNoStateStore();
             };
