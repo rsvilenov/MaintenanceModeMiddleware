@@ -1,6 +1,4 @@
-﻿using MaintenanceModeMiddleware.Configuration.Data;
-using MaintenanceModeMiddleware.Configuration.Enums;
-using MaintenanceModeMiddleware.StateStore;
+﻿using MaintenanceModeMiddleware.StateStore;
 using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
@@ -16,21 +14,17 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public void UseNoStateStore() => _useNoStateStore = true;
 
-        public void UseStateStore(IStateStore stateStore)
+        public void UseStateStore<T>(T instance = null)
+            where T: class, IStateStore
         {
-            if (stateStore == null)
+            if (typeof(T) == typeof(IStateStore)
+                && instance == null)
             {
-                throw new ArgumentNullException(nameof(stateStore));
+                throw new ArgumentNullException(nameof(IStateStore));
             }
-            _stateStoreInstance = stateStore;
-            _stateStoreType = stateStore.GetType();
-            _useNoStateStore = true;
-        }
 
-        public void UseStateStore<T>()
-            where T: IStateStore
-        {
             _stateStoreType = typeof(T);
+            _stateStoreInstance = instance;
         }
 
         internal IStateStore GetStateStoreInstance()
