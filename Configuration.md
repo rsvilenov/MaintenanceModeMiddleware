@@ -10,7 +10,6 @@ This document describes in detail how to configure this component.
 - [Options for the control service](#Options-for-the-control-service)
     - [UseNoStateStore](#UseNoStateStore)
     - [UseStateStore](#UseStateStore)
-    - [UseDefaultStateStore](#UseDefaultStateStore)
 - [Options for the middleware](#Options-for-the-middleware)
     - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
     - [BypassUser](#BypassUser)
@@ -127,18 +126,19 @@ To disable the storing of the maintenance state, thus preventing the applicatin 
 ```csharp
     options.UseNoStateStore();
 ```
-
 ### UseStateStore
 
 To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this methid.
 
 ```csharp
-    options.UseStateStore(myCustomStateStore);
+    options.UseStateStore<MyCustomStateStore>();
 ```
 
-### UseDefaultStateStore
+To pass an already constructed object of a custom state store, call the method like this:
 
-This is the default setting. If you do not call any of the methods above, this setting will be applied.
+```csharp
+    options.UseStateStore(myCustomStateStore);
+```
 
 
 ## Options for the middleware
