@@ -53,11 +53,11 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     app.UseMaintenance(options =>
     {
         options.BypassUser("Demo");
-        options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+        options.UseResponseFile("maintenance.html", EnvDirectory.WebRootPath);
         //... some other options
 
         // You can configure it using the fluid interface the configuration methods provide. Like this:
-        // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+        // options.BypassUser("Demo").UseResponseFile("maintenance.html", EnvDirectory.WebRootPath);
     });
 
     app.UseEndpoints(endpoints =>
@@ -232,13 +232,13 @@ If the option is not specified, a default html response is served.
 Specify a file, containing the maintenance response. This file can be placed either in `ContentRootPath` or in `WebRootPath`.
 
 ```csharp
-    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath);
+    options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath);
 ```
 
 If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
 
 ```csharp
-    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath, 10000);
+    options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath, 10000);
 ```
 
 If the option is not specified, a default html response is served.
