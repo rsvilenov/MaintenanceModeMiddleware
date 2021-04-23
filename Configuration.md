@@ -82,14 +82,6 @@ Notice the first parameter of the call. It allows you to specify the duration of
 
 ### Override default configuration values
 
-If no options are passed to services.AddMaintenance(), the default configuration would be the same as if the following option was specififed:
-```csharp
-services.AddMaintenance(options =>
-{
-    options.UseDefaultStateStore();
-});
-```
-
 if no options are passed to app.UseMaintenance(), the default configuration would be the same as if the following options were specified:
 ```csharp
 app.UseMaintenance(options =>
