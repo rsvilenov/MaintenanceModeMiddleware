@@ -94,8 +94,8 @@ app.UseMaintenance(options =>
 ```
 
 To override any of these default settings, you have two options:
-1. Call its method and pass your own values. This will cause the default setting to be ommitted in favour of the value you have specified.
-2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you don't want to allow only a specific user to retain access to the site, regardless of the roles he has.
+1. Call the bulder's method, which corresponds to the setting, and pass your own value. This will cause the default setting to be ommitted in favour of the value you have specified.
+2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you want to allow only a specific user to retain access to the site, regardless of the roles they have.
 
 ```csharp
 app.UseMaintenance(options =>
