@@ -1,10 +1,7 @@
-﻿using MaintenanceModeMiddleware.Configuration.Data;
-using MaintenanceModeMiddleware.Configuration.Enums;
+﻿using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
-using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.StateStore;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
-using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -87,85 +84,18 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 .ShouldBe(testOption.TypeName);
         }
 
-        [Theory]
-        [InlineData("test1.json", null)]
-        [InlineData("test2.json", EnvDirectory.ContentRootPath)]
-        [InlineData("test3.json", EnvDirectory.WebRootPath)]
-        public void SetStore_InVariousPaths_ShouldStoreAndRestoreCorrectData(string file, EnvDirectory? baseDir)
-        {
-            FileStateStore store = GetStateStore(SafeTempPath.Create(file), baseDir);
-            var testState = new StorableMaintenanceState
-            {
-                IsMaintenanceOn = true,
-                ExpirationDate = DateTime.Now
-            };
-            Func<StorableMaintenanceState> testFunc = () =>
-            {
-                store.SetState(testState);
-                return store.GetState();
-            };
-
-            StorableMaintenanceState restoredState = testFunc.ShouldNotThrow();
-
-            restoredState.ShouldNotBeNull();
-            restoredState.ExpirationDate.ShouldBe(testState.ExpirationDate);
-            restoredState.IsMaintenanceOn.ShouldBe(testState.IsMaintenanceOn);
-        }
-
-        [Theory]
-        [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.ContentRootPath, true)]
-        [InlineData("test2.json", EnvDirectory.WebRootPath, EnvDirectory.WebRootPath, true)]
-        [InlineData("test2.json", EnvDirectory.ContentRootPath, EnvDirectory.WebRootPath, false)]
-        public void SetStore_InVariousPathsWithMismatch_WhenMismatchShouldRestoreNull(string file, 
-            EnvDirectory baseDirStore, 
-            EnvDirectory baseDirRestore,
-            bool shouldSucceed)
-        {
-            var testState = new StorableMaintenanceState();
-            string tempDir = Path.GetTempPath();
-            string prefixedFileName = SafeTempPath.Create(file); 
-            string tempPath = null;
-
-            // store
-            FileStateStore storeWrite = GetStateStore(prefixedFileName, baseDirStore,
-                (tf) => tempPath = tf,
-                tempDir);
-            Action testActionStore = () =>
-            {
-                storeWrite.SetState(testState);
-            };
-
-            testActionStore.ShouldNotThrow();
-
-            // restore
-            FileStateStore storeRead = GetStateStore(prefixedFileName, baseDirRestore, null, tempDir);
-            Func<StorableMaintenanceState> testFuncRestore = () =>
-            {
-                return storeRead.GetState();
-            };
-
-            StorableMaintenanceState restoredState = testFuncRestore.ShouldNotThrow();
-
-            if (shouldSucceed)
-            {
-                restoredState.ShouldNotBeNull();
-            }
-            else
-            {
-                restoredState.ShouldBeNull();
-            }
-        }
-
         [Fact]
         public void GetState_WhenFileIsEmpty_ShouldReturnNull()
         {
-            string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_emptied.json"), null, (filePath) =>
+            string tempDir = null;
+            FileStateStore store = GetStateStore((s) => { tempDir = s; });
+            store.SetState(new StorableMaintenanceState());
+            if (Directory.Exists(tempDir))
             {
-                generatedFilePath = filePath;
-            });
-            File.WriteAllText(generatedFilePath, "");
-
+                var fileToNullOut = Directory.GetFiles(tempDir, "*.json").FirstOrDefault();
+                File.WriteAllText(fileToNullOut, "");
+            }
+            
             Func<StorableMaintenanceState> testFunc = () =>
             {
                 return store.GetState();
@@ -179,14 +109,14 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         [Fact]
         public void GetState_WhenFileDoesNotExist_ShouldReturnNull()
         {
-            string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempPath.Create("test_to_be_deleted.json"), null, (filePath) =>
+            string tempDir = null;
+            FileStateStore store = GetStateStore((s) => { tempDir = s; });
+            store.SetState(new StorableMaintenanceState());
+
+            if (Directory.Exists(tempDir))
             {
-                generatedFilePath = filePath;
-            });
-            if (File.Exists(generatedFilePath))
-            {
-                File.Delete(generatedFilePath);
+                var fileToDelete = Directory.GetFiles(tempDir, "*.json").FirstOrDefault();
+                File.Delete(fileToDelete);
             }
 
             Func<StorableMaintenanceState> testFunc = () =>
@@ -202,11 +132,7 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
         [Fact]
         public void SetState_WhenDirectoryDoesNotExist_ShouldNotThrow()
         {
-            string generatedFilePath = null;
-            FileStateStore store = GetStateStore(SafeTempPath.Create("test_dir/test_to_be_deleted.json"), null, (filePath) =>
-            {
-                generatedFilePath = filePath;
-            });
+            FileStateStore store = GetStateStore();
 
             Action testAction = () =>
             {
@@ -217,31 +143,16 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
                 .ShouldNotThrow();
         }
 
-        private FileStateStore GetStateStore(string file = "test.json",
-            EnvDirectory? baseDir = EnvDirectory.ContentRootPath,
-            Action<string> onFileGenerated = null,
-            string tempDir = null)
+        private FileStateStore GetStateStore(Action<string> onFullTempDirGenerated = null)
         {
-            if (tempDir == null)
-            {
-                tempDir = Path.GetTempPath();
-            }
+            string tempDir = Path.GetTempPath();
+            tempDir = SafeTempPath.Create(tempDir);
 
             var pathMapperSvc = FakePathMapperService.Create(tempDir);
+            string fullTempPath = pathMapperSvc.GetPath(EnvDirectory.ContentRootPath);
+            onFullTempDirGenerated?.Invoke(fullTempPath);
 
-            var serviceProvider = Substitute.For<IServiceProvider>();
-            serviceProvider
-                .GetService(typeof(IPathMapperService))
-                .Returns(pathMapperSvc);
-
-            FileDescriptor fileDescriptor = baseDir.HasValue
-                ? new FileDescriptor(file, baseDir.Value)
-                : new FileDescriptor(Path.Combine(tempDir, file));
-
-            FileStateStore store = new FileStateStore(fileDescriptor);
-            (store as IServiceConsumer).ServiceProvider = serviceProvider;
-
-            onFileGenerated?.Invoke(Path.Combine(tempDir, file));
+            FileStateStore store = new FileStateStore(pathMapperSvc);
 
             return store;
         }

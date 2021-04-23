@@ -17,32 +17,13 @@ namespace MaintenanceModeMiddleware.Tests.Services
         private const string testUserName = "testUser";
         private readonly IPathMapperService _pathMapperSvc = FakePathMapperService.Create();
 
-        [Fact]
-        public void Constructor_WithAllParams_OptionBuilderDelegateShouldBeCalled()
-        {
-            IStateStoreService stateStoreSvc = Substitute.For<IStateStoreService>();
-            bool delegateCalled = false;
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) => delegateCalled = true;
-            
-            new MaintenanceControlService(
-                    _pathMapperSvc,
-                    stateStoreSvc,
-                    optionBuilderDelegate);
-
-            delegateCalled.ShouldBeTrue();
-        }
 
         [Fact]
         public void EnterMaintenance_WithExpirationDate_ShouldSucceed()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate);
+                FakeStateStoreService.Create());
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
 
@@ -55,14 +36,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithExpirationDate_ShouldEndMaintenanceAutomatically()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate);
+                FakeStateStoreService.Create());
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
 
@@ -76,14 +52,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithNoParams_ShouldSucceed()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate); 
+                FakeStateStoreService.Create()); 
             
             svc.EnterMaintanence();
 
@@ -95,14 +66,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WhenCalledTwice_SecondTimeShouldThrow()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate); 
+                FakeStateStoreService.Create()); 
             Action testAction = () => svc.EnterMaintanence();
 
             testAction.ShouldNotThrow();
@@ -114,14 +80,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithMiddlewareOptions_ShouldSetMiddlewareOptionsToState()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate);
+                FakeStateStoreService.Create());
 
             svc.EnterMaintanence(null, options =>
             {
@@ -143,17 +104,11 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void EnterMaintenance_WithNoMiddlewareOptions_GetOptionsToOverrideShouldReturnNull()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
-            
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate);
-                svc.EnterMaintanence();
-
+                FakeStateStoreService.Create());
+                
+            svc.EnterMaintanence();
 
             IMaintenanceState state = svc.GetState();
             IMiddlewareOptionsContainer optionsContainer = (IMiddlewareOptionsContainer)state;
@@ -165,14 +120,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void LeaveMaintenance_WhenMaintenanceIsOn_ShouldTurnMaintenanceOff()
         {
-            Action<IServiceOptionsBuilder> optionBuilderDelegate = (options) =>
-            {
-                options.UseNoStateStore();
-            };
             MaintenanceControlService svc = new MaintenanceControlService(
                 _pathMapperSvc,
-                FakeStateStoreService.Create(),
-                optionBuilderDelegate);
+                FakeStateStoreService.Create());
             
             svc.EnterMaintanence();
             bool isOnAfterEnter = svc.GetState().IsMaintenanceOn;

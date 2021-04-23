@@ -17,12 +17,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         private readonly IServiceProvider _svcProvider = Substitute.For<IServiceProvider>();
 
         [Fact]
-        public void SetStateStore_WithStoreParam_ShouldNotThrow()
+        public void Constructor_WithStateStoreParam_ShouldNotThrow()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
-            svc.SetStateStore(new InMemoryStateStore());
-
-            Action testAction = () => svc.SetStateStore(new InMemoryStateStore());
+            Action testAction = () => new StateStoreService(new InMemoryStateStore());
 
             testAction.ShouldNotThrow();
         }
@@ -30,8 +27,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void SetState_WithValidState_ShouldNotThrow()
         {
-            IStateStoreService stateStoreSvc = new StateStoreService(_svcProvider);
-            stateStoreSvc.SetStateStore(new InMemoryStateStore());
+            IStateStoreService stateStoreSvc = new StateStoreService(new InMemoryStateStore());
             IPathMapperService pathMapperSvc = FakePathMapperService.Create();
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
             builder.BypassAllAuthenticatedUsers();
@@ -45,8 +41,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void GetState_AfterStoredState_ShouldRestoreSameState()
         {
             // store
-            IStateStoreService stateStoreSvc1 = new StateStoreService(_svcProvider);
-            stateStoreSvc1.SetStateStore(new InMemoryStateStore());
+            IStateStoreService stateStoreSvc1 = new StateStoreService(new InMemoryStateStore());
             IPathMapperService pathMapperSvc = FakePathMapperService.Create();
             MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
             builder.BypassAllAuthenticatedUsers();
@@ -54,8 +49,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             stateStoreSvc1.SetState(new MaintenanceState(null, isMaintenanceOn: true, builder.GetOptions()));
 
             // restore
-            IStateStoreService stateStoreSvc2 = new StateStoreService(_svcProvider);
-            stateStoreSvc2.SetStateStore(new InMemoryStateStore());
+            IStateStoreService stateStoreSvc2 = new StateStoreService(new InMemoryStateStore());
 
             Func<MaintenanceState> testFunc = () => stateStoreSvc2.GetState();
 
@@ -72,8 +66,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void SetState_WithNoMaintenanceOptions_ShouldNotThrow()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
-            svc.SetStateStore(new InMemoryStateStore());
+            IStateStoreService svc = new StateStoreService(new InMemoryStateStore());
 
             Action testAction = () => svc.SetState(new MaintenanceState
             {
@@ -84,24 +77,24 @@ namespace MaintenanceModeMiddleware.Tests.Services
         }
 
         [Fact]
-        public void SetStateStore_WithSvcConsumer_ShouldCallServiceProvider()
+        public void SetState_WhenStateStoreIsNotSet_ShouldNotThrow()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
-            IStateStore svcConsumer = Substitute.For<IStateStore, IServiceConsumer>();
+            IStateStoreService svc = new StateStoreService(null);
 
-            svc.SetStateStore(svcConsumer);
+            Action testAction = () => svc.SetState(new MaintenanceState
+            {
+                IsMaintenanceOn = true
+            });
 
-            ((IServiceConsumer)svcConsumer).ServiceProvider
-                .Received(1);
+            testAction.ShouldNotThrow();
         }
 
         [Fact]
-        public void RestoreState_WhenStateStoreIsNotSet_ShouldNotThrow()
+        public void GetState_WhenStateStoreIsNotSet_ShouldNotThrow()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
-            IStateStore stateStore = Substitute.For<IStateStore>();
+            IStateStoreService svc = new StateStoreService(null);
 
-            Action testAction = () => svc.SetStateStore(stateStore);
+            Action testAction = () => svc.GetState();
 
             testAction.ShouldNotThrow();
         }
@@ -109,10 +102,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
         [Fact]
         public void RestoreState_WhenStateStoreReturnsNull_ShouldNotReturnNull()
         {
-            IStateStoreService svc = new StateStoreService(_svcProvider);
             IStateStore stateStore = Substitute.For<IStateStore>();
+            IStateStoreService svc = new StateStoreService(stateStore);
             stateStore.GetState().ReturnsNull();
-            svc.SetStateStore(stateStore);
 
             MaintenanceState state = svc.GetState();
 

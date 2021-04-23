@@ -1,6 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Services;
+using MaintenanceModeMiddleware.StateStore;
 using NSubstitute;
-using System;
 
 namespace MaintenanceModeMiddleware.Tests.HelperTypes
 {
@@ -8,9 +8,8 @@ namespace MaintenanceModeMiddleware.Tests.HelperTypes
     {
         internal static IStateStoreService Create()
         {
-            IServiceProvider svcProvider = Substitute.For<IServiceProvider>();
-            IStateStoreService stateStoreSvc = new StateStoreService(svcProvider);
-            stateStoreSvc.SetStateStore(new InMemoryStateStore());
+            IStateStore stateStore = Substitute.For<IStateStore>();
+            IStateStoreService stateStoreSvc = new StateStoreService(stateStore);
             return stateStoreSvc;
         }
     }

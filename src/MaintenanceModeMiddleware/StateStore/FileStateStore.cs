@@ -1,17 +1,21 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
-using System;
 using System.Text.Json;
 using IO = System.IO;
 
 namespace MaintenanceModeMiddleware.StateStore
 {
-    internal class FileStateStore : IStateStore, IServiceConsumer
+    internal class FileStateStore : IStateStore
     {
-        internal FileStateStore(FileDescriptor file)
+        private readonly IPathMapperService _pathMapperSvc;
+        public FileStateStore(IPathMapperService pathMapperService)
         {
-            File = file;
+            _pathMapperSvc = pathMapperService;
+
+            File = new FileDescriptor("maintenanceState.json",
+                   EnvDirectory.ContentRootPath);
         }
 
         public StorableMaintenanceState GetState()
@@ -35,12 +39,6 @@ namespace MaintenanceModeMiddleware.StateStore
         {
             string filePath = GetFileFullPath();
 
-            string dirPath = IO.Path.GetDirectoryName(filePath);
-            if (!IO.Directory.Exists(dirPath))
-            {
-                IO.Directory.CreateDirectory(dirPath);
-            }
-
             string serialized = JsonSerializer.Serialize(state, new JsonSerializerOptions
             {
                 WriteIndented = true
@@ -53,27 +51,9 @@ namespace MaintenanceModeMiddleware.StateStore
 
         private string GetFileFullPath()
         {
-            if (File.BaseDir == null)
-            {
-                return File.Path;
-            }
-
-            IPathMapperService pathMapperSvc = GetPathMapperService();
-
-            string envPath = pathMapperSvc.GetPath(File.BaseDir.Value);
+            string envPath = _pathMapperSvc.GetPath(File.BaseDir.Value);
 
             return IO.Path.Combine(envPath, File.Path);
-        }
-
-        private IPathMapperService GetPathMapperService()
-        {
-            IServiceProvider svcProvider = ((IServiceConsumer)this).ServiceProvider;
-            return (IPathMapperService)svcProvider.GetService(typeof(IPathMapperService));
-        }
-
-        IServiceProvider IServiceConsumer.ServiceProvider
-        {
-            get; set;
         }
     }
 }

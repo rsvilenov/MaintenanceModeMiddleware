@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Services;
+using MaintenanceModeMiddleware.StateStore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -13,19 +14,42 @@ namespace MaintenanceModeMiddleware.Extensions
         /// <param name="optionBuilderDelegate">Optional configuraiton for the service.</param>
         /// <returns>The same instance of the <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
-            Action<IServiceOptionsBuilder> options = null)
+            Action<IStateStoreOptionsBuilder> options = null)
         {
             services.AddSingleton<IPathMapperService, PathMapperService>();
 
+            services.RegisterStateStore(options);
             services.AddSingleton<IStateStoreService, StateStoreService>();
 
-            services.AddSingleton<IMaintenanceControlService>(svcProvider =>
-                new MaintenanceControlService(
-                    svcProvider.GetService<IPathMapperService>(),
-                    svcProvider.GetService<IStateStoreService>(),
-                    options));
+            services.AddSingleton<IMaintenanceControlService, MaintenanceControlService>();
 
             return services;
+        }
+
+        private static void RegisterStateStore(this IServiceCollection services, 
+            Action<IStateStoreOptionsBuilder> options)
+        {
+            if (options == null)
+            {
+                services.AddSingleton<IStateStore, FileStateStore>();
+                return;
+            }
+                
+            StateStoreOptionsBuilder optionsBuilder = new StateStoreOptionsBuilder();
+            options.Invoke(optionsBuilder);
+
+            IStateStore instance = optionsBuilder.GetStateStoreInstance();
+            if (instance != null)
+            {
+                services.AddSingleton(instance);
+                return;
+            }
+
+            Type type = optionsBuilder.GetStateStoreType();
+            if (type != null)
+            {
+                services.AddSingleton(typeof(IStateStore), type);
+            }
         }
     }
 }

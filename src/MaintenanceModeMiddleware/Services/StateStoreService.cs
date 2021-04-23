@@ -9,15 +9,14 @@ namespace MaintenanceModeMiddleware.Services
 {
     internal class StateStoreService : IStateStoreService
     {
-        private readonly IServiceProvider _svcProvider;
         private readonly List<Type> _optionTypes;
 
         private IStateStore _stateStore;
         private MaintenanceState _state;
 
-        public StateStoreService(IServiceProvider svcProvider)
+        public StateStoreService(IStateStore stateStore)
         {
-            _svcProvider = svcProvider;
+            _stateStore = stateStore;
             _optionTypes = CollectOptionTypes();
         }
 
@@ -36,16 +35,6 @@ namespace MaintenanceModeMiddleware.Services
             }
 
             return _state;
-        }
-
-        void IStateStoreService.SetStateStore(IStateStore stateStore)
-        {
-            if (stateStore is IServiceConsumer svcConsumer)
-            {
-                svcConsumer.ServiceProvider = _svcProvider;
-            }
-
-            _stateStore = stateStore;
         }
 
         void IStateStoreService.SetState(MaintenanceState state)
