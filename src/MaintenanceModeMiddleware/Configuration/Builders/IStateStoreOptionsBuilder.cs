@@ -10,8 +10,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         void UseNoStateStore();
 
         /// <summary>
-        /// Allows passing a custom state store, which can,
-        /// for example, store the maintenance state in the database.
+        /// Use a custom state store.
         /// </summary>
         /// <typeparam name="T">The type of the custom implementation of <see cref="IStateStore"/></typeparam>
         /// <param name="instance">Optional: an already constructed instance of <see cref="IStateStore"/></param>

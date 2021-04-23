@@ -1,5 +1,4 @@
 ﻿using MaintenanceModeMiddleware.Configuration.State;
-using MaintenanceModeMiddleware.StateStore;
 
 namespace MaintenanceModeMiddleware.Services
 {

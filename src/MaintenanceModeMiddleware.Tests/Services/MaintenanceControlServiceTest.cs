@@ -1,10 +1,8 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
-using NSubstitute;
 using Shouldly;
 using System;
 using System.Threading;

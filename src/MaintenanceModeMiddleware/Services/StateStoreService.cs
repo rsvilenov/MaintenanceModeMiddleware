@@ -11,7 +11,7 @@ namespace MaintenanceModeMiddleware.Services
     {
         private readonly List<Type> _optionTypes;
 
-        private IStateStore _stateStore;
+        private readonly IStateStore _stateStore;
         private MaintenanceState _state;
 
         public StateStoreService(IStateStore stateStore)

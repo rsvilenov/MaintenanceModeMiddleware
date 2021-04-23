@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace MaintenanceModeMiddleware.Configuration.State
 {
-    [Serializable]
     public class StorableMaintenanceState
     {
         public DateTime? ExpirationDate { get; set; }
