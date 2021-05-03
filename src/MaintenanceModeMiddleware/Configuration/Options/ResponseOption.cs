@@ -55,7 +55,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.ContentType}{PARTS_SEPARATOR}{Value.ContentEncoding.CodePage}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.ContentEncoding.GetString(Value.ContentBytes)}";
         }
 
-        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
+        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
         {
             return Value;
         }

@@ -4,16 +4,16 @@ using System;
 
 namespace MaintenanceModeMiddleware.Services
 {
-    internal class PathMapperService : IPathMapperService
+    internal class DirectoryMapperService : IDirectoryMapperService
     {
         private readonly IWebHostEnvironment _webHostEnv;
 
-        public PathMapperService(IWebHostEnvironment webHostEnv)
+        public DirectoryMapperService(IWebHostEnvironment webHostEnv)
         {
             _webHostEnv = webHostEnv;
         }
 
-        public string GetPath(EnvDirectory dir)
+        public string GetAbsolutePath(EnvDirectory dir)
         {
             return dir switch
             {

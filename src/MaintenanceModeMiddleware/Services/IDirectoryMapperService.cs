@@ -2,8 +2,8 @@
 
 namespace MaintenanceModeMiddleware.Services
 {
-    internal interface IPathMapperService
+    internal interface IDirectoryMapperService
     {
-        string GetPath(EnvDirectory dir);
+        string GetAbsolutePath(EnvDirectory dir);
     }
 }

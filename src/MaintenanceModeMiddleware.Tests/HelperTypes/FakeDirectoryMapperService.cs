@@ -4,18 +4,18 @@ using NSubstitute;
 
 namespace MaintenanceModeMiddleware.Tests.HelperTypes
 {
-    internal static class FakePathMapperService
+    internal static class FakeDirectoryMapperService
     {
-        internal static IPathMapperService Create(string tempDir = null)
+        internal static IDirectoryMapperService Create(string tempDir = null)
         {
             var fakeEnv = FakeWebHostEnvironment.Create(tempDir);
-            var fakeMapper = Substitute.For<IPathMapperService>();
+            var fakeMapper = Substitute.For<IDirectoryMapperService>();
             string contentRoot = fakeEnv.ContentRootPath;
             string wwwRoot = fakeEnv.WebRootPath;
 
-            fakeMapper.GetPath(EnvDirectory.ContentRootPath)
+            fakeMapper.GetAbsolutePath(EnvDirectory.ContentRootPath)
                 .Returns(contentRoot);
-            fakeMapper.GetPath(EnvDirectory.WebRootPath)
+            fakeMapper.GetAbsolutePath(EnvDirectory.WebRootPath)
                 .Returns(wwwRoot);
 
             return fakeMapper;

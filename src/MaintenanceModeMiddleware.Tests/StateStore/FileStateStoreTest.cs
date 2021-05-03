@@ -148,11 +148,11 @@ namespace MaintenanceModeMiddleware.Tests.StateStore
             string tempDir = Path.GetTempPath();
             tempDir = SafeTempPath.Create(tempDir);
 
-            var pathMapperSvc = FakePathMapperService.Create(tempDir);
-            string fullTempPath = pathMapperSvc.GetPath(EnvDirectory.ContentRootPath);
+            var dirMapperSvc = FakeDirectoryMapperService.Create(tempDir);
+            string fullTempPath = dirMapperSvc.GetAbsolutePath(EnvDirectory.ContentRootPath);
             onFullTempDirGenerated?.Invoke(fullTempPath);
 
-            FileStateStore store = new FileStateStore(pathMapperSvc);
+            FileStateStore store = new FileStateStore(dirMapperSvc);
 
             return store;
         }

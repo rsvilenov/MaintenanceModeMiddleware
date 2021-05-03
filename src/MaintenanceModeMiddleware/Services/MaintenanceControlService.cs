@@ -9,13 +9,13 @@ namespace MaintenanceModeMiddleware.Services
         IMaintenanceControlService
     {
         private readonly IStateStoreService _stateStoreService;
-        private readonly IPathMapperService _pathMapperSvc;
+        private readonly IDirectoryMapperService _dirMapperSvc;
 
         public MaintenanceControlService(
-            IPathMapperService pathMapperSvc,
+            IDirectoryMapperService dirMapperSvc,
             IStateStoreService stateStoreService)
         {
-            _pathMapperSvc = pathMapperSvc;
+            _dirMapperSvc = dirMapperSvc;
             _stateStoreService = stateStoreService;
         }
 
@@ -60,7 +60,7 @@ namespace MaintenanceModeMiddleware.Services
 
         private OptionCollection GetMiddlewareOptions(Action<MiddlewareOptionsBuilder> middlewareOptionsBuilder)
         {
-            var optionsBuilder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var optionsBuilder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             middlewareOptionsBuilder?.Invoke(optionsBuilder);
 
             return optionsBuilder.GetOptions();

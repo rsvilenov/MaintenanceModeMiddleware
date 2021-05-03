@@ -17,13 +17,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
     internal class MiddlewareOptionsBuilder : IMiddlewareOptionsBuilder
     {
         private readonly OptionCollection _options;
-        private readonly IPathMapperService _pathMapperSvc;
+        private readonly IDirectoryMapperService _dirMapperSvc;
         private bool _areDefaultOptionsFilledIn;
         
-        internal MiddlewareOptionsBuilder(IPathMapperService pathMapperSvc)
+        internal MiddlewareOptionsBuilder(IDirectoryMapperService dirMapperSvc)
         {
             _options = new OptionCollection();
-            _pathMapperSvc = pathMapperSvc;
+            _dirMapperSvc = dirMapperSvc;
         }
 
         public IMiddlewareOptionsBuilder UseResponseFromFile(string relativePath, 
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
-            string envDir = _pathMapperSvc.GetPath(baseDir);
+            string envDir = _dirMapperSvc.GetAbsolutePath(baseDir);
             string fullFilePath = Path.Combine(envDir, relativePath);
 
             if (!File.Exists(fullFilePath))

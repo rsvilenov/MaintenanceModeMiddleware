@@ -28,8 +28,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void SetState_WithValidState_ShouldNotThrow()
         {
             IStateStoreService stateStoreSvc = new StateStoreService(new InMemoryStateStore());
-            IPathMapperService pathMapperSvc = FakePathMapperService.Create();
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
+            IDirectoryMapperService dirMapperSvc = FakeDirectoryMapperService.Create();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(dirMapperSvc);
             builder.BypassAllAuthenticatedUsers();
 
             Action testAction = () => stateStoreSvc.SetState(new MaintenanceState(null, isMaintenanceOn: true, builder.GetOptions()));
@@ -42,8 +42,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             // store
             IStateStoreService stateStoreSvc1 = new StateStoreService(new InMemoryStateStore());
-            IPathMapperService pathMapperSvc = FakePathMapperService.Create();
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(pathMapperSvc);
+            IDirectoryMapperService dirMapperSvc = FakeDirectoryMapperService.Create();
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(dirMapperSvc);
             builder.BypassAllAuthenticatedUsers();
 
             stateStoreSvc1.SetState(new MaintenanceState(null, isMaintenanceOn: true, builder.GetOptions()));

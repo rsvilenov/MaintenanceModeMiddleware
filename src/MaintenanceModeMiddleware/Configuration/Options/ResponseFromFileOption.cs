@@ -63,9 +63,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.File.BaseDir}{PARTS_SEPARATOR}{Value.File.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}";
         }
 
-        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
+        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
         {
-            string fullPath = GetFileFullPath(pathMapperSvc);
+            string fullPath = GetFileFullPath(dirMapperSvc);
 
             using (StreamReader sr = new StreamReader(fullPath,
                 detectEncodingFromByteOrderMarks: true))
@@ -98,9 +98,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return contentType.HasValue;
         }
 
-        private string GetFileFullPath(IPathMapperService pathMapperSvc)
+        private string GetFileFullPath(IDirectoryMapperService dirMapperSvc)
         {
-            string envDir = pathMapperSvc.GetPath(Value.File.BaseDir.Value);
+            string envDir = dirMapperSvc.GetAbsolutePath(Value.File.BaseDir.Value);
 
             string absPath = Path.Combine(envDir, Value.File.Path);
             return absPath;

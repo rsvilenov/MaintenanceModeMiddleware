@@ -8,22 +8,22 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Services
 {
-    public class PathMapperServiceTest
+    public class DirectoryMapperServiceTest
     {
-        private readonly IPathMapperService _mapperSvc;
+        private readonly IDirectoryMapperService _mapperSvc;
         
-        public PathMapperServiceTest()
+        public DirectoryMapperServiceTest()
         {
             IWebHostEnvironment webHostEnv = FakeWebHostEnvironment.Create();
-            _mapperSvc = new PathMapperService(webHostEnv);
+            _mapperSvc = new DirectoryMapperService(webHostEnv);
         }
 
         [Theory]
         [InlineData(EnvDirectory.ContentRootPath)]
         [InlineData(EnvDirectory.WebRootPath)]
-        public void GetPath_WithValidEnumValue_ShouldReturnPath(EnvDirectory dir)
+        public void GetAbsolutePath_WithValidEnumValue_ShouldReturnPath(EnvDirectory dir)
         {
-            Func<string> testFunc = () => _mapperSvc.GetPath(dir);
+            Func<string> testFunc = () => _mapperSvc.GetAbsolutePath(dir);
 
             string path = testFunc.ShouldNotThrow();
 
@@ -31,11 +31,11 @@ namespace MaintenanceModeMiddleware.Tests.Services
         }
 
         [Fact]
-        public void GetPath_WithInvalidEnumValue_ShouldThrow()
+        public void GetAbsolutePath_WithInvalidEnumValue_ShouldThrow()
         {
             EnvDirectory invalidDir = (EnvDirectory)(-1);
 
-            Action testAction = () => _mapperSvc.GetPath(invalidDir);
+            Action testAction = () => _mapperSvc.GetAbsolutePath(invalidDir);
 
             testAction.ShouldThrow<InvalidOperationException>();
         }

@@ -16,7 +16,7 @@ namespace MaintenanceModeMiddleware.Extensions
         public static IServiceCollection AddMaintenance(this IServiceCollection services,
             Action<IStateStoreOptionsBuilder> options = null)
         {
-            services.AddSingleton<IPathMapperService, PathMapperService>();
+            services.AddSingleton<IDirectoryMapperService, DirectoryMapperService>();
 
             services.RegisterStateStore(options);
             services.AddSingleton<IStateStoreService, StateStoreService>();

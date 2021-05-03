@@ -69,8 +69,8 @@ namespace MaintenanceModeMiddleware.Tests
             string tempPath = Path.GetTempPath();
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
             webHostEnv.ContentRootPath.Returns(tempPath);
-            IPathMapperService pathMappingSvc = Substitute.For<IPathMapperService>();
-            pathMappingSvc.GetPath(Arg.Any<EnvDirectory>()).Returns(tempPath);
+            IDirectoryMapperService pathMappingSvc = Substitute.For<IDirectoryMapperService>();
+            pathMappingSvc.GetAbsolutePath(Arg.Any<EnvDirectory>()).Returns(tempPath);
 
             File.Create(Path.Combine(webHostEnv.ContentRootPath, testFileNameCaseExists))
                 .Dispose();
@@ -105,8 +105,8 @@ namespace MaintenanceModeMiddleware.Tests
             string tempPath = Path.GetTempPath();
             IWebHostEnvironment webHostEnv = Substitute.For<IWebHostEnvironment>();
             webHostEnv.ContentRootPath.Returns(tempPath);
-            IPathMapperService pathMappingSvc = Substitute.For<IPathMapperService>();
-            pathMappingSvc.GetPath(Arg.Any<EnvDirectory>()).Returns(tempPath);
+            IDirectoryMapperService pathMappingSvc = Substitute.For<IDirectoryMapperService>();
+            pathMappingSvc.GetAbsolutePath(Arg.Any<EnvDirectory>()).Returns(tempPath);
 
 
             Action<IMiddlewareOptionsBuilder> optionBuilderDelegate = (options) =>

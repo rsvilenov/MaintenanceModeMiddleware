@@ -489,12 +489,12 @@ namespace MaintenanceModeMiddleware.Tests
                 tempDir = Path.GetTempPath();
             }
 
-            IPathMapperService pathMapperSvc = FakePathMapperService.Create(tempDir);
+            IDirectoryMapperService dirMapperSvc = FakeDirectoryMapperService.Create(tempDir);
 
             OptionCollection middlewareOptions = null;
             if (optionsOverrideSetup != null)
             {
-                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(pathMapperSvc);
+                MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);
                 optionsOverrideSetup.Invoke(optionOverrideBuilder);
                 middlewareOptions = optionOverrideBuilder.GetOptions();
             }
@@ -505,7 +505,7 @@ namespace MaintenanceModeMiddleware.Tests
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
                 nextDelegate,
                 svc,
-                pathMapperSvc,
+                dirMapperSvc,
                 optionsSetup);
 
             return new MiddlewareTestDesk

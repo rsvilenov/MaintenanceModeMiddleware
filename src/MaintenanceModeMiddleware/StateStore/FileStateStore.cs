@@ -9,10 +9,10 @@ namespace MaintenanceModeMiddleware.StateStore
 {
     internal class FileStateStore : IStateStore
     {
-        private readonly IPathMapperService _pathMapperSvc;
-        public FileStateStore(IPathMapperService pathMapperService)
+        private readonly IDirectoryMapperService _dirMapperSvc;
+        public FileStateStore(IDirectoryMapperService dirMapperService)
         {
-            _pathMapperSvc = pathMapperService;
+            _dirMapperSvc = dirMapperService;
 
             File = new FileDescriptor("maintenanceState.json",
                    EnvDirectory.ContentRootPath);
@@ -51,7 +51,7 @@ namespace MaintenanceModeMiddleware.StateStore
 
         private string GetFileFullPath()
         {
-            string envPath = _pathMapperSvc.GetPath(File.BaseDir.Value);
+            string envPath = _dirMapperSvc.GetAbsolutePath(File.BaseDir.Value);
 
             return IO.Path.Combine(envPath, File.Path);
         }

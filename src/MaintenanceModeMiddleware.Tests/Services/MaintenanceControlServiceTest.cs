@@ -13,14 +13,14 @@ namespace MaintenanceModeMiddleware.Tests.Services
     public class MaintenanceControlServiceTest
     {
         private const string testUserName = "testUser";
-        private readonly IPathMapperService _pathMapperSvc = FakePathMapperService.Create();
+        private readonly IDirectoryMapperService _dirMapperSvc = FakeDirectoryMapperService.Create();
 
 
         [Fact]
         public void EnterMaintenance_WithExpirationDate_ShouldSucceed()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create());
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void EnterMaintenance_WithExpirationDate_ShouldEndMaintenanceAutomatically()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create());
             
             svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
@@ -51,7 +51,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void EnterMaintenance_WithNoParams_ShouldSucceed()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create()); 
             
             svc.EnterMaintanence();
@@ -65,7 +65,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void EnterMaintenance_WhenCalledTwice_SecondTimeShouldThrow()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create()); 
             Action testAction = () => svc.EnterMaintanence();
 
@@ -79,7 +79,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void EnterMaintenance_WithMiddlewareOptions_ShouldSetMiddlewareOptionsToState()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create());
 
             svc.EnterMaintanence(null, options =>
@@ -103,7 +103,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void EnterMaintenance_WithNoMiddlewareOptions_GetOptionsToOverrideShouldReturnNull()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create());
                 
             svc.EnterMaintanence();
@@ -119,7 +119,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
         public void LeaveMaintenance_WhenMaintenanceIsOn_ShouldTurnMaintenanceOff()
         {
             MaintenanceControlService svc = new MaintenanceControlService(
-                _pathMapperSvc,
+                _dirMapperSvc,
                 FakeStateStoreService.Create());
             
             svc.EnterMaintanence();

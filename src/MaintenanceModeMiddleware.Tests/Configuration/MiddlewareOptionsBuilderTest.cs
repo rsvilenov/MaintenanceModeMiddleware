@@ -16,14 +16,14 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 {
     public class MiddlewareOptionsBuilderTest
     {
-        private readonly IPathMapperService _pathMapperSvc = FakePathMapperService.Create();
+        private readonly IDirectoryMapperService _dirMapperSvc = FakeDirectoryMapperService.Create();
 
         [Fact]
         public void Constructor_Default_ShouldAddDefaultOptions()
         {
             MiddlewareOptionsBuilder builder = null;
             
-            builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
             builder.GetOptions()
                 .ShouldNotBeNull();
@@ -35,8 +35,8 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void UseResponseFile_WithValidData_GetOptionsValueShouldEqualInput(string relativePath,
             EnvDirectory baseDir)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
-            string filePath = Path.Combine(_pathMapperSvc.GetPath(baseDir), relativePath);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+            string filePath = Path.Combine(_dirMapperSvc.GetAbsolutePath(baseDir), relativePath);
             File.Create(filePath);
 
             builder.UseResponseFromFile(relativePath, baseDir);
@@ -58,10 +58,10 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             bool createFile,
             Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             if (createFile)
             {
-                string filePath = Path.Combine(_pathMapperSvc.GetPath(baseDir), relativePath);
+                string filePath = Path.Combine(_dirMapperSvc.GetAbsolutePath(baseDir), relativePath);
                 File.Create(filePath);
             }
             Action testAction = () =>
@@ -80,7 +80,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             int codePage)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
-            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             
             builder.UseResponse(response, contentType, encoding);
@@ -103,7 +103,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             int codePage)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
-            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
 
             builder.UseResponse(encoding.GetBytes(response), contentType, encoding);
@@ -127,7 +127,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Type expectedException)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
-            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.UseResponse(response, contentType, encoding);
@@ -146,7 +146,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Type expectedException)
         {
             Encoding encoding = Encoding.GetEncoding(codePage);
-            var builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.UseResponse(string.IsNullOrEmpty(response)
@@ -163,7 +163,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void UseDefaultResponse_WhenCalled_ShouldSucceed()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
                 // ensure that the UseDefaultResponse option is used
             builder.UseNoDefaultValues();
 
@@ -178,7 +178,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassUser_WithUser_ShouldSucceed()
         {
             const string userName = "userName1";
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassUser(userName);
 
@@ -194,7 +194,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("", typeof(ArgumentNullException))]
         public void BypassUser_WithNullOrEmptyUsername_ShouldThrow(string userName, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassUser(userName);
@@ -208,7 +208,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassUsers_WithValidUsers_ShouldSucceed()
         {
             string[] userNames = new string[] { "userName1", "userName2" };
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
 
             builder.BypassUsers(userNames);
@@ -229,7 +229,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { }, typeof(ArgumentException))]
         public void BypassUsers_WithNullOrEmptyArray_ShouldThrow(string[] userNames, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassUsers(userNames);
@@ -242,7 +242,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassUserRole_WithRole_ValueShouldBeEqualToTheInput()
         {
             const string userRole = "role1";
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassUserRole(userRole);
 
@@ -258,7 +258,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("", typeof(ArgumentNullException))]
         public void BypassUserRole_WithNullOrEmptyRole_ShouldThrow(string userRole, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassUserRole(userRole);
@@ -271,7 +271,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassUserRoles_WithRoles_ShouldSucceed()
         {
             string[] userRoles = new string[] { "role1", "role2" };
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassUserRoles(userRoles);
 
@@ -290,7 +290,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { }, typeof(ArgumentException))]
         public void BypassUserRoles_WithNullOrEmptyArray_ShouldThrow(string[] userRoles, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassUserRoles(userRoles);
@@ -303,7 +303,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void BypassAllAuthenticatedUsers_Default_ShouldSucceed()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassAllAuthenticatedUsers();
 
@@ -315,7 +315,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void BypassUrlPath_WithEmptyPath_ShouldThrowArgumentException()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassUrlPath(new PathString(), StringComparison.Ordinal);;
@@ -328,7 +328,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassUrlPath_WithNonEmptyPath_ValueShouldEqualInput()
         {
             const string urlPath = "/path";
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassUrlPath(new PathString(urlPath), StringComparison.Ordinal);
                
@@ -343,7 +343,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [MemberData(nameof(GetBypassUrlPathsMembers))]
         public void BypassUrlPaths(PathString[] pathStrings, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Func<IEnumerable<BypassUrlPathOption>> testFunc = () =>
             {
                 builder.BypassUrlPaths(pathStrings, StringComparison.Ordinal);
@@ -402,7 +402,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(".txt")]
         public void BypassFileExtension_WithValidExtension_ValueShouldEqualInput(string extension)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             
             builder.BypassFileExtension(extension);
                 
@@ -421,7 +421,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData("", typeof(ArgumentNullException))]
         public void BypassFileExtension_WithNullOrEmptyInput_ShouldThrow(string extension, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassFileExtension(extension);
@@ -435,7 +435,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         public void BypassFileExtensions_WithValidExtensions_ShouldSucceed()
         {
             string[] extensions = new string[] { "txt", "html" };
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
             builder.BypassFileExtensions(extensions);
 
@@ -453,7 +453,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [InlineData(new string[] { }, typeof(ArgumentException))]
         public void BypassFileExtensions_WithNullOrEmptyArray_ShouldThrow(string[] extensions, Type expectedException)
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () =>
             {
                 builder.BypassFileExtensions(extensions);
@@ -465,7 +465,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void UseNoDefaultValues_Default_GetOptionsShouldThrow()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             builder.UseNoDefaultValues();
             Action assertAction = () => builder.GetOptions();
 
@@ -476,7 +476,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void FillEmptyOptionsWithDefault_Default_ShouldAddOptions()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
             builder.GetOptions().ShouldNotBeNull()
                 .GetAll().ShouldNotBeEmpty();
@@ -485,7 +485,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void MiddlewareOptionsBuilder_WhenGetOptionsIsCalledTwice_ShouldNotThrow()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             Action testAction = () => 
             {
                 builder.GetOptions();
@@ -498,7 +498,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void MiddlewareOptionsBuilder_WhenDuplicateResponseOptionIsSet_GetOptionShouldThrow()
         {
-            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_pathMapperSvc); 
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc); 
             builder.UseNoDefaultValues();
             builder.UseDefaultResponse();
             builder.UseResponse(Encoding.UTF8.GetBytes("test"), ResponseContentType.Text, Encoding.UTF8);

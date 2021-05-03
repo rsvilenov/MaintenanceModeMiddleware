@@ -14,18 +14,18 @@ namespace MaintenanceModeMiddleware
     internal class MaintenanceMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IMaintenanceControlService _maintenanceCtrlSev;
-        private readonly IPathMapperService _pathMapperSvc;
+        private readonly IMaintenanceControlService _maintenanceCtrlSvc;
+        private readonly IDirectoryMapperService _dirMapperSvc;
         private readonly OptionCollection _startupOptions;
 
         public MaintenanceMiddleware(RequestDelegate next,
-            IMaintenanceControlService maintenanceCtrlSev,
-            IPathMapperService pathMapperSvc,
+            IMaintenanceControlService maintenanceCtrlSvc,
+            IDirectoryMapperService dirMapperSvc,
             Action<IMiddlewareOptionsBuilder> optionsBuilderDelegate)
         {
             _next = next;
-            _maintenanceCtrlSev = maintenanceCtrlSev;
-            _pathMapperSvc = pathMapperSvc;
+            _maintenanceCtrlSvc = maintenanceCtrlSvc;
+            _dirMapperSvc = dirMapperSvc;
 
             _startupOptions = GetStartupOptions(optionsBuilderDelegate);
         }
@@ -43,7 +43,7 @@ namespace MaintenanceModeMiddleware
 
         private bool ShouldAllowRequest(HttpContext context)
         {
-            IMaintenanceState maintenanceState = _maintenanceCtrlSev
+            IMaintenanceState maintenanceState = _maintenanceCtrlSvc
                 .GetState();
 
             if (maintenanceState.IsMaintenanceOn)
@@ -62,7 +62,7 @@ namespace MaintenanceModeMiddleware
         {
             MaintenanceResponse response = GetLatestOptions()
                    .GetSingleOrDefault<IResponseHolder>()
-                   .GetResponse(_pathMapperSvc);
+                   .GetResponse(_dirMapperSvc);
 
             context
                 .Response
@@ -91,7 +91,7 @@ namespace MaintenanceModeMiddleware
         {
             OptionCollection latestOptions = null;
 
-            if (_maintenanceCtrlSev
+            if (_maintenanceCtrlSvc
                 .GetState() is IMiddlewareOptionsContainer optionsContainer)
             {
                 latestOptions = optionsContainer.MiddlewareOptions;
@@ -102,7 +102,7 @@ namespace MaintenanceModeMiddleware
 
         private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)
         {
-            var optionsBuilder = new MiddlewareOptionsBuilder(_pathMapperSvc);
+            var optionsBuilder = new MiddlewareOptionsBuilder(_dirMapperSvc);
             builderDelegate?.Invoke(optionsBuilder);
             return optionsBuilder.GetOptions();
         }

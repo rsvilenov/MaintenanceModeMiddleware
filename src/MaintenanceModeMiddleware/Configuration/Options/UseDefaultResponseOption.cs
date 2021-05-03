@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value.ToString();
         }
 
-        public MaintenanceResponse GetResponse(IPathMapperService pathMapperSvc)
+        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
         {
             using (Stream resStream = GetType()
                     .Assembly
