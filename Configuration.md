@@ -53,11 +53,11 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     app.UseMaintenance(options =>
     {
         options.BypassUser("Demo");
-        options.UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+        options.UseResponseFile("maintenance.html", EnvDirectory.WebRootPath);
         //... some other options
 
         // You can configure it using the fluid interface the configuration methods provide. Like this:
-        // options.BypassUser("Demo").UseResponseFile("maintenance.html", PathBaseDirectory.WebRootPath);
+        // options.BypassUser("Demo").UseResponseFile("maintenance.html", EnvDirectory.WebRootPath);
     });
 
     app.UseEndpoints(endpoints =>
@@ -82,14 +82,6 @@ Notice the first parameter of the call. It allows you to specify the duration of
 
 ### Override default configuration values
 
-If no options are passed to services.AddMaintenance(), the default configuration would be the same as if the following option was specififed:
-```csharp
-services.AddMaintenance(options =>
-{
-    options.UseDefaultStateStore();
-});
-```
-
 if no options are passed to app.UseMaintenance(), the default configuration would be the same as if the following options were specified:
 ```csharp
 app.UseMaintenance(options =>
@@ -102,8 +94,8 @@ app.UseMaintenance(options =>
 ```
 
 To override any of these default settings, you have two options:
-1. Call its method and pass your own values. This will cause the default setting to be ommitted in favour of the value you have specified.
-2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you don't want to allow only a specific user to retain access to the site, regardless of the roles he has.
+1. Call the bulder's method, which corresponds to the setting, and pass your own value. This will cause the default setting to be ommitted in favour of the value you have specified.
+2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you want to allow only a specific user to retain access to the site, regardless of the roles they have.
 
 ```csharp
 app.UseMaintenance(options =>
@@ -232,13 +224,13 @@ If the option is not specified, a default html response is served.
 Specify a file, containing the maintenance response. This file can be placed either in `ContentRootPath` or in `WebRootPath`.
 
 ```csharp
-    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath);
+    options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath);
 ```
 
 If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
 
 ```csharp
-    options.UseResponseFile("customResponse.html", PathBaseDirectory.WebRootPath, 10000);
+    options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath, 10000);
 ```
 
 If the option is not specified, a default html response is served.

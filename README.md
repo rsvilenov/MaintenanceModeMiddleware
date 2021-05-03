@@ -77,7 +77,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the `IStateStore` interface to `optoins.UseStateStore(yourStateStore)`.
+You can pass options to the control service as well. For example, you can specify that the maintenance state should be preserved after the app has been restarted. By default the state is stored in a json file. If you want to store the state somewhere else, for example in the database, you can pass your own implementation of the `IStateStore` interface to `optoins.UseStateStore<YourStateStore>()`.
 
 ### Basic use
 
@@ -121,7 +121,3 @@ public IActionResult ToggleMaintenanceMode()
 ### Options
 
 All the available options are decsribed in detail here [here](Configuration.md).
-
-### Thanks to
-
-This project was inspired from this blog [post](https://rimdev.io/middleware-madness-site-maintenance-in-aspnet-core/), written by Khalid Abuhakmeh abd Bill Boga.
