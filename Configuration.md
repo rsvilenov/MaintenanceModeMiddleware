@@ -29,7 +29,7 @@ call the method, associated with it. See examples of how to do this below.
 
 ### Configure in Startup
 
-To specify where the maintenance state is stored, so that it can be restored after a restart of the application, use the options, available in the extension method for registeratin of the control service. By default, the state is stored in a json file. To override that, you can implement your own state store and pass it as a parameter to UseStateStore(). For inspiration, take a look at the implementation of [FileStateStore](src/MaintenanceModeMiddleware/StateStore/FileStateStore.cs).
+To specify where the maintenance state is stored, so that it can be restored after a restart of the application, use the options, available in the extension method for registration of the control service. By default, the state is stored in a json file. To override that, you can implement your own state store and pass it as a parameter to UseStateStore(). For inspiration, take a look at the implementation of [FileStateStore](src/MaintenanceModeMiddleware/StateStore/FileStateStore.cs).
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -94,7 +94,7 @@ app.UseMaintenance(options =>
 ```
 
 To override any of these default settings, you have two options:
-1. Call the bulder's method, which corresponds to the setting, and pass your own value. This will cause the default setting to be ommitted in favour of the value you have specified.
+1. Call the builder's method, which corresponds to the setting, and pass your own value. This will cause the default setting to be omitted in favor of the value you have specified.
 2. Call `options.UseNoDefaultValues();` to tell the middleware not to apply any default values. Then you can specify only the settings you need. This is useful for example when you want to allow only a specific user to retain access to the site, regardless of the roles they have.
 
 ```csharp
@@ -113,14 +113,14 @@ app.UseMaintenance(options =>
 
 ### UseNoStateStore
 
-To disable the storing of the maintenance state, thus preventing the applicatin to being able to restore it upon restart, use this option.
+To disable the storing of the maintenance state, thus preventing the application to being able to restore it upon restart, use this option.
 
 ```csharp
     options.UseNoStateStore();
 ```
 ### UseStateStore
 
-To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this methid.
+To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this method.
 
 ```csharp
     options.UseStateStore<MyCustomStateStore>();
@@ -190,7 +190,7 @@ When we are in maintenance mode, we want to continue serving specific file types
     options.BypassFileExtension(".png");
 ```
 
-If no extensions are explicitly specified in `BypassFileExtension()` by the user, then these file extensions will remain accessable:
+If no extensions are explicitly specified in `BypassFileExtension()` by the user, then these file extensions will remain accessible:
 ```
 "css", "jpg", "png", "gif", "svg", "js"
 ```
