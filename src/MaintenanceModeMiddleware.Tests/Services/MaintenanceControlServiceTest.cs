@@ -23,7 +23,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create());
             
-            svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
+            svc.EnterMaintenance(DateTime.Now.AddSeconds(5));
 
             IMaintenanceState state = svc.GetState()
                 .ShouldNotBeNull();
@@ -38,7 +38,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create());
             
-            svc.EnterMaintanence(DateTime.Now.AddSeconds(5));
+            svc.EnterMaintenance(DateTime.Now.AddSeconds(5));
 
             IMaintenanceState state = svc.GetState();
             TimeSpan delay = state.ExpirationDate.Value - DateTime.Now;
@@ -54,7 +54,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create()); 
             
-            svc.EnterMaintanence();
+            svc.EnterMaintenance();
 
             IMaintenanceState state = svc.GetState();
             state.IsMaintenanceOn.ShouldBeTrue();
@@ -67,7 +67,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
                 FakeStateStoreService.Create()); 
-            Action testAction = () => svc.EnterMaintanence();
+            Action testAction = () => svc.EnterMaintenance();
 
             testAction.ShouldNotThrow();
             // the second call to EnterMaintenance should throw,
@@ -82,7 +82,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create());
 
-            svc.EnterMaintanence(null, options =>
+            svc.EnterMaintenance(null, options =>
             {
                 options.BypassUser(testUserName);
             });
@@ -106,7 +106,7 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create());
                 
-            svc.EnterMaintanence();
+            svc.EnterMaintenance();
 
             IMaintenanceState state = svc.GetState();
             IMiddlewareOptionsContainer optionsContainer = (IMiddlewareOptionsContainer)state;
@@ -122,9 +122,9 @@ namespace MaintenanceModeMiddleware.Tests.Services
                 _dirMapperSvc,
                 FakeStateStoreService.Create());
             
-            svc.EnterMaintanence();
+            svc.EnterMaintenance();
             bool isOnAfterEnter = svc.GetState().IsMaintenanceOn;
-            svc.LeaveMaintanence();
+            svc.LeaveMaintenance();
             bool isStillOnAfterLeave = svc.GetState().IsMaintenanceOn;
             
             isOnAfterEnter.ShouldBeTrue();
