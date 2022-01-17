@@ -19,7 +19,7 @@ namespace MaintenanceModeMiddleware.Services
             _stateStoreService = stateStoreService;
         }
 
-        public void EnterMaintanence(DateTime? expirationDate = null,
+        public void EnterMaintenance(DateTime? expirationDate = null,
             Action<IMiddlewareOptionsBuilder> middlewareOptionsBuilder = null)
         {
             if (_stateStoreService.GetState()
@@ -39,7 +39,7 @@ namespace MaintenanceModeMiddleware.Services
                 newMiddlewareOptions));
         }
 
-        public void LeaveMaintanence()
+        public void LeaveMaintenance()
         {
             _stateStoreService.SetState(new MaintenanceState(isMaintenanceOn: false));
         }
@@ -49,7 +49,7 @@ namespace MaintenanceModeMiddleware.Services
             MaintenanceState state = _stateStoreService.GetState();
             if (state.ExpirationDate <= DateTime.Now)
             {
-                LeaveMaintanence();
+                LeaveMaintenance();
 
                 state = new MaintenanceState(isMaintenanceOn: false);
             }
