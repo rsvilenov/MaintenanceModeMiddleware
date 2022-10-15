@@ -48,11 +48,11 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
         {
             if (vm.IsMaintenanceOn)
             {
-                _maintenanceCtrlSvc.LeaveMaintanence();
+                _maintenanceCtrlSvc.LeaveMaintenance();
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintanence(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null,
+                _maintenanceCtrlSvc.EnterMaintenance(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null,
                     options => options.BypassAllAuthenticatedUsers());
             }
 

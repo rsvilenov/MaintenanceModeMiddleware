@@ -92,7 +92,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         /// <summary>
         /// Specify that all logged in users should have access to the entire web application
-        /// after it has been put in maintanence mode.
+        /// after it has been put in maintenance mode.
         /// This does not apply only to the users, which had been already logged in when the application
         /// was put in maintenance mode. Since, if not specified otherwise, the Identity area remains
         /// accessible, other users may log in and still get the access to the web application.

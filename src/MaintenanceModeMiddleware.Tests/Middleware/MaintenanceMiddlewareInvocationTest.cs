@@ -96,7 +96,7 @@ namespace MaintenanceModeMiddleware.Tests
                 (optionsToOverrideFromSvc) =>
                 {
                     // this is an option, passed as a parameter to
-                    // the method EnterMaintanence() of MaintenanceControlService
+                    // the method EnterMaintenance() of MaintenanceControlService
                     optionsToOverrideFromSvc.BypassUrlPath(overridenPath);
                 });
 
