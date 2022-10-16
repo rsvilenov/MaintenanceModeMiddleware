@@ -38,7 +38,7 @@ namespace MaintenanceModeMiddleware
                 return;
             }
 
-            await WriteMaintenanceResponse(context);
+            await HandleMaintenanceResponse(context);
         }
 
         private bool ShouldAllowRequest(HttpContext context)
@@ -58,11 +58,32 @@ namespace MaintenanceModeMiddleware
             return true;
         }
 
-        private async Task WriteMaintenanceResponse(HttpContext context)
+        private async Task HandleMaintenanceResponse(HttpContext context)
         {
-            MaintenanceResponse response = GetLatestOptions()
-                   .GetSingleOrDefault<IResponseHolder>()
-                   .GetResponse(_dirMapperSvc);
+            IResponseHolder responseHolder = GetLatestOptions()
+                   .GetSingleOrDefault<IResponseHolder>();
+
+            if (responseHolder != null)
+            {
+                await WriteMaintenanceResponse(context, responseHolder);
+                return;
+            }
+
+            IRedirectInitializer redirectInitializer = GetLatestOptions()
+                .GetSingleOrDefault<IRedirectInitializer>();
+
+            context
+                .Response
+                .Redirect(redirectInitializer
+                    .RedirectPath
+                    .ToUriComponent());
+        }
+    
+
+        private async Task WriteMaintenanceResponse(HttpContext context, IResponseHolder responseHolder)
+        {
+            MaintenanceResponse response = responseHolder
+                                   .GetResponse(_dirMapperSvc);
 
             context
                 .Response

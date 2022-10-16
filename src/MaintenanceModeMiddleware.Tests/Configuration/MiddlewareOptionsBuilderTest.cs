@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Configuration.Builders;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Services;
@@ -172,6 +173,38 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             builder.GetOptions()
                 .GetSingleOrDefault<UseDefaultResponseOption>()
                 .ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void UseRedirect_WithValidUriPath_ValueShouldEqualInput()
+        {
+            string uriPath = "/test";
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+
+
+            builder.UseRedirect(uriPath);
+
+
+            var option = builder
+                .GetOptions()
+                .GetSingleOrDefault<IRedirectInitializer>();
+            option.RedirectPath.ToString().ShouldBe(uriPath);
+        }
+
+        [Theory]
+        [InlineData(null, typeof(ArgumentNullException))]
+        [InlineData("", typeof(ArgumentNullException))]
+        [InlineData("2013.05.29_14:33:41", typeof(ArgumentException))]
+        public void UseRedirect_WithInvalidUriPath_ShouldThrow(string uriPath, Type expectedException)
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+
+            Action testAction = () =>
+            {
+                builder.UseRedirect(uriPath);
+            };
+
+            testAction.ShouldThrow(expectedException);
         }
 
         [Fact]
@@ -470,7 +503,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Action assertAction = () => builder.GetOptions();
 
             assertAction.ShouldThrow<ArgumentException>()
-                .Message.ShouldStartWith("No response was specified.");
+                .Message.ShouldStartWith("No response or redirect was specified.");
         }
 
         [Fact]
@@ -510,6 +543,23 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             testAction.ShouldThrow<ArgumentException>()
                 .Message.ShouldStartWith("More than one response");
+
+        }
+
+        [Fact]
+        public void MiddlewareOptionsBuilder_WhenBothResponseAndRedirectOptionIsSet_GetOptionShouldThrow()
+        {
+            MiddlewareOptionsBuilder builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+            builder.UseDefaultResponse();
+            builder.UseRedirect("/test");
+
+            Action testAction = () =>
+            {
+                builder.GetOptions();
+            };
+
+            testAction.ShouldThrow<ArgumentException>()
+                .Message.ShouldStartWith("Both a response and a redirect were specified.");
 
         }
     }

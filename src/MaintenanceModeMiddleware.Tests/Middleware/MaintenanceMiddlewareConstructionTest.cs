@@ -59,7 +59,7 @@ namespace MaintenanceModeMiddleware.Tests
                     optionBuilderDelegate);
 
             testAction.ShouldThrow<ArgumentException>()
-                .Message.ShouldStartWith("No response was specified");
+                .Message.ShouldStartWith("No response or redirect was specified");
         }
 
         [Fact]

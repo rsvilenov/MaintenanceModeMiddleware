@@ -300,7 +300,7 @@ namespace MaintenanceModeMiddleware.Tests
             desk.CurrentHttpContext.Response.StatusCode
                 .ShouldBe(503);
             desk.CurrentHttpContext.Response.Headers
-                .Any(h => h.Key == "Retry-After").ShouldBeTrue();
+                .ShouldContain(h => h.Key == "Retry-After");
             desk.CurrentHttpContext.Response.ContentType
                 .ShouldBe("text/html");
             GetResponseString(desk.CurrentHttpContext)
@@ -327,8 +327,7 @@ namespace MaintenanceModeMiddleware.Tests
             desk.CurrentHttpContext.Response.StatusCode
                 .ShouldBe(503);
             desk.CurrentHttpContext.Response.Headers
-                .Any(h => h.Key == "Retry-After")
-                .ShouldBeTrue();
+                .ShouldContain(h => h.Key == "Retry-After");
             desk.CurrentHttpContext.Response.ContentType
                 .ShouldBe("text/plain");
             GetResponseString(desk.CurrentHttpContext)
@@ -374,12 +373,38 @@ namespace MaintenanceModeMiddleware.Tests
             desk.CurrentHttpContext.Response.StatusCode
                 .ShouldBe(503);
             desk.CurrentHttpContext.Response.Headers
-                .Any(h => h.Key == "Retry-After")
-                .ShouldBeTrue();
+                .ShouldContain(h => h.Key == "Retry-After");
             desk.CurrentHttpContext.Response.ContentType
                 .ShouldBe(expectedContentType);
             GetResponseString(desk.CurrentHttpContext)
                 .ShouldBe("test");
+        }
+
+        [Fact]
+        public async void Invoke_WithUseRedirect_ResponseShouldBeAppropriate()
+        {
+            string testUriPath = "/test";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UseRedirect(testUriPath);
+                });
+
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(302);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContain(h => h.Key == "Location");
+            desk.CurrentHttpContext.Response.Headers["Location"]
+                .ToString()
+                .ShouldBe(testUriPath);
         }
 
 

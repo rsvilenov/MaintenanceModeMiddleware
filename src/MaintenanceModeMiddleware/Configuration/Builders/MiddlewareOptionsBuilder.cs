@@ -3,6 +3,7 @@ using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -93,6 +94,21 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             _options.Add(new UseDefaultResponseOption
             {
                 Value = true
+            });
+
+            return this;
+        }
+
+        public IMiddlewareOptionsBuilder UseRedirect(PathString redirectPath)
+        {
+            if (!redirectPath.HasValue)
+            {
+                throw new ArgumentNullException($"{nameof(redirectPath)} is empty.");
+            }
+
+            _options.Add(new UseRedirectOption
+            {
+                Value = redirectPath
             });
 
             return this;
@@ -272,23 +288,23 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         internal void FillEmptyOptionsWithDefault()
         {
-            if (!_options.GetAll<BypassFileExtensionOption>().Any())
+            if (!_options.Any<BypassFileExtensionOption>())
             {
                 BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
             }
 
-            if (!_options.GetAll<BypassUrlPathOption>().Any())
+            if (!_options.Any<BypassUrlPathOption>())
             {
                 BypassUrlPath("/Identity");
             }
             
-            if (!_options.GetAll<BypassUserRoleOption>().Any())
+            if (!_options.Any<BypassUserRoleOption>())
             {
                 BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
-            if (!_options.GetAll<ResponseFromFileOption>().Any()
-                && !_options.GetAll<ResponseOption>().Any())
+            if (!_options.Any<IResponseHolder>()
+                && !_options.Any<IRedirectInitializer>())
             {
                 UseDefaultResponse();
             }
@@ -314,9 +330,17 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             IEnumerable<IResponseHolder> responseHolders = _options
                 .GetAll<IResponseHolder>();
 
-            if (!responseHolders.Any())
+            IEnumerable<IRedirectInitializer> redirectInitializers = _options
+                .GetAll<IRedirectInitializer>();
+
+            if (!responseHolders.Any() && ! redirectInitializers.Any())
             {
-                throw new ArgumentException("No response was specified.");
+                throw new ArgumentException("No response or redirect was specified.");
+            }
+
+            if (responseHolders.Any() && redirectInitializers.Any())
+            {
+                throw new ArgumentException("Both a response and a redirect were specified.");
             }
 
             if (responseHolders.Count() > 1)
