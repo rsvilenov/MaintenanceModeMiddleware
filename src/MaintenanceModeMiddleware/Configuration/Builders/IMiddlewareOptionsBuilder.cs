@@ -58,6 +58,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseDefaultResponse();
 
 
+        /// <summary>
+        /// Redirect to a relative URI path when the application is in maintenance mode.
+        /// Warning: When this method is used, the response code, returned from the middleware,
+        /// will not be 503 but 302 instead.
+        /// </summary>
+        /// <param name="path">The URI path to redirect to.</param>
+        /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
         IMiddlewareOptionsBuilder UseRedirect(PathString path);
 
         /// <summary>
