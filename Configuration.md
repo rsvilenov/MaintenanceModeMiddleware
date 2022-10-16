@@ -234,3 +234,13 @@ If you wish to specify a custom Retry-After interval for the 503 response code, 
 ```
 
 If the option is not specified, a default html response is served.
+
+### UseRedirect
+
+Redirect to a relative URI path when the application is in maintenance mode.
+
+:warning: **Warning:** When this method is used, the response code, returned from the middleware, will not be 503 but 302 instead.
+
+```csharp
+    options.UseRedirect("/SomeController/SomeAction");
+```
