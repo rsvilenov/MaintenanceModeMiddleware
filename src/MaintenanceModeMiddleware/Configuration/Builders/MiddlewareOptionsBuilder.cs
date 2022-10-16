@@ -288,24 +288,23 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         internal void FillEmptyOptionsWithDefault()
         {
-            if (!_options.GetAll<BypassFileExtensionOption>().Any())
+            if (!_options.Any<BypassFileExtensionOption>())
             {
                 BypassFileExtensions(new string[] { "css", "jpg", "png", "gif", "svg", "js" });
             }
 
-            if (!_options.GetAll<BypassUrlPathOption>().Any())
+            if (!_options.Any<BypassUrlPathOption>())
             {
                 BypassUrlPath("/Identity");
             }
             
-            if (!_options.GetAll<BypassUserRoleOption>().Any())
+            if (!_options.Any<BypassUserRoleOption>())
             {
                 BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
-            if (!_options.GetAll<ResponseFromFileOption>().Any()
-                && !_options.GetAll<ResponseOption>().Any()
-                && !_options.GetAll<IRedirectInitializer>().Any())
+            if (!_options.Any<IResponseHolder>()
+                && !_options.Any<IRedirectInitializer>())
             {
                 UseDefaultResponse();
             }
