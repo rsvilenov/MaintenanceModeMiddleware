@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Enums;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -55,6 +56,9 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// </summary>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
         IMiddlewareOptionsBuilder UseDefaultResponse();
+
+
+        IMiddlewareOptionsBuilder UseRedirect(PathString path);
 
         /// <summary>
         /// Specify which user should retain access to the web application after
