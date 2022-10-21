@@ -171,7 +171,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             builder.UseDefaultResponse();
             
             builder.GetOptions()
-                .GetSingleOrDefault<UseDefaultResponseOption>()
+                .GetSingleOrDefault<DefaultResponseOption>()
                 .ShouldNotBeNull();
         }
 
@@ -188,7 +188,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             var option = builder
                 .GetOptions()
                 .GetSingleOrDefault<IRedirectInitializer>();
-            option.RedirectPath.ToString().ShouldBe(uriPath);
+            option.RedirectLocation.ShouldBe(uriPath);
         }
 
         [Theory]

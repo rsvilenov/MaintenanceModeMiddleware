@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class UseDefaultResponseOption : Option<bool>, IResponseHolder
+    internal class DefaultResponseOption : Option<bool>, IResponseHolder
     {
         private const int DEFAULT_503_RETRY_INTERVAL = 5300;
 

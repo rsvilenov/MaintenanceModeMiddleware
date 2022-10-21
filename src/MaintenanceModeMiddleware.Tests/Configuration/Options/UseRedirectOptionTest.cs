@@ -11,7 +11,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         public void LoadFromString_WithValidInput_ValueShouldEqualInput()
         {
             var urlPath = $"/{Guid.NewGuid()}";
-            var option = new UseRedirectOption();
+            var option = new PathRedirectOption();
 
             option.LoadFromString(urlPath);
 
@@ -22,7 +22,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         public void LoadFromString_WithValidInput_StringValueShouldEqualInput()
         {
             var urlPath = $"/{Guid.NewGuid()}";
-            var option = new UseRedirectOption();
+            var option = new PathRedirectOption();
 
             option.LoadFromString(urlPath);
 
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("2013.05.29_14:33:41", typeof(ArgumentException))]
         public void LoadFromString_WithInvalidInput_ShouldThrow(string str, Type expectedException)
         {
-            var option = new UseRedirectOption();
+            var option = new PathRedirectOption();
             Action testAction = () => option.LoadFromString(str);
 
             testAction.ShouldThrow(expectedException);

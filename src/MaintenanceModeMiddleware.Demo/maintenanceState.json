@@ -1,5 +1,50 @@
 {
   "ExpirationDate": null,
-  "IsMaintenanceOn": false,
-  "MiddlewareOptions": null
+  "IsMaintenanceOn": true,
+  "MiddlewareOptions": [
+    {
+      "TypeName": "BypassAllAuthenticatedUsersOption",
+      "StringValue": "True"
+    },
+    {
+      "TypeName": "PathRedirectOption",
+      "StringValue": "/Home/Maintenance[::]0[::]True"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "css"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "jpg"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "png"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "gif"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "svg"
+    },
+    {
+      "TypeName": "BypassFileExtensionOption",
+      "StringValue": "js"
+    },
+    {
+      "TypeName": "BypassUrlPathOption",
+      "StringValue": "/Identity;Ordinal"
+    },
+    {
+      "TypeName": "BypassUserRoleOption",
+      "StringValue": "Admin"
+    },
+    {
+      "TypeName": "BypassUserRoleOption",
+      "StringValue": "Administrator"
+    }
+  ]
 }
