@@ -22,7 +22,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             Value = new PathRedirectData
             {
                 Path = new PathString(parts[0]),
-                Code503RetryInterval = int.Parse(parts[1]),
+                Code503RetryInterval = uint.Parse(parts[1]),
                 Set503ResponseCode = bool.Parse(parts[2])
             };
         }

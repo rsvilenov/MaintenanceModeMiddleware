@@ -19,7 +19,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
         IMiddlewareOptionsBuilder UseResponseFromFile(string relativePath,
             EnvDirectory baseDir,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Specify a response to be served to the users, trying to access the web application
@@ -33,7 +33,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseResponse(string response,
             ResponseContentType contentType,
             Encoding encoding,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Specify a response to be served to the users, trying to access the web application
@@ -47,7 +47,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseResponse(byte[] responseBytes,
             ResponseContentType contentType,
             Encoding encoding,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Serve the built-in html response to the users, trying to access the application

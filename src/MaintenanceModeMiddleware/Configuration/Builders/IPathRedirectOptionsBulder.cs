@@ -12,6 +12,6 @@
         /// Specify the retry interval for the response code of 503.
         /// </summary>
         /// <param name="retryInterval">The interval in milliseconds</param>
-        void Use503CodeRetryInterval(int retryInterval);
+        void Use503CodeRetryInterval(uint retryInterval);
     }
 }

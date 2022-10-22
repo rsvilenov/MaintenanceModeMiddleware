@@ -29,7 +29,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseResponseFromFile(string relativePath, 
             EnvDirectory baseDir, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -52,7 +52,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         public IMiddlewareOptionsBuilder UseResponse(string response, 
             ResponseContentType contentType, 
             Encoding encoding, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(response))
             {
@@ -65,7 +65,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         public IMiddlewareOptionsBuilder UseResponse(byte[] responseBytes, 
             ResponseContentType contentType, 
             Encoding encoding, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (responseBytes == null)
             {
@@ -305,7 +305,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseNoDefaultValues()
         {
-            _options.Add(new UseNoDefaultValuesOption
+            _options.Add(new NoDefaultValuesOption
             {
                 Value = true
             });
@@ -340,7 +340,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         {
             if (!_areDefaultOptionsFilledIn
                 && _options
-                    .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                    .GetSingleOrDefault<NoDefaultValuesOption>()
                     ?.Value != true)
             {
                 FillEmptyOptionsWithDefault();

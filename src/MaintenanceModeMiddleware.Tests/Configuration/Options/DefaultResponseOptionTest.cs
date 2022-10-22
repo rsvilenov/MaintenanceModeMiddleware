@@ -6,7 +6,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration.Options
 {
-    public class UseDefaultResponseOptionTest
+    public class DefaultResponseOptionTest
     {
         [Theory]
         [InlineData("True", true)]

@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
@@ -15,19 +13,26 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value;
         }
 
-        
         public override void LoadFromString(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            if (!Uri.IsWellFormedUriString(str, UriKind.RelativeOrAbsolute))
+            {
+                throw new ArgumentException("The restored url is not well formatted.", paramName: nameof(str));
+            }
+
             Value = str;
         }
 
         public bool IsMatch(HttpContext context)
         {
-            string fullUrl = UriHelper.GetDisplayUrl(context.Request);
-
-            return fullUrl
+            return UriHelper
+                .GetDisplayUrl(context.Request)
                 .Equals(Value, StringComparison.InvariantCultureIgnoreCase);
         }
-
     }
 }
