@@ -6,6 +6,6 @@ namespace MaintenanceModeMiddleware.Configuration.Data
     {
         public PathString Path { get; set; }
         public uint Code503RetryInterval { get; set; }
-        public bool Set503ResponseCode { get; set; }
+        public bool Set503StatusCode { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         {
             _data = new PathRedirectData
             {
-                Set503ResponseCode = true,
+                Set503StatusCode = true,
                 Code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL
             };
         }
@@ -23,17 +23,17 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             _isCustomRetryIntervalSpecified = true;
         }
 
-        public void UseDefaultResponseCode()
+        public void PreserveStatusCode()
         {
-            _data.Set503ResponseCode = false;
+            _data.Set503StatusCode = false;
         }
 
         public PathRedirectData GetPathRedirectData()
         {
-            if (!_data.Set503ResponseCode
+            if (!_data.Set503StatusCode
                 && _isCustomRetryIntervalSpecified)
             {
-                throw new InvalidOperationException($"{nameof(Use503CodeRetryInterval)} cannot be used along with {nameof(UseDefaultResponseCode)}.");
+                throw new InvalidOperationException($"{nameof(Use503CodeRetryInterval)} cannot be used along with {nameof(PreserveStatusCode)}.");
             }
 
             return _data;
