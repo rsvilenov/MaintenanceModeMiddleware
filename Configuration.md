@@ -7,9 +7,6 @@ This document describes in detail how to configure this component.
     - [Configure in Startup](#Configure-in-Startup)
     - [Configure by the control service](#Configure-by-the-control-service)
     - [Override default configuration values](#Override-default-configuration-values)
-- [Options for the control service](#Options-for-the-control-service)
-    - [UseNoStateStore](#UseNoStateStore)
-    - [UseStateStore](#UseStateStore)
 - [Options for the middleware](#Options-for-the-middleware)
     - [BypassAllAuthenticatedUsers](#BypassAllAuthenticatedUsers)
     - [BypassUser](#BypassUser)
@@ -20,6 +17,9 @@ This document describes in detail how to configure this component.
     - [UseResponseFile](#UseResponseFile)
     - [UseRedirect](#UseRedirect)
     - [UsePathRedirect](#UsePathRedirect)
+- [Options for the control service](#Options-for-the-control-service)
+    - [UseNoStateStore](#UseNoStateStore)
+    - [UseStateStore](#UseStateStore)
 
 
 
@@ -110,30 +110,6 @@ app.UseMaintenance(options =>
     options.UseDefaultResponse();
 });
 ```
-
-## Options for the control service
-
-### UseNoStateStore
-
-To disable the storing of the maintenance state, thus preventing the application to being able to restore it upon restart, use this option.
-
-```csharp
-    options.UseNoStateStore();
-```
-### UseStateStore
-
-To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this method.
-
-```csharp
-    options.UseStateStore<MyCustomStateStore>();
-```
-
-To pass an already constructed object of a custom state store, call the method like this:
-
-```csharp
-    options.UseStateStore(myCustomStateStore);
-```
-
 
 ## Options for the middleware
 
@@ -270,3 +246,28 @@ The default "Retry-After" interval is 5300 milliseconds. You can change it like 
 ```
 
 `Use503CodeRetryInterval(uint)` is incompatible with `PreserveStatusCode()`. Using both options at the same time will produce an InvalidOperationException.
+
+## Options for the control service
+
+### UseNoStateStore
+
+To disable the storing of the maintenance state, thus preventing the application to being able to restore it upon restart, use this option.
+
+```csharp
+    options.UseNoStateStore();
+```
+### UseStateStore
+
+To pass a custom implementation of [IStateStore](src/MaintenanceModeMiddleware/StateStore/IStateStore.cs), call this method.
+
+```csharp
+    options.UseStateStore<MyCustomStateStore>();
+```
+
+To pass an already constructed object of a custom state store, call the method like this:
+
+```csharp
+    options.UseStateStore(myCustomStateStore);
+```
+
+
