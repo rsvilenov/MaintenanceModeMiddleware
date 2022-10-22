@@ -18,6 +18,8 @@ This document describes in detail how to configure this component.
     - [BypassFileExtension](#BypassFileExtension)
     - [UseResponse](#UseResponse)
     - [UseResponseFile](#UseResponseFile)
+    - [UseRedirect](#UseRedirect)
+    - [UsePathRedirect](#UsePathRedirect)
 
 
 
