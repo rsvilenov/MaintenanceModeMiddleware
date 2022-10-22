@@ -15,7 +15,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
             PathRedirectData data = builder.GetPathRedirectData();
                 
-            data.Set503ResponseCode.ShouldBeTrue();
+            data.Set503StatusCode.ShouldBeTrue();
         }
 
         [Fact]
@@ -30,14 +30,14 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void UseDefaultResponseCode_WhenCalled_GetPathRedirectDataSet503ShouldBeFalse()
+        public void PreserveStatusCode_WhenCalled_GetPathRedirectDataSet503ShouldBeFalse()
         {
             PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
 
-            builder.UseDefaultResponseCode();
+            builder.PreserveStatusCode();
 
             builder.GetPathRedirectData()
-                .Set503ResponseCode
+                .Set503StatusCode
                 .ShouldBeFalse();
         }
 
@@ -55,11 +55,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Fact]
-        public void WhenCalled_UseDefaultResponseCode_And_Use503CodeRetryInterval_ShouldThrow()
+        public void WhenCalled_PreserveStatusCode_And_Use503CodeRetryInterval_ShouldThrow()
         {
             const uint retryInterval = 123;
             PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
-            builder.UseDefaultResponseCode();
+            builder.PreserveStatusCode();
             builder.Use503CodeRetryInterval(retryInterval);
 
             Action testAction = () => builder.GetPathRedirectData();

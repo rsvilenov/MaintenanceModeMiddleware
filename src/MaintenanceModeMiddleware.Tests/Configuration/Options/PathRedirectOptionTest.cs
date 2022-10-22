@@ -13,25 +13,25 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         public void LoadFromString_WithValidInput_ValueShouldEqualInput()
         {
             uint interval = 5000;
-            bool set503ResponseCode = true;
+            bool set503StatusCode = true;
             string path = $"/{Guid.NewGuid()}";
-            var serializedOption = $"{path}{PARTS_SEPARATOR}{interval}{PARTS_SEPARATOR}{set503ResponseCode}";
+            var serializedOption = $"{path}{PARTS_SEPARATOR}{interval}{PARTS_SEPARATOR}{set503StatusCode}";
             var option = new PathRedirectOption();
 
             option.LoadFromString(serializedOption);
 
             option.Value.Path.ToString().ShouldBe(path);
             option.Value.Code503RetryInterval.ShouldBe(interval);
-            option.Value.Set503ResponseCode.ShouldBe(set503ResponseCode);
+            option.Value.Set503StatusCode.ShouldBe(set503StatusCode);
         }
 
         [Fact]
         public void LoadFromString_WithValidInput_StringValueShouldEqualInput()
         {
             int interval = 5000;
-            bool set503ResponseCode = true;
+            bool set503StatusCode = true;
             string path = $"/{Guid.NewGuid()}";
-            var serializedOption = $"{path}{PARTS_SEPARATOR}{interval}{PARTS_SEPARATOR}{set503ResponseCode}";
+            var serializedOption = $"{path}{PARTS_SEPARATOR}{interval}{PARTS_SEPARATOR}{set503StatusCode}";
             var option = new PathRedirectOption();
 
             option.LoadFromString(serializedOption);

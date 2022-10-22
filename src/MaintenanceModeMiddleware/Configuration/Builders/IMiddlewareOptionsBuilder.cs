@@ -63,7 +63,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// razor page or action for generating the maintenance mode response.
         /// When the response is generated, the middleware will automatically change the response code to 503.
         /// Changing of the response code can be disabled with the option builder method 
-        /// <see cref="IPathRedirectOptionsBulder.UseDefaultResponseCode()"/>.
+        /// <see cref="IPathRedirectOptionsBulder.PreserveStatusCode()"/>.
         /// </summary>
         /// <param name="path">The relative URI path to the razor page</param>
         /// <param name="options">An option builder for configuring the redirect behavior.</param>

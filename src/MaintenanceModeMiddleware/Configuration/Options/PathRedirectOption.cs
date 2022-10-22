@@ -23,13 +23,13 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             {
                 Path = new PathString(parts[0]),
                 Code503RetryInterval = uint.Parse(parts[1]),
-                Set503ResponseCode = bool.Parse(parts[2])
+                Set503StatusCode = bool.Parse(parts[2])
             };
         }
 
         public override string GetStringValue()
         {
-            return $"{Value.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.Set503ResponseCode}";
+            return $"{Value.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.Set503StatusCode}";
         }
 
         public bool IsMatch(HttpContext context)

@@ -56,7 +56,7 @@ namespace MaintenanceModeMiddleware
             var matcher = (IAllowedRequestMatcher)pathRedirectOption;
 
             if (matcher.IsMatch(context)
-                && pathRedirectOption.Value.Set503ResponseCode)
+                && pathRedirectOption.Value.Set503StatusCode)
             {
                 context
                     .Response
