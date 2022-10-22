@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace MaintenanceModeMiddleware.Configuration
+﻿namespace MaintenanceModeMiddleware.Configuration
 {
     internal interface IRedirectInitializer : IOption
     {
-        PathString RedirectPath { get; }
+        string RedirectLocation { get; }
     }
 }

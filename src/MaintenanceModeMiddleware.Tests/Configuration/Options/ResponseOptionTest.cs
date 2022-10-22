@@ -96,7 +96,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         public void LoadFromString_WithValidRetryAfter_ValueRetryAfterShouldEqualInput()
         {
             const string input = "Text;65001;5300;maintenance mode";
-            const int expectedValue = 5300;
+            const uint expectedValue = 5300;
             var option = new ResponseOption();
             
             option.LoadFromString(input);

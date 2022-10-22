@@ -113,7 +113,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [Theory]
         [InlineData("ContentRootPath;file.txt;5300", 5300)]
         [InlineData("ContentRootPath;file.txt;2200", 2200)]
-        public void LoadFromString_WithValidRetryTimeout_RetryTimeoutInValueShouldMatch(string input, int expectedTimeout)
+        public void LoadFromString_WithValidRetryTimeout_RetryTimeoutInValueShouldMatch(string input, uint expectedTimeout)
         {
             var option = new ResponseFromFileOption();
             
@@ -138,7 +138,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         {
             string filePath = "some.txt";
             EnvDirectory baseDir = EnvDirectory.ContentRootPath;
-            int code503RetryInterval = 2000;
+            uint code503RetryInterval = 2000;
 
             ResponseFromFileOption opt =
                 new ResponseFromFileOption(filePath, baseDir, code503RetryInterval);

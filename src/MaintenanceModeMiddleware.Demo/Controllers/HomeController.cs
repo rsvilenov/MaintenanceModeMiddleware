@@ -53,7 +53,12 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             else
             {
                 _maintenanceCtrlSvc.EnterMaintenance(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null,
-                    options => options.BypassAllAuthenticatedUsers());
+                    options =>
+                    {
+                        options.BypassAllAuthenticatedUsers();
+                        // uncomment this to use custom maintenance response path/action
+                        //options.UsePathRedirect("/Home/Maintenance");
+                    });
             }
 
             return RedirectToAction(nameof(Index));
@@ -87,6 +92,16 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        /// <summary>
+        /// This is an example action to use with
+        /// options.UsePathRedirect("/Home/Maintenance")
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Maintenance()
+        {
+            return View();
         }
     }
 }

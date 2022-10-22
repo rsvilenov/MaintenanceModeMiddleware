@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Data;
+using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Http;
@@ -35,10 +36,37 @@ namespace MaintenanceModeMiddleware
             if (ShouldAllowRequest(context))
             {
                 await _next.Invoke(context);
+                PostProcessResponse(context);
                 return;
             }
 
             await HandleMaintenanceResponse(context);
+        }
+
+        private void PostProcessResponse(HttpContext context)
+        {
+            PathRedirectOption pathRedirectOption = GetLatestOptions()
+                .GetSingleOrDefault<PathRedirectOption>();
+
+            if (pathRedirectOption == null)
+            {
+                return;
+            }
+
+            var matcher = (IAllowedRequestMatcher)pathRedirectOption;
+
+            if (matcher.IsMatch(context)
+                && pathRedirectOption.Value.Set503ResponseCode)
+            {
+                context
+                    .Response
+                    .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+
+                context
+                    .Response
+                    .Headers
+                    .Add("Retry-After", pathRedirectOption.Value.Code503RetryInterval.ToString());
+            }
         }
 
         private bool ShouldAllowRequest(HttpContext context)
@@ -75,8 +103,7 @@ namespace MaintenanceModeMiddleware
             context
                 .Response
                 .Redirect(redirectInitializer
-                    .RedirectPath
-                    .ToUriComponent());
+                    .RedirectLocation);
         }
     
 

@@ -29,7 +29,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseResponseFromFile(string relativePath, 
             EnvDirectory baseDir, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(relativePath))
             {
@@ -52,7 +52,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         public IMiddlewareOptionsBuilder UseResponse(string response, 
             ResponseContentType contentType, 
             Encoding encoding, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (string.IsNullOrEmpty(response))
             {
@@ -65,7 +65,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         public IMiddlewareOptionsBuilder UseResponse(byte[] responseBytes, 
             ResponseContentType contentType, 
             Encoding encoding, 
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL)
         {
             if (responseBytes == null)
             {
@@ -91,7 +91,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseDefaultResponse()
         {
-            _options.Add(new UseDefaultResponseOption
+            _options.Add(new DefaultResponseOption
             {
                 Value = true
             });
@@ -99,16 +99,43 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
-        public IMiddlewareOptionsBuilder UseRedirect(PathString redirectPath)
+
+        public IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBulder> options = null)
         {
-            if (!redirectPath.HasValue)
+            if (!path.HasValue)
             {
-                throw new ArgumentNullException($"{nameof(redirectPath)} is empty.");
+                throw new ArgumentNullException($"{nameof(path)} is empty.");
             }
 
-            _options.Add(new UseRedirectOption
+            PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
+            options?.Invoke(builder);
+
+            PathRedirectData data = builder.GetPathRedirectData();
+            data.Path = path;
+
+            _options.Add(new PathRedirectOption
             {
-                Value = redirectPath
+                Value = data
+            });
+
+            return this;
+        }
+
+        public IMiddlewareOptionsBuilder UseRedirect(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
+            if (!Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
+            {
+                throw new ArgumentException("The passed url is not well formatted.", paramName: nameof(url));
+            }
+
+            _options.Add(new RedirectOption
+            {
+                Value = url
             });
 
             return this;
@@ -278,7 +305,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseNoDefaultValues()
         {
-            _options.Add(new UseNoDefaultValuesOption
+            _options.Add(new NoDefaultValuesOption
             {
                 Value = true
             });
@@ -313,7 +340,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         {
             if (!_areDefaultOptionsFilledIn
                 && _options
-                    .GetSingleOrDefault<UseNoDefaultValuesOption>()
+                    .GetSingleOrDefault<NoDefaultValuesOption>()
                     ?.Value != true)
             {
                 FillEmptyOptionsWithDefault();

@@ -19,7 +19,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
         IMiddlewareOptionsBuilder UseResponseFromFile(string relativePath,
             EnvDirectory baseDir,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Specify a response to be served to the users, trying to access the web application
@@ -33,7 +33,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseResponse(string response,
             ResponseContentType contentType,
             Encoding encoding,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Specify a response to be served to the users, trying to access the web application
@@ -47,7 +47,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseResponse(byte[] responseBytes,
             ResponseContentType contentType,
             Encoding encoding,
-            int code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            uint code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL);
 
         /// <summary>
         /// Serve the built-in html response to the users, trying to access the application
@@ -59,13 +59,25 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
 
         /// <summary>
-        /// Redirect to a relative URI path when the application is in maintenance mode.
+        /// Redirect to a relative URI path. This is useful when you want to use a custom 
+        /// razor page or action for generating the maintenance mode response.
+        /// When the response is generated, the middleware will automatically change the response code to 503.
+        /// Changing of the response code can be disabled with the option builder method 
+        /// <see cref="IPathRedirectOptionsBulder.UseDefaultResponseCode()"/>.
+        /// </summary>
+        /// <param name="path">The relative URI path to the razor page</param>
+        /// <param name="options">An option builder for configuring the redirect behavior.</param>
+        /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
+        IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBulder> options = null);
+
+        /// <summary>
+        /// Redirect to a URL when the application is in maintenance mode.
         /// Warning: When this method is used, the response code, returned from the middleware,
         /// will not be 503 but 302 instead.
         /// </summary>
-        /// <param name="path">The URI path to redirect to.</param>
+        /// <param name="url">The URL to redirect to.</param>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
-        IMiddlewareOptionsBuilder UseRedirect(PathString path);
+        IMiddlewareOptionsBuilder UseRedirect(string url);
 
         /// <summary>
         /// Specify which user should retain access to the web application after

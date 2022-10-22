@@ -12,7 +12,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         internal ResponseFromFileOption() { }
 
-        internal ResponseFromFileOption(string filePath, EnvDirectory baseDir, int code503RetryInterval)
+        internal ResponseFromFileOption(string filePath, EnvDirectory baseDir, uint code503RetryInterval)
         {
             SetValue(filePath, baseDir, code503RetryInterval);
         }
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new ArgumentException($"Unknown base directory type {parts[0]}");
             }
 
-            if (!int.TryParse(parts[2], out int code503RetryInterval))
+            if (!uint.TryParse(parts[2], out uint code503RetryInterval))
             {
                 throw new ArgumentException("Unable to parse the code 503 retry interval.");
             }
@@ -43,7 +43,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             SetValue(parts[1], baseDir, code503RetryInterval);
         }
 
-        private void SetValue(string filePath, EnvDirectory baseDir, int code503RetryInterval)
+        private void SetValue(string filePath, EnvDirectory baseDir, uint code503RetryInterval)
         {
             if (!TryGetContentType(filePath, out _))
             {

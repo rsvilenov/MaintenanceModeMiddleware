@@ -33,7 +33,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 throw new FormatException($"The code page {parts[1]} is not a valid integer.");
             }
 
-            if (!int.TryParse(parts[2], out int code503RetryInterval))
+            if (!uint.TryParse(parts[2], out uint code503RetryInterval))
             {
                 throw new ArgumentException("Unable to parse the code 503 retry interval.");
             }

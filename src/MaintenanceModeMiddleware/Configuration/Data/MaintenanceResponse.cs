@@ -9,7 +9,7 @@ namespace MaintenanceModeMiddleware.Configuration.Data
         public ResponseContentType ContentType { get; set; }
         public Encoding ContentEncoding { get; set; }
         public byte[] ContentBytes { get; set; }
-        public int Code503RetryInterval { get; set; } = 5300;
+        public uint Code503RetryInterval { get; set; }
 
         public string GetContentTypeString()
         {

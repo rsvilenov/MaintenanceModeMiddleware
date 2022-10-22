@@ -171,37 +171,69 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             builder.UseDefaultResponse();
             
             builder.GetOptions()
-                .GetSingleOrDefault<UseDefaultResponseOption>()
+                .GetSingleOrDefault<DefaultResponseOption>()
                 .ShouldNotBeNull();
         }
 
         [Fact]
-        public void UseRedirect_WithValidUriPath_ValueShouldEqualInput()
+        public void UseRedirect_WithValidUrl_ValueShouldEqualInput()
         {
-            string uriPath = "/test";
+            string url = "http://test.com/test";
             var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
 
-            builder.UseRedirect(uriPath);
+            builder.UseRedirect(url);
 
 
             var option = builder
                 .GetOptions()
                 .GetSingleOrDefault<IRedirectInitializer>();
-            option.RedirectPath.ToString().ShouldBe(uriPath);
+            option.RedirectLocation.ShouldBe(url);
         }
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
         [InlineData("", typeof(ArgumentNullException))]
         [InlineData("2013.05.29_14:33:41", typeof(ArgumentException))]
-        public void UseRedirect_WithInvalidUriPath_ShouldThrow(string uriPath, Type expectedException)
+        public void UseRedirect_WithInvalidUrl_ShouldThrow(string url, Type expectedException)
         {
             var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
             Action testAction = () =>
             {
-                builder.UseRedirect(uriPath);
+                builder.UseRedirect(url);
+            };
+
+            testAction.ShouldThrow(expectedException);
+        }
+
+        [Fact]
+        public void UsePathRedirect_WithValidUriPath_ValueShouldEqualInput()
+        {
+            string uriPath = "/test";
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+
+
+            builder.UsePathRedirect(uriPath);
+
+
+            var option = builder
+                .GetOptions()
+                .GetSingleOrDefault<IRedirectInitializer>();
+            option.RedirectLocation.ShouldBe(uriPath);
+        }
+
+        [Theory]
+        [InlineData(null, typeof(ArgumentNullException))]
+        [InlineData("", typeof(ArgumentNullException))]
+        [InlineData("2013.05.29_14:33:41", typeof(ArgumentException))]
+        public void UsePathRedirect_WithInvalidUriPath_ShouldThrow(string uriPath, Type expectedException)
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+
+            Action testAction = () =>
+            {
+                builder.UsePathRedirect(uriPath);
             };
 
             testAction.ShouldThrow(expectedException);

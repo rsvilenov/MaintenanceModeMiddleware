@@ -383,7 +383,7 @@ namespace MaintenanceModeMiddleware.Tests
         [Fact]
         public async void Invoke_WithUseRedirect_ResponseShouldBeAppropriate()
         {
-            string testUriPath = "/test";
+            string testUriPath = "http://test.com/test";
             MiddlewareTestDesk desk = GetTestDesk(
                 (httpContext) =>
                 {
@@ -407,6 +407,132 @@ namespace MaintenanceModeMiddleware.Tests
                 .ShouldBe(testUriPath);
         }
 
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_RedirectResponseShouldBeAppropriate()
+        {
+            string testUriPath = "/test";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath);
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(302);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContain(h => h.Key == "Location");
+            desk.CurrentHttpContext.Response.Headers["Location"]
+                .ToString()
+                .ShouldBe(testUriPath);
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_ResponseAfterRedirectShouldBeAppropriate()
+        {
+            const string testUriPath = "/test";
+            const int defaultStatusCode = 200;
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath);
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Request.Path = testUriPath;
+            desk.CurrentHttpContext.Response.StatusCode = defaultStatusCode;
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(503);
+            desk.CurrentHttpContext.Request.Path.ToString()
+                .ShouldBe(testUriPath);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContain(h => h.Key == "Retry-After");
+            desk.CurrentHttpContext.Response.Headers["Retry-After"]
+                .ToString()
+                .ShouldBe(DefaultValues.DEFAULT_503_RETRY_INTERVAL.ToString());
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_And_UseDefaultResponseCode_ResponseShouldBeAppropriate()
+        {
+            const string testUriPath = "/test";
+            const int defaultStatusCode = 200;
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath, redirectOptionsBuilder =>
+                        redirectOptionsBuilder.UseDefaultResponseCode());
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Request.Path = testUriPath;
+            desk.CurrentHttpContext.Response.StatusCode = defaultStatusCode;
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(defaultStatusCode);
+            desk.CurrentHttpContext.Request.Path.ToString()
+                .ShouldBe(testUriPath);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldNotContain(h => h.Key == "Retry-After");
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_And_Use503CodeRetryInterval_ResponseShouldBeAppropriate()
+        {
+            const int retryInterval = 1234;
+            const string testUriPath = "/test";
+            const int defaultStatusCode = 200;
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath, redirectOptionsBuilder =>
+                        redirectOptionsBuilder.Use503CodeRetryInterval(retryInterval));
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Request.Path = testUriPath;
+            desk.CurrentHttpContext.Response.StatusCode = defaultStatusCode;
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(503);
+            desk.CurrentHttpContext.Request.Path.ToString()
+                .ShouldBe(testUriPath);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContain(h => h.Key == "Retry-After");
+            desk.CurrentHttpContext.Response.Headers["Retry-After"]
+                .ToString()
+                .ShouldBe(retryInterval.ToString());
+        }
 
         [Fact]
         public void Invoke_WhenMaintenanceModeIsOn_ShouldNotThrow()
@@ -503,10 +629,10 @@ namespace MaintenanceModeMiddleware.Tests
             contextSetup(httpContext);
 
             bool isNextDelegateCalled = false;
-            RequestDelegate nextDelegate = (HttpContext hc) =>
+            RequestDelegate nextDelegate = async (HttpContext hc) =>
             {
                 isNextDelegateCalled = true;
-                return Task.CompletedTask;
+                await Task.CompletedTask;
             };
 
             if (tempDir == null)

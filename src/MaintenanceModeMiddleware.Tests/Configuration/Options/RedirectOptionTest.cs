@@ -5,28 +5,28 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration.Options
 {
-    public class UseRedirectOptionTest
+    public class RedirectOptionTest
     {
         [Fact]
         public void LoadFromString_WithValidInput_ValueShouldEqualInput()
         {
-            var urlPath = $"/{Guid.NewGuid()}";
-            var option = new UseRedirectOption();
+            string str = "http://test.com/test";
+            var option = new RedirectOption();
 
-            option.LoadFromString(urlPath);
+            option.LoadFromString(str);
 
-            option.Value.ToString().ShouldBe(urlPath);
+            option.Value.ShouldBe(str);
         }
 
         [Fact]
         public void LoadFromString_WithValidInput_StringValueShouldEqualInput()
         {
-            var urlPath = $"/{Guid.NewGuid()}";
-            var option = new UseRedirectOption();
+            string str = "http://test.com/test"; 
+            var option = new RedirectOption();
 
-            option.LoadFromString(urlPath);
+            option.LoadFromString(str);
 
-            option.GetStringValue().ShouldBe(urlPath);
+            option.GetStringValue().ShouldBe(str);
         }
 
         [Theory]
@@ -35,7 +35,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("2013.05.29_14:33:41", typeof(ArgumentException))]
         public void LoadFromString_WithInvalidInput_ShouldThrow(string str, Type expectedException)
         {
-            var option = new UseRedirectOption();
+            var option = new RedirectOption();
             Action testAction = () => option.LoadFromString(str);
 
             testAction.ShouldThrow(expectedException);
