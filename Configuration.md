@@ -237,10 +237,32 @@ If the option is not specified, a default html response is served.
 
 ### UseRedirect
 
-Redirect to a relative URI path when the application is in maintenance mode.
+Redirect to a URL when the application is in maintenance mode.
 
 :warning: **Warning:** When this method is used, the response code, returned from the middleware, will not be 503 but 302 instead.
 
 ```csharp
-    options.UseRedirect("/SomeController/SomeAction");
+    options.UseRedirect("http://my-other-site.com");
+```
+
+### UsePathRedirect
+
+Redirect to a URI path when the application is in maintenance mode. The path can lead to anything - an action or a razor page. 
+
+```csharp
+    options.UsePathRedirect("/SomeController/SomeAction");
+```
+
+By default the resultant status code will be overwritten by the middleware - it will be set to 503. If such behaviour is undesired, there is an option to disable it.
+
+```csharp
+    options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
+        redirectOptions.UseDefaultResponseCode());
+```
+
+You can change the "Retry-After" interval like this:
+
+```csharp
+    options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
+        redirectOptions.Use503CodeRetryInterval(1200));
 ```
