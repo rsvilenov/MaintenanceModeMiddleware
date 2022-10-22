@@ -253,11 +253,11 @@ Redirect to a URI path when the application is in maintenance mode. The path can
     options.UsePathRedirect("/SomeController/SomeAction");
 ```
 
-By default the resultant status code will be overwritten by the middleware - it will be set to 503. If such behaviour is undesired, there is an option to disable it.
+By default the status code of the response, coming from the redirect location, will be overwritten by the middleware - it will be set to 503. If such behaviour is undesired, there is an option to disable it.
 
 ```csharp
     options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
-        redirectOptions.UseDefaultResponseCode());
+        redirectOptions.PreserveStatusCode());
 ```
 
 You can change the "Retry-After" interval like this:
