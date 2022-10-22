@@ -213,7 +213,7 @@ Customize the maintenance message to the users.
     options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8);
 ```
 
-If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
+The default "Retry-After" interval is 5300 milliseconds. If you wish to specify a custom interval, pass the custom value to the last (and optional) parameter of the method. 
 
 ```csharp
     options.UseResponse("maintenance mode", ContentType.Text, Encoding.UTF8, 10000);
@@ -229,7 +229,7 @@ Specify a file, containing the maintenance response. This file can be placed eit
     options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath);
 ```
 
-If you wish to specify a custom Retry-After interval for the 503 response code, pass the custom value to the last  (and optional) parameter of the method. 
+The default "Retry-After" interval is 5300 milliseconds. If you wish to specify a custom interval, pass the custom value to the last (and optional) parameter of the method. 
 
 ```csharp
     options.UseResponseFile("customResponse.html", EnvDirectory.WebRootPath, 10000);
@@ -252,20 +252,20 @@ Redirect to a URL when the application is in maintenance mode.
 Redirect to a URI path when the application is in maintenance mode. The path can lead to anything - an action, a razor page, a static file, etc. 
 
 ```csharp
-    options.UsePathRedirect("/SomeController/SomeAction");
+    options.UsePathRedirect("/SomePath");
 ```
 
 By default the status code of the response, coming from the redirect location, will be overwritten by the middleware - it will be set to 503. If such behaviour is undesired, there is an option to disable it.
 
 ```csharp
-    options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
+    options.UsePathRedirect("/SomePath", redirectOptions => 
         redirectOptions.PreserveStatusCode());
 ```
 
 The default "Retry-After" interval is 5300 milliseconds. You can change it like this:
 
 ```csharp
-    options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
+    options.UsePathRedirect("/SomePath", redirectOptions => 
         redirectOptions.Use503CodeRetryInterval(1200));
 ```
 
