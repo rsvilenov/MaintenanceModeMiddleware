@@ -249,7 +249,7 @@ Redirect to a URL when the application is in maintenance mode.
 
 ### UsePathRedirect
 
-Redirect to a URI path when the application is in maintenance mode. The path can lead to anything - an action or a razor page. 
+Redirect to a URI path when the application is in maintenance mode. The path can lead to anything - an action, a razor page, a static file, etc. 
 
 ```csharp
     options.UsePathRedirect("/SomeController/SomeAction");
