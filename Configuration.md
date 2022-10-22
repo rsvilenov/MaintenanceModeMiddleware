@@ -262,9 +262,11 @@ By default the status code of the response, coming from the redirect location, w
         redirectOptions.PreserveStatusCode());
 ```
 
-You can change the "Retry-After" interval like this:
+The default "Retry-After" interval is 5300 milliseconds. You can change it like this:
 
 ```csharp
     options.UsePathRedirect("/SomeController/SomeAction", redirectOptions => 
         redirectOptions.Use503CodeRetryInterval(1200));
 ```
+
+`Use503CodeRetryInterval(uint)` is incompatible with `PreserveStatusCode()`. Using both options at the same time will produce an InvalidOperationException.
