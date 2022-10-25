@@ -89,7 +89,8 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="actionName">The action name within the controller.</param>
         /// <param name="areaName">An optional area name.</param>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
-        IMiddlewareOptionsBuilder UseControllerAction(string controllerName, string actionName, string areaName = null);
+        IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<ICustomActionOptionsBuilder> options = null)
+            where TController : ControllerBase;
 
         /// <summary>
         /// Specify which user should retain access to the web application after

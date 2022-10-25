@@ -107,11 +107,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException($"{nameof(path)} is empty.");
             }
 
-            PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
+            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
             options?.Invoke(builder);
 
-            PathRedirectData data = builder.GetPathRedirectData();
-            data.Path = path;
+            PathRedirectData data = new PathRedirectData
+            {
+                Path = path,
+                StatusCodeData = builder.GetStatusCodeData()
+            };
 
             _options.Add(new PathRedirectOption
             {
@@ -142,23 +145,32 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         }
 
 
-        public IMiddlewareOptionsBuilder UseControllerAction(string controllerName, string actionName, string areaName = null)
+        public IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<ICustomActionOptionsBuilder> options = null)
+            where TController : ControllerBase
         {
-            if (string.IsNullOrEmpty(controllerName))
-            {
-                throw new ArgumentNullException(nameof(controllerName));
-            }
-
             if (string.IsNullOrEmpty(actionName))
             {
-                throw new ArgumentNullException(nameof(actionName));
+                actionName = "Index";
             }
 
+            Type controllerType = typeof(TController);
+
+            string controllerName = controllerType.Name;
             string controllerSuffix = "Controller";
             if (controllerName.EndsWith(controllerSuffix))
             {
                 controllerName = controllerName.Remove(controllerName.Length - controllerSuffix.Length);
             }
+
+            string areaName = string.Empty;
+            object areaAttribute = controllerType.GetCustomAttributes(typeof(AreaAttribute), true).FirstOrDefault();
+            if (areaAttribute != null)
+            {
+                areaName = ((AreaAttribute)areaAttribute).RouteValue;
+            }
+
+            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+            options?.Invoke(builder);
 
             _options.Add(new ControllerActionOption
             {
@@ -166,7 +178,8 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 {
                     ControllerName = controllerName,
                     ActionName = actionName,
-                    AreaName = areaName ?? string.Empty
+                    AreaName = areaName,
+                    StatusCodeData = builder.GetStatusCodeData()
                 }
             });
 

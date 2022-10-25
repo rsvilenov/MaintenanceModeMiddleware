@@ -3,14 +3,17 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    internal class PathRedirectOptionsBulder : IPathRedirectOptionsBulder
+    internal class StatusCodeOptionsBulder : 
+        IPathRedirectOptionsBulder, 
+        ICustomActionOptionsBuilder,
+        IStatusCodeOptionsBuilder
     {
-        private readonly PathRedirectData _data;
+        private readonly ResponseStatusCodeData _data;
         private bool _isCustomRetryIntervalSpecified;
 
-        public PathRedirectOptionsBulder()
+        public StatusCodeOptionsBulder()
         {
-            _data = new PathRedirectData
+            _data = new ResponseStatusCodeData
             {
                 Set503StatusCode = true,
                 Code503RetryInterval = DefaultValues.DEFAULT_503_RETRY_INTERVAL
@@ -28,7 +31,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             _data.Set503StatusCode = false;
         }
 
-        public PathRedirectData GetPathRedirectData()
+        public ResponseStatusCodeData GetStatusCodeData()
         {
             if (!_data.Set503StatusCode
                 && _isCustomRetryIntervalSpecified)

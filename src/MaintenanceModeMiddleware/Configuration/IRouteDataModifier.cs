@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MaintenanceModeMiddleware.Configuration.Data;
 
 namespace MaintenanceModeMiddleware.Configuration
 {
@@ -6,5 +7,6 @@ namespace MaintenanceModeMiddleware.Configuration
     {
         Dictionary<string, string> GetRouteValues();
         Dictionary<string, string> GetDataTokens();
+        ResponseStatusCodeData StatusCodeData { get; }
     }
 }

@@ -45,5 +45,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 ActionName = parts[2]
             };
         }
+
+        public ResponseStatusCodeData StatusCodeData => Value.StatusCodeData;
     }
 }

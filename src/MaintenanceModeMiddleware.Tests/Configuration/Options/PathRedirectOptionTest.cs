@@ -21,8 +21,9 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
             option.LoadFromString(serializedOption);
 
             option.Value.Path.ToString().ShouldBe(path);
-            option.Value.Code503RetryInterval.ShouldBe(interval);
-            option.Value.Set503StatusCode.ShouldBe(set503StatusCode);
+            option.Value.StatusCodeData.ShouldNotBeNull();
+            option.Value.StatusCodeData.Code503RetryInterval.ShouldBe(interval);
+            option.Value.StatusCodeData.Set503StatusCode.ShouldBe(set503StatusCode);
         }
 
         [Fact]

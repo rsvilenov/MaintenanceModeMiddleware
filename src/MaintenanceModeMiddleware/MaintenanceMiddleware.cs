@@ -65,7 +65,7 @@ namespace MaintenanceModeMiddleware
             var matcher = (IAllowedRequestMatcher)pathRedirectOption;
 
             if (matcher.IsMatch(context)
-                && pathRedirectOption.Value.Set503StatusCode)
+                && pathRedirectOption.Value.StatusCodeData.Set503StatusCode)
             {
                 context
                     .Response
@@ -74,7 +74,7 @@ namespace MaintenanceModeMiddleware
                 context
                     .Response
                     .Headers
-                    .Add("Retry-After", pathRedirectOption.Value.Code503RetryInterval.ToString());
+                    .Add("Retry-After", pathRedirectOption.Value.StatusCodeData.Code503RetryInterval.ToString());
             }
         }
 
@@ -124,6 +124,18 @@ namespace MaintenanceModeMiddleware
 
             ModifyRouteData(context, routeValuesModifier);
             await _next.Invoke(context);
+
+            if (routeValuesModifier.StatusCodeData.Set503StatusCode)
+            {
+                context
+                        .Response
+                        .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+
+                context
+                    .Response
+                    .Headers
+                    .Add("Retry-After", routeValuesModifier.StatusCodeData.Code503RetryInterval.ToString());
+            }
         }
 
         private static void ModifyRouteData(HttpContext context, IRouteDataModifier routeValuesModifier)

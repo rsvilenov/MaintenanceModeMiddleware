@@ -22,14 +22,17 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             Value = new PathRedirectData
             {
                 Path = new PathString(parts[0]),
-                Code503RetryInterval = uint.Parse(parts[1]),
-                Set503StatusCode = bool.Parse(parts[2])
+                StatusCodeData = new ResponseStatusCodeData
+                {
+                    Code503RetryInterval = uint.Parse(parts[1]),
+                    Set503StatusCode = bool.Parse(parts[2])
+                }
             };
         }
 
         public override string GetStringValue()
         {
-            return $"{Value.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.Set503StatusCode}";
+            return $"{Value.Path}{PARTS_SEPARATOR}{Value.StatusCodeData.Code503RetryInterval}{PARTS_SEPARATOR}{Value.StatusCodeData.Set503StatusCode}";
         }
 
         public bool IsMatch(HttpContext context)
