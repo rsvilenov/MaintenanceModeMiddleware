@@ -141,6 +141,38 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             return this;
         }
 
+
+        public IMiddlewareOptionsBuilder UseControllerAction(string controllerName, string actionName, string areaName = null)
+        {
+            if (string.IsNullOrEmpty(controllerName))
+            {
+                throw new ArgumentNullException(nameof(controllerName));
+            }
+
+            if (string.IsNullOrEmpty(actionName))
+            {
+                throw new ArgumentNullException(nameof(actionName));
+            }
+
+            string controllerSuffix = "Controller";
+            if (controllerName.EndsWith(controllerSuffix))
+            {
+                controllerName = controllerName.Remove(controllerName.Length - controllerSuffix.Length);
+            }
+
+            _options.Add(new ControllerActionOption
+            {
+                Value = new ControllerActionData
+                {
+                    ControllerName = controllerName,
+                    ActionName = actionName,
+                    AreaName = areaName ?? string.Empty
+                }
+            });
+
+            return this;
+        }
+
         public IMiddlewareOptionsBuilder BypassUser(string userName)
         {
             if (string.IsNullOrEmpty(userName))
@@ -331,7 +363,8 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             }
 
             if (!_options.Any<IResponseHolder>()
-                && !_options.Any<IRedirectInitializer>())
+                && !_options.Any<IRedirectInitializer>()
+                && !_options.Any<IRouteDataModifier>())
             {
                 UseDefaultResponse();
             }
@@ -354,25 +387,21 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         private void VerifyResponseOptions()
         {
-            IEnumerable<IResponseHolder> responseHolders = _options
-                .GetAll<IResponseHolder>();
+            IEnumerable<IOption> responseOptions = _options
+                .GetAll<IResponseHolder>()
+                .Cast<IOption>()
+                .Concat(_options.GetAll<IRedirectInitializer>())
+                .Concat(_options.GetAll<IRouteDataModifier>());
 
-            IEnumerable<IRedirectInitializer> redirectInitializers = _options
-                .GetAll<IRedirectInitializer>();
 
-            if (!responseHolders.Any() && ! redirectInitializers.Any())
+            if (!responseOptions.Any())
             {
-                throw new ArgumentException("No response or redirect was specified.");
+                throw new ArgumentException("No response, redirect or route data was specified.");
             }
 
-            if (responseHolders.Any() && redirectInitializers.Any())
+            if (responseOptions.Count() > 1)
             {
-                throw new ArgumentException("Both a response and a redirect were specified.");
-            }
-
-            if (responseHolders.Count() > 1)
-            {
-                throw new ArgumentException("More than one response was specified.");
+                throw new ArgumentException("More than one response, redirect or route data was specified.");
             }
         }
     }

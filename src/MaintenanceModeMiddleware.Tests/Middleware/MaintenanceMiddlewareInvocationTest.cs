@@ -552,7 +552,7 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 svc,
                 null,
-                (options) => { });
+                new OptionCollection());
 
 
             Action testAction = async ()
@@ -585,7 +585,7 @@ namespace MaintenanceModeMiddleware.Tests
                 },
                 svc,
                 null,
-                (options) => { });
+                new OptionCollection());
 
 
             await middleware.Invoke(httpContext);
@@ -657,7 +657,7 @@ namespace MaintenanceModeMiddleware.Tests
                 nextDelegate,
                 svc,
                 dirMapperSvc,
-                optionsSetup);
+                middlewareOptions);
 
             return new MiddlewareTestDesk
             {

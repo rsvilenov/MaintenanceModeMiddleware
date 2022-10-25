@@ -19,10 +19,20 @@ namespace MaintenanceModeMiddleware.Extensions
                 .GetService(typeof(IMaintenanceControlService));
             if (maintenanceSvc == null)
             {
-                throw new InvalidOperationException($"Unable to find the required service. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+                throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceControlService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
             }
 
-            return builder.UseMiddleware<MaintenanceMiddleware>(options);
+            IDirectoryMapperService dirMapperSvc = builder.ApplicationServices
+                .GetService(typeof(IDirectoryMapperService)) as IDirectoryMapperService;
+            if (maintenanceSvc == null)
+            {
+                throw new InvalidOperationException($"Unable to find {nameof(IDirectoryMapperService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+            }
+
+            var optionsBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);
+            options?.Invoke(optionsBuilder);
+
+            return builder.UseMiddleware<MaintenanceMiddleware>(optionsBuilder.GetOptions());
         }
     }
 }

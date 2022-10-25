@@ -52,13 +52,13 @@ namespace MaintenanceModeMiddleware.TestApp.Controllers
             }
             else
             {
-                _maintenanceCtrlSvc.EnterMaintenance(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null,
-                    options =>
-                    {
-                        options.BypassAllAuthenticatedUsers();
-                        // uncomment this to use custom maintenance response path/action
-                        //options.UsePathRedirect("/Home/Maintenance");
-                    });
+                _maintenanceCtrlSvc.EnterMaintenance(vm.IsExpirationDateSpecified ? vm.ExpirationDate : null);
+                    //options =>
+                    //{
+                    //    options.BypassAllAuthenticatedUsers();
+                    //    // uncomment this to use custom maintenance response path/action
+                    //    //options.UsePathRedirect("/Home/Maintenance");
+                    //});
             }
 
             return RedirectToAction(nameof(Index));

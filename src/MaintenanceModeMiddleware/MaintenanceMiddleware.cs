@@ -5,6 +5,7 @@ using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Linq;
 using System.Net;
@@ -22,13 +23,13 @@ namespace MaintenanceModeMiddleware
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSvc,
             IDirectoryMapperService dirMapperSvc,
-            Action<IMiddlewareOptionsBuilder> optionsBuilderDelegate)
+            OptionCollection startupOptions)
         {
             _next = next;
             _maintenanceCtrlSvc = maintenanceCtrlSvc;
             _dirMapperSvc = dirMapperSvc;
 
-            _startupOptions = GetStartupOptions(optionsBuilderDelegate);
+            _startupOptions = startupOptions;
         }
 
         public async Task Invoke(HttpContext context)
@@ -45,6 +46,14 @@ namespace MaintenanceModeMiddleware
 
         private void PostProcessResponse(HttpContext context)
         {
+            IMaintenanceState maintenanceState = _maintenanceCtrlSvc
+                   .GetState();
+
+            if (!maintenanceState.IsMaintenanceOn)
+            {
+                return;
+            }
+
             PathRedirectOption pathRedirectOption = GetLatestOptions()
                 .GetSingleOrDefault<PathRedirectOption>();
 
@@ -100,12 +109,42 @@ namespace MaintenanceModeMiddleware
             IRedirectInitializer redirectInitializer = GetLatestOptions()
                 .GetSingleOrDefault<IRedirectInitializer>();
 
-            context
-                .Response
-                .Redirect(redirectInitializer
-                    .RedirectLocation);
+            if (redirectInitializer != null)
+            {
+                context
+                    .Response
+                    .Redirect(redirectInitializer
+                        .RedirectLocation);
+
+                return;
+            }
+
+            IRouteDataModifier routeValuesModifier = GetLatestOptions()
+                .GetSingleOrDefault<IRouteDataModifier>();
+
+            ModifyRouteData(context, routeValuesModifier);
+            await _next.Invoke(context);
         }
-    
+
+        private static void ModifyRouteData(HttpContext context, IRouteDataModifier routeValuesModifier)
+        {
+            var routeData = context.GetRouteData();
+
+            var newRouteValues = routeValuesModifier.GetRouteValues();
+            foreach (string routeValueKey in routeData.Values.Keys
+                .Where(key => newRouteValues.ContainsKey(key)))
+            {
+                routeData.Values[routeValueKey] = newRouteValues[routeValueKey];
+            }
+
+
+            var newDataTokens = routeValuesModifier.GetDataTokens();
+            foreach (string dataTokenKey in routeData.DataTokens.Keys
+                .Where(key => newRouteValues.ContainsKey(key)))
+            {
+                routeData.DataTokens[dataTokenKey] = newRouteValues[dataTokenKey];
+            }
+        }
 
         private async Task WriteMaintenanceResponse(HttpContext context, IResponseHolder responseHolder)
         {
@@ -146,13 +185,6 @@ namespace MaintenanceModeMiddleware
             }
 
             return  latestOptions ?? _startupOptions;
-        }
-
-        private OptionCollection GetStartupOptions(Action<MiddlewareOptionsBuilder> builderDelegate)
-        {
-            var optionsBuilder = new MiddlewareOptionsBuilder(_dirMapperSvc);
-            builderDelegate?.Invoke(optionsBuilder);
-            return optionsBuilder.GetOptions();
         }
     }
 }

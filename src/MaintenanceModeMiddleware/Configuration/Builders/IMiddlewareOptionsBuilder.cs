@@ -80,6 +80,18 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         IMiddlewareOptionsBuilder UseRedirect(string url);
 
         /// <summary>
+        /// Routes the requests to a specific controller action.
+        /// When this option is used, we must make sure that the call to <see cref="MaintenanceModeMiddleware.Extensions.Configuration.UseMaintenance(Microsoft.AspNetCore.Builder.IApplicationBuilder, Action{IMiddlewareOptionsBuilder})"/>
+        /// is preceded by a call to <see cref="Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseRouting(Microsoft.AspNetCore.Builder.IApplicationBuilder)"/>
+        /// and is followed by a call to <see cref="Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints(Microsoft.AspNetCore.Builder.IApplicationBuilder, Action{Microsoft.AspNetCore.Routing.IEndpointRouteBuilder})"/>.
+        /// </summary>
+        /// <param name="controllerName">The name of the controller.</param>
+        /// <param name="actionName">The action name within the controller.</param>
+        /// <param name="areaName">An optional area name.</param>
+        /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
+        IMiddlewareOptionsBuilder UseControllerAction(string controllerName, string actionName, string areaName = null);
+
+        /// <summary>
         /// Specify which user should retain access to the web application after
         /// it has been put in maintenance mode.
         /// </summary>
