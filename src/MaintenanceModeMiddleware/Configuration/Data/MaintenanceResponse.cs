@@ -4,12 +4,13 @@ using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Data
 {
-    internal class MaintenanceResponse
+    internal class MaintenanceResponse : IHaveStatusCodeInfo
     {
         public ResponseContentType ContentType { get; set; }
         public Encoding ContentEncoding { get; set; }
         public byte[] ContentBytes { get; set; }
         public uint Code503RetryInterval { get; set; }
+        public bool Set503StatusCode { get; } = true;
 
         public string GetContentTypeString()
         {

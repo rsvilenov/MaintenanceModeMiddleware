@@ -1,14 +1,10 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
-using MaintenanceModeMiddleware.Configuration.Builders;
-using MaintenanceModeMiddleware.Configuration.Data;
-using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
+using MaintenanceModeMiddleware.RequestHandlers;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware
@@ -17,186 +13,84 @@ namespace MaintenanceModeMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSvc;
-        private readonly IDirectoryMapperService _dirMapperSvc;
-        private readonly OptionCollection _startupOptions;
+        private readonly IMaintenanceOptionsService _optionsService;
+        private readonly IEnumerable<IRequestHandler> _requestHandlers;
 
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSvc,
-            IDirectoryMapperService dirMapperSvc,
-            OptionCollection startupOptions)
+            IMaintenanceOptionsService optionsService,
+            IEnumerable<IRequestHandler> requestHandlers)
         {
             _next = next;
             _maintenanceCtrlSvc = maintenanceCtrlSvc;
-            _dirMapperSvc = dirMapperSvc;
-
-            _startupOptions = startupOptions;
+            _optionsService = optionsService;
+            _requestHandlers = requestHandlers;
         }
 
         public async Task Invoke(HttpContext context)
-        {
-            if (ShouldAllowRequest(context))
-            {
-                await _next.Invoke(context);
-                PostProcessResponse(context);
-                return;
-            }
-
-            await HandleMaintenanceResponse(context);
-        }
-
-        private void PostProcessResponse(HttpContext context)
         {
             IMaintenanceState maintenanceState = _maintenanceCtrlSvc
                    .GetState();
 
             if (!maintenanceState.IsMaintenanceOn)
             {
+                await _next.Invoke(context);
                 return;
             }
 
-            PathRedirectOption pathRedirectOption = GetLatestOptions()
-                .GetSingleOrDefault<PathRedirectOption>();
-
-            if (pathRedirectOption == null)
+            if (ShouldAllowRequest(context))
             {
+                await _next.Invoke(context);
+
+                if (GetLatestOptions().Any<IRedirectInitializer>())
+                {
+                    foreach (IRequestHandler requestHandler in _requestHandlers)
+                    {
+                        if (requestHandler.ShouldApply(context))
+                        {
+                            await requestHandler.Postprocess(context);
+                        }
+                    }
+                }
+
                 return;
             }
 
-            var matcher = (IAllowedRequestMatcher)pathRedirectOption;
-
-            if (matcher.IsMatch(context)
-                && pathRedirectOption.Value.StatusCodeData.Set503StatusCode)
+            foreach (IRequestHandler requestHandler in _requestHandlers)
             {
-                context
-                    .Response
-                    .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+                if (requestHandler.ShouldApply(context))
+                {
+                    PreprocessResult ppResult = await requestHandler.Preprocess(context);
+                    if (!ppResult.CallNext)
+                    {
+                        return;
+                    }
+                }
+            }
 
-                context
-                    .Response
-                    .Headers
-                    .Add("Retry-After", pathRedirectOption.Value.StatusCodeData.Code503RetryInterval.ToString());
+            await _next.Invoke(context);
+
+            foreach (IRequestHandler requestHandler in _requestHandlers)
+            {
+                if (requestHandler.ShouldApply(context))
+                {
+                    await requestHandler.Postprocess(context);
+                }
             }
         }
 
         private bool ShouldAllowRequest(HttpContext context)
         {
-            IMaintenanceState maintenanceState = _maintenanceCtrlSvc
-                .GetState();
+            OptionCollection options = GetLatestOptions();
 
-            if (maintenanceState.IsMaintenanceOn)
-            {
-                OptionCollection options = GetLatestOptions();
-
-                return options
-                    .GetAll<IAllowedRequestMatcher>()
-                    .Any(matcher => matcher.IsMatch(context));
-            }
-
-            return true;
-        }
-
-        private async Task HandleMaintenanceResponse(HttpContext context)
-        {
-            IResponseHolder responseHolder = GetLatestOptions()
-                   .GetSingleOrDefault<IResponseHolder>();
-
-            if (responseHolder != null)
-            {
-                await WriteMaintenanceResponse(context, responseHolder);
-                return;
-            }
-
-            IRedirectInitializer redirectInitializer = GetLatestOptions()
-                .GetSingleOrDefault<IRedirectInitializer>();
-
-            if (redirectInitializer != null)
-            {
-                context
-                    .Response
-                    .Redirect(redirectInitializer
-                        .RedirectLocation);
-
-                return;
-            }
-
-            IRouteDataModifier routeValuesModifier = GetLatestOptions()
-                .GetSingleOrDefault<IRouteDataModifier>();
-
-            ModifyRouteData(context, routeValuesModifier);
-            await _next.Invoke(context);
-
-            if (routeValuesModifier.StatusCodeData.Set503StatusCode)
-            {
-                context
-                        .Response
-                        .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-
-                context
-                    .Response
-                    .Headers
-                    .Add("Retry-After", routeValuesModifier.StatusCodeData.Code503RetryInterval.ToString());
-            }
-        }
-
-        private static void ModifyRouteData(HttpContext context, IRouteDataModifier routeValuesModifier)
-        {
-            var routeData = context.GetRouteData();
-
-            var newRouteValues = routeValuesModifier.GetRouteValues();
-            foreach (string routeValueKey in routeData.Values.Keys
-                .Where(key => newRouteValues.ContainsKey(key)))
-            {
-                routeData.Values[routeValueKey] = newRouteValues[routeValueKey];
-            }
-
-
-            var newDataTokens = routeValuesModifier.GetDataTokens();
-            foreach (string dataTokenKey in routeData.DataTokens.Keys
-                .Where(key => newRouteValues.ContainsKey(key)))
-            {
-                routeData.DataTokens[dataTokenKey] = newRouteValues[dataTokenKey];
-            }
-        }
-
-        private async Task WriteMaintenanceResponse(HttpContext context, IResponseHolder responseHolder)
-        {
-            MaintenanceResponse response = responseHolder
-                                   .GetResponse(_dirMapperSvc);
-
-            context
-                .Response
-                .StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-
-            context
-                .Response
-                .Headers
-                .Add("Retry-After", response.Code503RetryInterval.ToString());
-
-            context
-                .Response
-                .ContentType = response.GetContentTypeString();
-
-            string responseStr = response
-                .ContentEncoding
-                .GetString(response.ContentBytes);
-
-            await context
-                .Response
-                .WriteAsync(responseStr,
-                    response.ContentEncoding);
+            return options
+                .GetAll<IAllowedRequestMatcher>()
+                .Any(matcher => matcher.IsMatch(context));
         }
 
         private OptionCollection GetLatestOptions()
         {
-            OptionCollection latestOptions = null;
-
-            if (_maintenanceCtrlSvc
-                .GetState() is IMiddlewareOptionsContainer optionsContainer)
-            {
-                latestOptions = optionsContainer.MiddlewareOptions;
-            }
-
-            return  latestOptions ?? _startupOptions;
+            return _optionsService.GetOptions();
         }
     }
 }

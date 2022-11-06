@@ -10,13 +10,16 @@ namespace MaintenanceModeMiddleware.Services
     {
         private readonly IStateStoreService _stateStoreService;
         private readonly IDirectoryMapperService _dirMapperSvc;
+        private readonly IMaintenanceOptionsService _optionsService;
 
         public MaintenanceControlService(
             IDirectoryMapperService dirMapperSvc,
-            IStateStoreService stateStoreService)
+            IStateStoreService stateStoreService,
+            IMaintenanceOptionsService optionsService)
         {
             _dirMapperSvc = dirMapperSvc;
             _stateStoreService = stateStoreService;
+            _optionsService = optionsService;
         }
 
         public void EnterMaintenance(DateTime? expirationDate = null,
@@ -37,11 +40,14 @@ namespace MaintenanceModeMiddleware.Services
             _stateStoreService.SetState(new MaintenanceState(expirationDate,
                 isMaintenanceOn: true,
                 newMiddlewareOptions));
+
+            _optionsService.SetCurrentOptions(newMiddlewareOptions);
         }
 
         public void LeaveMaintenance()
         {
             _stateStoreService.SetState(new MaintenanceState(isMaintenanceOn: false));
+            _optionsService.SetCurrentOptions(null);
         }
 
         public IMaintenanceState GetState()

@@ -85,9 +85,9 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// is preceded by a call to <see cref="Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseRouting(Microsoft.AspNetCore.Builder.IApplicationBuilder)"/>
         /// and is followed by a call to <see cref="Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints(Microsoft.AspNetCore.Builder.IApplicationBuilder, Action{Microsoft.AspNetCore.Routing.IEndpointRouteBuilder})"/>.
         /// </summary>
-        /// <param name="controllerName">The name of the controller.</param>
+        /// <typeparam name="TController">The type of the controller.</typeparam>
         /// <param name="actionName">The action name within the controller.</param>
-        /// <param name="areaName">An optional area name.</param>
+        /// <param name="options">Additional options for the response.</param>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
         IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<ICustomActionOptionsBuilder> options = null)
             where TController : ControllerBase;

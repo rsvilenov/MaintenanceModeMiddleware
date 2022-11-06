@@ -29,10 +29,19 @@ namespace MaintenanceModeMiddleware.Extensions
                 throw new InvalidOperationException($"Unable to find {nameof(IDirectoryMapperService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
             }
 
+            IMaintenanceOptionsService optionsService = builder.ApplicationServices
+               .GetService(typeof(IMaintenanceOptionsService)) as IMaintenanceOptionsService;
+            if (maintenanceSvc == null)
+            {
+                throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceOptionsService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+            }
+
             var optionsBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);
             options?.Invoke(optionsBuilder);
 
-            return builder.UseMiddleware<MaintenanceMiddleware>(optionsBuilder.GetOptions());
+            optionsService.SetStartupOptions(optionsBuilder.GetOptions());
+
+            return builder.UseMiddleware<MaintenanceMiddleware>();
         }
     }
 }

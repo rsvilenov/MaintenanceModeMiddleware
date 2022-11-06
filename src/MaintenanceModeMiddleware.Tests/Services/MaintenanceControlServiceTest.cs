@@ -3,6 +3,7 @@ using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
+using NSubstitute;
 using Shouldly;
 using System;
 using System.Threading;
@@ -21,7 +22,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create());
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>());
             
             svc.EnterMaintenance(DateTime.Now.AddSeconds(5));
 
@@ -36,7 +38,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create());
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>());
             
             svc.EnterMaintenance(DateTime.Now.AddSeconds(5));
 
@@ -52,7 +55,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create()); 
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>()); 
             
             svc.EnterMaintenance();
 
@@ -66,7 +70,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create()); 
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>()); 
             Action testAction = () => svc.EnterMaintenance();
 
             testAction.ShouldNotThrow();
@@ -80,7 +85,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create());
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>());
 
             svc.EnterMaintenance(null, options =>
             {
@@ -104,7 +110,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create());
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>());
                 
             svc.EnterMaintenance();
 
@@ -120,7 +127,8 @@ namespace MaintenanceModeMiddleware.Tests.Services
         {
             MaintenanceControlService svc = new MaintenanceControlService(
                 _dirMapperSvc,
-                FakeStateStoreService.Create());
+                FakeStateStoreService.Create(),
+                Substitute.For<IMaintenanceOptionsService>());
             
             svc.EnterMaintenance();
             bool isOnAfterEnter = svc.GetState().IsMaintenanceOn;

@@ -150,7 +150,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         {
             if (string.IsNullOrEmpty(actionName))
             {
-                actionName = "Index";
+                throw new ArgumentNullException(nameof(actionName));
             }
 
             Type controllerType = typeof(TController);

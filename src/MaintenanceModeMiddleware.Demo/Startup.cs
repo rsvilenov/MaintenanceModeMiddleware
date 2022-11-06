@@ -64,7 +64,8 @@ namespace MaintenanceModeMiddleware.TestApp
             app.UseMaintenance(options =>
             {
                 options.BypassUser("Demo");
-                options.UseControllerAction<Controllers.HomeController>(nameof(Controllers.HomeController.Maintenance));
+                options.UsePathRedirect("/Home/Maintenance");
+                //options.UseControllerAction<Controllers.HomeController>(nameof(Controllers.HomeController.Maintenance));
             });
 
             app.UseEndpoints(endpoints =>
