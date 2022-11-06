@@ -6,5 +6,6 @@ namespace MaintenanceModeMiddleware.Configuration.Data
     {
         public PathString Path { get; set; }
         public ResponseStatusCodeData StatusCodeData { get; set; }
+        public ReturnUrlData ReturnUrlData { get; set; }
     }
 }

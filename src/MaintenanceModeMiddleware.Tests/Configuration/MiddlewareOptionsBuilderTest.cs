@@ -175,21 +175,21 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
                 .ShouldNotBeNull();
         }
 
-        [Fact]
-        public void UseRedirect_WithValidUrl_ValueShouldEqualInput()
-        {
-            string url = "http://test.com/test";
-            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+        //[Fact]
+        //public void UseRedirect_WithValidUrl_ValueShouldEqualInput()
+        //{
+        //    string url = "http://test.com/test";
+        //    var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
 
-            builder.UseRedirect(url);
+        //    builder.UseRedirect(url);
 
 
-            var option = builder
-                .GetOptions()
-                .GetSingleOrDefault<IRedirectInitializer>();
-            option.RedirectLocation.ShouldBe(url);
-        }
+        //    var option = builder
+        //        .GetOptions()
+        //        .GetSingleOrDefault<IRedirectInitializer>();
+        //    option.RedirectLocation.ShouldBe(url);
+        //}
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
@@ -207,21 +207,21 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             testAction.ShouldThrow(expectedException);
         }
 
-        [Fact]
-        public void UsePathRedirect_WithValidUriPath_ValueShouldEqualInput()
-        {
-            string uriPath = "/test";
-            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+        //[Fact]
+        //public void UsePathRedirect_WithValidUriPath_ValueShouldEqualInput()
+        //{
+        //    string uriPath = "/test";
+        //    var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
 
-            builder.UsePathRedirect(uriPath);
+        //    builder.UsePathRedirect(uriPath);
 
 
-            var option = builder
-                .GetOptions()
-                .GetSingleOrDefault<IRedirectInitializer>();
-            option.RedirectLocation.ShouldBe(uriPath);
-        }
+        //    var option = builder
+        //        .GetOptions()
+        //        .GetSingleOrDefault<IRedirectInitializer>();
+        //    option.RedirectLocation.ShouldBe(uriPath);
+        //}
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]

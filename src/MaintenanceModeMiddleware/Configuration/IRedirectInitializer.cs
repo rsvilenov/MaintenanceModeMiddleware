@@ -2,6 +2,5 @@
 {
     internal interface IRedirectInitializer : IOption
     {
-        string RedirectLocation { get; }
     }
 }

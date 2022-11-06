@@ -107,13 +107,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new ArgumentNullException($"{nameof(path)} is empty.");
             }
 
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+            PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
             options?.Invoke(builder);
 
             PathRedirectData data = new PathRedirectData
             {
                 Path = path,
-                StatusCodeData = builder.GetStatusCodeData()
+                StatusCodeData = builder.GetStatusCodeData(),
+                ReturnUrlData = builder.GetReturnUrlData()
             };
 
             _options.Add(new PathRedirectOption

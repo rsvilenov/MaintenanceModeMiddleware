@@ -1,5 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -11,8 +12,8 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         IRequestHandler
     {
         private const string PARTS_SEPARATOR = "[::]";
-
-        public string RedirectLocation => Value.Path.ToUriComponent();
+        private const string COOKIE_PREFIX = "MaintenanceReturnUrl";
+        private string _cookieName;
 
         public override void LoadFromString(string str)
         {
@@ -66,9 +67,31 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
         {
+            if (Value.ReturnUrlData.SetReturnUrlInCookie)
+            {
+                _cookieName ??= $"{Value.ReturnUrlData.ReturnUrlCookiePrefix}_{Guid.NewGuid()}";
+
+                if (!context.Request.Cookies.ContainsKey(_cookieName))
+                {
+                    context
+                        .Response
+                        .Cookies
+                        .Append(_cookieName, context.Request.Path,
+                            Value.ReturnUrlData.ReturnUrlCookieOptions ?? new CookieOptions { IsEssential = true });
+                }
+            }
+
+            string returnUrlPath = Value.ReturnUrlData.CustomReturnPath.HasValue
+                ? Value.ReturnUrlData.CustomReturnPath.Value.ToUriComponent()
+                : Value.Path.ToUriComponent();
+
+            string fullRedirectPath = Value.ReturnUrlData.SetReturnUrlInUrlParameter
+                ? $"{Value.Path.ToUriComponent()}?{Uri.EscapeDataString(Value.ReturnUrlData.ReturnUrlUrlParameterName)}={returnUrlPath}"
+                : Value.Path.ToUriComponent();
+
             context
                 .Response
-                .Redirect(RedirectLocation);
+                .Redirect(fullRedirectPath);
 
             return Task.FromResult(new PreprocessResult { CallNext = false });
         }

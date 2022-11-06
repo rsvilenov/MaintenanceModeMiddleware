@@ -4,7 +4,6 @@ using System;
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
     internal class StatusCodeOptionsBulder : 
-        IPathRedirectOptionsBulder, 
         ICustomActionOptionsBuilder,
         IStatusCodeOptionsBuilder
     {

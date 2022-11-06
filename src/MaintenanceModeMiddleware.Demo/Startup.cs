@@ -64,7 +64,11 @@ namespace MaintenanceModeMiddleware.TestApp
             app.UseMaintenance(options =>
             {
                 options.BypassUser("Demo");
-                options.UsePathRedirect("/Home/Maintenance");
+                options.UsePathRedirect("/Home/Maintenance", options =>
+                {
+                    options.PassReturnPathAsParameter();
+                    options.SetCustomReturnPath("/somePath");
+                });
                 //options.UseControllerAction<Controllers.HomeController>(nameof(Controllers.HomeController.Maintenance));
             });
 
