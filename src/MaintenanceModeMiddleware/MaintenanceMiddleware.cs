@@ -1,6 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.State;
-using MaintenanceModeMiddleware.RequestHandlers;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
@@ -14,17 +14,14 @@ namespace MaintenanceModeMiddleware
         private readonly RequestDelegate _next;
         private readonly IMaintenanceControlService _maintenanceCtrlSvc;
         private readonly IMaintenanceOptionsService _optionsService;
-        private readonly IEnumerable<IRequestHandler> _requestHandlers;
 
         public MaintenanceMiddleware(RequestDelegate next,
             IMaintenanceControlService maintenanceCtrlSvc,
-            IMaintenanceOptionsService optionsService,
-            IEnumerable<IRequestHandler> requestHandlers)
+            IMaintenanceOptionsService optionsService)
         {
             _next = next;
             _maintenanceCtrlSvc = maintenanceCtrlSvc;
             _optionsService = optionsService;
-            _requestHandlers = requestHandlers;
         }
 
         public async Task Invoke(HttpContext context)
@@ -38,59 +35,39 @@ namespace MaintenanceModeMiddleware
                 return;
             }
 
+            IRequestHandler requestHandler = _optionsService
+                .GetOptions()
+                .GetSingleOrDefault<IRequestHandler>();
+
             if (ShouldAllowRequest(context))
             {
                 await _next.Invoke(context);
 
-                if (GetLatestOptions().Any<IRedirectInitializer>())
+                if (requestHandler is IRedirectInitializer)
                 {
-                    foreach (IRequestHandler requestHandler in _requestHandlers)
-                    {
-                        if (requestHandler.ShouldApply(context))
-                        {
-                            await requestHandler.Postprocess(context);
-                        }
-                    }
+                    await requestHandler.Postprocess(context);
                 }
 
                 return;
             }
 
-            foreach (IRequestHandler requestHandler in _requestHandlers)
+            PreprocessResult ppResult = await requestHandler.Preprocess(context);
+            if (!ppResult.CallNext)
             {
-                if (requestHandler.ShouldApply(context))
-                {
-                    PreprocessResult ppResult = await requestHandler.Preprocess(context);
-                    if (!ppResult.CallNext)
-                    {
-                        return;
-                    }
-                }
+                return;
             }
 
             await _next.Invoke(context);
 
-            foreach (IRequestHandler requestHandler in _requestHandlers)
-            {
-                if (requestHandler.ShouldApply(context))
-                {
-                    await requestHandler.Postprocess(context);
-                }
-            }
+            await requestHandler.Postprocess(context);
         }
 
         private bool ShouldAllowRequest(HttpContext context)
         {
-            OptionCollection options = GetLatestOptions();
-
-            return options
+            return _optionsService
+                .GetOptions()
                 .GetAll<IAllowedRequestMatcher>()
                 .Any(matcher => matcher.IsMatch(context));
-        }
-
-        private OptionCollection GetLatestOptions()
-        {
-            return _optionsService.GetOptions();
         }
     }
 }

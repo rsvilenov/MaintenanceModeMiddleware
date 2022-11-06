@@ -1,4 +1,6 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Services;
+using NSubstitute;
 using Shouldly;
 using System;
 using Xunit;
@@ -13,7 +15,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("False", false)]
         public void LoadFromString_WithValidInput_ValueShouldEqualInput(string str, bool isSet)
         {
-            var option = new DefaultResponseOption();
+            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
 
             option.LoadFromString(str);
 
@@ -25,7 +27,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("False")]
         public void LoadFromString_WithValidInput_StringValueShouldEqualInput(string str)
         {
-            var option = new DefaultResponseOption();
+            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
 
             option.LoadFromString(str);
 
@@ -37,7 +39,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData(null, typeof(ArgumentNullException))]
         public void LoadFromString_WithInvalidInput_ShouldThrow(string str, Type expectedException)
         {
-            var option = new DefaultResponseOption();
+            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
             Action testAction = () => option.LoadFromString(str);
 
             testAction.ShouldThrow(expectedException);

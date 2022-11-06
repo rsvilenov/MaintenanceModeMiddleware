@@ -1,14 +1,22 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Services;
+using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class DefaultResponseOption : Option<bool>, IResponseHolder
+    internal class DefaultResponseOption : Option<bool>, IRequestHandler
     {
         private const int DEFAULT_503_RETRY_INTERVAL = 5300;
+        private readonly IDirectoryMapperService _dirMapperSvc;
+
+        public DefaultResponseOption(IDirectoryMapperService dirMapperSvc)
+        {
+            _dirMapperSvc = dirMapperSvc;
+        }
 
         public override void LoadFromString(string str)
         {
@@ -20,7 +28,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value.ToString();
         }
 
-        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
+        private MaintenanceResponse GetResponse()
         {
             using (Stream resStream = GetType()
                     .Assembly
@@ -35,6 +43,41 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                     Code503RetryInterval = DEFAULT_503_RETRY_INTERVAL
                 };
             }
+        }
+
+
+        Task IRequestHandler.Postprocess(HttpContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        async Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
+        {
+            MaintenanceResponse response = GetResponse();
+
+            context
+                .Response
+                .StatusCode = StatusCodes.Status503ServiceUnavailable;
+
+            context
+                .Response
+                .Headers
+                .Add("Retry-After", response.Code503RetryInterval.ToString());
+
+            context
+                .Response
+                .ContentType = response.GetContentTypeString();
+
+            string responseStr = response
+                .ContentEncoding
+                .GetString(response.ContentBytes);
+
+            await context
+                .Response
+                .WriteAsync(responseStr,
+                    response.ContentEncoding);
+
+            return new PreprocessResult { CallNext = false };
         }
     }
 }

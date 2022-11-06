@@ -2,14 +2,12 @@
 using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.State;
-using MaintenanceModeMiddleware.RequestHandlers;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -657,16 +655,9 @@ namespace MaintenanceModeMiddleware.Tests
             optionsSvc.SetStartupOptions(middlewareOptions);
             ctrlSvc.GetState().Returns(new MaintenanceState(null, isMaintenanceOn: true, middlewareOptions));
 
-            List<IRequestHandler> requestHandlers = new List<IRequestHandler>
-            {
-                new DirectResponseHandler(optionsSvc, dirMapperSvc),
-                new RedirectRequestHandler(optionsSvc),
-                new ResponseAfterRedirectHandler(optionsSvc),
-                new RouteModificationHandler(optionsSvc)
-            };
 
             MaintenanceMiddleware middleware = new MaintenanceMiddleware(
-                nextDelegate, ctrlSvc, optionsSvc, requestHandlers);
+                nextDelegate, ctrlSvc, optionsSvc);
 
             return new MiddlewareTestDesk
             {

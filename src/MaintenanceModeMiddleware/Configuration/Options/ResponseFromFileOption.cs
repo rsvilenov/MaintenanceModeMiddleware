@@ -1,19 +1,24 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Services;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class ResponseFromFileOption : Option<FileMaintenanceResponse>, IResponseHolder
+    internal class ResponseFromFileOption : Option<FileMaintenanceResponse>, IRequestHandler
     {
         private const char PARTS_SEPARATOR = ';';
 
         internal ResponseFromFileOption() { }
 
-        internal ResponseFromFileOption(string filePath, EnvDirectory baseDir, uint code503RetryInterval)
+        private readonly IDirectoryMapperService _dirMapperSvc;
+
+        internal ResponseFromFileOption(string filePath, EnvDirectory baseDir, uint code503RetryInterval, IDirectoryMapperService dirMapperSvc)
         {
+            _dirMapperSvc = dirMapperSvc;
             SetValue(filePath, baseDir, code503RetryInterval);
         }
 
@@ -63,9 +68,9 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.File.BaseDir}{PARTS_SEPARATOR}{Value.File.Path}{PARTS_SEPARATOR}{Value.Code503RetryInterval}";
         }
 
-        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
+        private MaintenanceResponse GetResponse()
         {
-            string fullPath = GetFileFullPath(dirMapperSvc);
+            string fullPath = GetFileFullPath(_dirMapperSvc);
 
             using (StreamReader sr = new StreamReader(fullPath,
                 detectEncodingFromByteOrderMarks: true))
@@ -104,6 +109,41 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
             string absPath = Path.Combine(envDir, Value.File.Path);
             return absPath;
+        }
+
+
+        Task IRequestHandler.Postprocess(HttpContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        async Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
+        {
+            MaintenanceResponse response = GetResponse();
+
+            context
+                .Response
+                .StatusCode = StatusCodes.Status503ServiceUnavailable;
+
+            context
+                .Response
+                .Headers
+                .Add("Retry-After", response.Code503RetryInterval.ToString());
+
+            context
+                .Response
+                .ContentType = response.GetContentTypeString();
+
+            string responseStr = response
+                .ContentEncoding
+                .GetString(response.ContentBytes);
+
+            await context
+                .Response
+                .WriteAsync(responseStr,
+                    response.ContentEncoding);
+
+            return new PreprocessResult { CallNext = false };
         }
     }
 }

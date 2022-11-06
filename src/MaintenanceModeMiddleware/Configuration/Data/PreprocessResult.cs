@@ -1,4 +1,4 @@
-﻿namespace MaintenanceModeMiddleware.RequestHandlers
+﻿namespace MaintenanceModeMiddleware.Configuration.Data
 {
     internal class PreprocessResult
     {

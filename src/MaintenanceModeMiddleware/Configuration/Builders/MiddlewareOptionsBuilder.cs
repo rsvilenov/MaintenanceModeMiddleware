@@ -44,7 +44,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 throw new FileNotFoundException($"Could not find file {relativePath}. Expected absolute path: {fullFilePath}.");
             }
 
-            _options.Add(new ResponseFromFileOption(relativePath, baseDir, code503RetryInterval));
+            _options.Add(new ResponseFromFileOption(relativePath, baseDir, code503RetryInterval, _dirMapperSvc));
 
             return this;
         }
@@ -91,7 +91,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseDefaultResponse()
         {
-            _options.Add(new DefaultResponseOption
+            _options.Add(new DefaultResponseOption(_dirMapperSvc)
             {
                 Value = true
             });
@@ -375,9 +375,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 BypassUserRoles(new string[] { "Admin", "Administrator"});
             }
 
-            if (!_options.Any<IResponseHolder>()
-                && !_options.Any<IRedirectInitializer>()
-                && !_options.Any<IRouteDataModifier>())
+            if (!_options.Any<IRequestHandler>())
             {
                 UseDefaultResponse();
             }
@@ -401,10 +399,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         private void VerifyResponseOptions()
         {
             IEnumerable<IOption> responseOptions = _options
-                .GetAll<IResponseHolder>()
-                .Cast<IOption>()
-                .Concat(_options.GetAll<IRedirectInitializer>())
-                .Concat(_options.GetAll<IRouteDataModifier>());
+                .GetAll<IRequestHandler>();
 
 
             if (!responseOptions.Any())

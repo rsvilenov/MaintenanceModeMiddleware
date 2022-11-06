@@ -14,7 +14,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value.ToString();
         }
 
-        public bool IsMatch(HttpContext context)
+        bool IAllowedRequestMatcher.IsMatch(HttpContext context)
         {
             return context
                 .User

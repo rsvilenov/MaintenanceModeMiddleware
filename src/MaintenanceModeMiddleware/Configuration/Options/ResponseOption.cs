@@ -1,12 +1,13 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Data;
 using MaintenanceModeMiddleware.Configuration.Enums;
-using MaintenanceModeMiddleware.Services;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
 {
-    internal class ResponseOption : Option<MaintenanceResponse>, IResponseHolder
+    internal class ResponseOption : Option<MaintenanceResponse>, IRequestHandler
     {
         private const char PARTS_SEPARATOR = ';';
 
@@ -55,9 +56,38 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return $"{Value.ContentType}{PARTS_SEPARATOR}{Value.ContentEncoding.CodePage}{PARTS_SEPARATOR}{Value.Code503RetryInterval}{PARTS_SEPARATOR}{Value.ContentEncoding.GetString(Value.ContentBytes)}";
         }
 
-        public MaintenanceResponse GetResponse(IDirectoryMapperService dirMapperSvc)
+        Task IRequestHandler.Postprocess(HttpContext context)
         {
-            return Value;
+            return Task.CompletedTask;
+        }
+
+        async Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
+        {
+            MaintenanceResponse response = Value;
+
+            context
+                .Response
+                .StatusCode = StatusCodes.Status503ServiceUnavailable;
+
+            context
+                .Response
+                .Headers
+                .Add("Retry-After", response.Code503RetryInterval.ToString());
+
+            context
+                .Response
+                .ContentType = response.GetContentTypeString();
+
+            string responseStr = response
+                .ContentEncoding
+                .GetString(response.ContentBytes);
+
+            await context
+                .Response
+                .WriteAsync(responseStr,
+                    response.ContentEncoding);
+
+            return new PreprocessResult { CallNext = false };
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
+using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Hosting;
+using NSubstitute;
 using Shouldly;
 using System;
 using System.IO;
@@ -141,7 +143,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
             uint code503RetryInterval = 2000;
 
             ResponseFromFileOption opt =
-                new ResponseFromFileOption(filePath, baseDir, code503RetryInterval);
+                new ResponseFromFileOption(filePath, baseDir, code503RetryInterval, Substitute.For<IDirectoryMapperService>());
 
             opt.Value.ShouldNotBeNull();
             opt.Value.File.Path.ShouldBe(filePath);

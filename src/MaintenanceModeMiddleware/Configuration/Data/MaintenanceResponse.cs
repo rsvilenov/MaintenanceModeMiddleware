@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MaintenanceModeMiddleware.Configuration.Data
 {
-    internal class MaintenanceResponse : IHaveStatusCodeInfo
+    internal class MaintenanceResponse
     {
         public ResponseContentType ContentType { get; set; }
         public Encoding ContentEncoding { get; set; }

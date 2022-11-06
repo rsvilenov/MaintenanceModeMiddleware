@@ -20,7 +20,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             return Value;
         }
 
-        public bool IsMatch(HttpContext context)
+        bool IAllowedRequestMatcher.IsMatch(HttpContext context)
         {
             return context
                 .Request

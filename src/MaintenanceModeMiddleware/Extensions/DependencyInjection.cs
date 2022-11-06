@@ -1,5 +1,4 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
-using MaintenanceModeMiddleware.RequestHandlers;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.StateStore;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,11 +23,6 @@ namespace MaintenanceModeMiddleware.Extensions
 
             services.AddSingleton<IMaintenanceControlService, MaintenanceControlService>();
             services.AddSingleton<IMaintenanceOptionsService, MaintenanceOptionsService>();
-
-            services.AddSingleton<IRequestHandler, DirectResponseHandler>();
-            services.AddSingleton<IRequestHandler, RedirectRequestHandler>();
-            services.AddSingleton<IRequestHandler, ResponseAfterRedirectHandler>();
-            services.AddSingleton<IRequestHandler, RouteModificationHandler>();
 
             return services;
         }
