@@ -535,7 +535,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             Action assertAction = () => builder.GetOptions();
 
             assertAction.ShouldThrow<ArgumentException>()
-                .Message.ShouldStartWith("No response or redirect was specified.");
+                .Message.ShouldStartWith("No response, redirect or route data was specified.");
         }
 
         [Fact]
@@ -591,7 +591,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             };
 
             testAction.ShouldThrow<ArgumentException>()
-                .Message.ShouldStartWith("Both a response and a redirect were specified.");
+                .Message.ShouldStartWith("More than one response, redirect or route data was specified.");
 
         }
     }

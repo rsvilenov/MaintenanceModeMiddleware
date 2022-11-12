@@ -1,70 +1,120 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Configuration.Data;
+using Microsoft.AspNetCore.Http;
 using Shouldly;
-using System;
 using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
 {
-    public class PathRedirectOptionsBuilderTest
+    public class PathRedirectOptionsBuilderTest : StatusCodeOptionsBuilderTestBase
     {
-        [Fact]
-        public void WhenCalledWithDefaultOptions_GetPathRedirectDataSet503ShouldBeTrue()
-        {
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+        public PathRedirectOptionsBuilderTest()
+            : base(new PathRedirectOptionsBuilder())
+        { }
 
-            ResponseStatusCodeData data = builder.GetStatusCodeData();
-                
-            data.Set503StatusCode.ShouldBeTrue();
+        [Fact]
+        public void WhenCalledWithPassReturnPathAsParameter_SetReturnUrlInUrlParameterShouldBeTrue()
+        {
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.PassReturnPathAsParameter();
+
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.SetReturnUrlInUrlParameter.ShouldBeTrue();
         }
 
         [Fact]
-        public void WhenCalledWithDefaultOptions_GetPathRedirectData503RetryShouldBeDefault()
+        public void WhenCalledWithPassReturnPathAsParameter_ReturnUrlParameterNameShouldBeDefault()
         {
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+            const string defaultReturnParameterName = "maintenanceReturnPath";
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.PassReturnPathAsParameter();
 
-            ResponseStatusCodeData data = builder.GetStatusCodeData();
+            ReturnUrlData data = builder.GetReturnUrlData();
 
-            data.Code503RetryInterval
-                .ShouldBe(DefaultValues.DEFAULT_503_RETRY_INTERVAL);
+            data.ReturnUrlParameterName.ShouldBe(defaultReturnParameterName);
         }
 
         [Fact]
-        public void PreserveStatusCode_WhenCalled_GetPathRedirectDataSet503ShouldBeFalse()
+        public void WhenCalledWithPassReturnPathAsParameter_WithName_ReturnUrlParameterNameShouldBeAsExpected()
         {
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+            const string returnParameterName = "path123";
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.PassReturnPathAsParameter(returnParameterName);
 
-            builder.PreserveStatusCode();
+            ReturnUrlData data = builder.GetReturnUrlData();
 
-            builder.GetStatusCodeData()
-                .Set503StatusCode
-                .ShouldBeFalse();
+            data.ReturnUrlParameterName.ShouldBe(returnParameterName);
         }
 
         [Fact]
-        public void Use503CodeRetryInterval_WhenCalledWithNonDefaultInterval_GetPathRedirectDataRetryIntervalShouldMatch()
+        public void WhenCalledWithSetReturnPathInCookier_SetReturnUrlInCookieShouldBeTrue()
         {
-            const uint retryInterval = 123;
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
-            
-            builder.Use503CodeRetryInterval(retryInterval);
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetReturnPathInCookie();
 
-            builder.GetStatusCodeData()
-                .Code503RetryInterval
-                .ShouldBe(retryInterval);
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.SetReturnUrlInCookie.ShouldBeTrue();
+        }
+
+
+        [Fact]
+        public void WhenCalledWithSetReturnPathInCookie_ReturnUrlCookiePrefixShouldBeDefault()
+        {
+            const string defaultReturnUrlCookiePrefix = "maintenanceReturnPath";
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetReturnPathInCookie();
+
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.ReturnUrlCookiePrefix.ShouldBe(defaultReturnUrlCookiePrefix);
         }
 
         [Fact]
-        public void WhenCalled_PreserveStatusCode_And_Use503CodeRetryInterval_ShouldThrow()
+        public void WhenCalledWithSetReturnPathInCookie_WithPrefix_ReturnUrlCookiePrefixShouldBeAsExpected()
         {
-            const uint retryInterval = 123;
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
-            builder.PreserveStatusCode();
-            builder.Use503CodeRetryInterval(retryInterval);
+            const string returnUrlCookiePrefix = "prefix123";
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetReturnPathInCookie(returnUrlCookiePrefix);
 
-            Action testAction = () => builder.GetStatusCodeData();
+            ReturnUrlData data = builder.GetReturnUrlData();
 
-            testAction.ShouldThrow<InvalidOperationException>();
+            data.ReturnUrlCookiePrefix.ShouldBe(returnUrlCookiePrefix);
+        }
+
+        [Fact]
+        public void WhenCalledWithPassReturnPathAsCookie_WithoutCookieOptions_ReturnUrlCookieOptionsShouldBeNull()
+        {
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetReturnPathInCookie(cookiePrefix: "test");
+
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.ReturnUrlCookieOptions.ShouldBeNull();
+        }
+
+        [Fact]
+        public void WhenCalledWithPassReturnPathAsCookie_WithCookieOptions_ReturnUrlCookieOptionsShouldNotBeNull()
+        {
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetReturnPathInCookie(cookiePrefix: "test", cookieOptions: new CookieOptions());
+
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.ReturnUrlCookieOptions.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void WhenCalledWithSetCustomReturnPath_CustomReturnPathShouldBeAsExpected()
+        {
+            PathString customReturnPath = "/test/path";
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
+            builder.SetCustomReturnPath(customReturnPath);
+
+            ReturnUrlData data = builder.GetReturnUrlData();
+
+            data.CustomReturnPath.ShouldBe(customReturnPath);
         }
     }
 }

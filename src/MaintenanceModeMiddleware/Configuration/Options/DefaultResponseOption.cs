@@ -13,11 +13,6 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         private const int DEFAULT_503_RETRY_INTERVAL = 5300;
         private readonly IDirectoryMapperService _dirMapperSvc;
 
-        public DefaultResponseOption(IDirectoryMapperService dirMapperSvc)
-        {
-            _dirMapperSvc = dirMapperSvc;
-        }
-
         public override void LoadFromString(string str)
         {
             Value = bool.Parse(str);

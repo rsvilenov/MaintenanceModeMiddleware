@@ -5,7 +5,7 @@ namespace MaintenanceModeMiddleware.Configuration.Data
     internal class ReturnUrlData
     {
         public string ReturnUrlCookiePrefix { get; set; }
-        public string ReturnUrlUrlParameterName { get; set; }
+        public string ReturnUrlParameterName { get; set; }
         public bool SetReturnUrlInCookie { get; set; }
         public bool SetReturnUrlInUrlParameter { get; set; }
         public CookieOptions ReturnUrlCookieOptions { get; set; }

@@ -3,14 +3,14 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    internal class StatusCodeOptionsBulder : 
+    internal class StatusCodeOptionsBuilder : 
         ICustomActionOptionsBuilder,
         IStatusCodeOptionsBuilder
     {
         private readonly ResponseStatusCodeData _data;
         private bool _isCustomRetryIntervalSpecified;
 
-        public StatusCodeOptionsBulder()
+        public StatusCodeOptionsBuilder()
         {
             _data = new ResponseStatusCodeData
             {

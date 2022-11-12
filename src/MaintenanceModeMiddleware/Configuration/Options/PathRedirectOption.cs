@@ -86,7 +86,7 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                 : Value.Path.ToUriComponent();
 
             string fullRedirectPath = Value.ReturnUrlData.SetReturnUrlInUrlParameter
-                ? $"{Value.Path.ToUriComponent()}?{Uri.EscapeDataString(Value.ReturnUrlData.ReturnUrlUrlParameterName)}={returnUrlPath}"
+                ? $"{Value.Path.ToUriComponent()}?{Uri.EscapeDataString(Value.ReturnUrlData.ReturnUrlParameterName)}={returnUrlPath}"
                 : Value.Path.ToUriComponent();
 
             context

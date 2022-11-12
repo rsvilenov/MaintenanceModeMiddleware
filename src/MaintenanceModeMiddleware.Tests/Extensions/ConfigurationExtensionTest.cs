@@ -21,7 +21,7 @@ namespace MaintenanceModeMiddleware.Tests.Extensions
             Action testAction = () => appBuilder.UseMaintenance();
 
             testAction.ShouldThrow<InvalidOperationException>()
-                .Message.ShouldStartWith("Unable to find the required service.");
+                .Message.ShouldStartWith("Unable to find IMaintenanceControlService. You should call AddMaintenance in Startup's Configure method.");
         }
 
         [Fact]

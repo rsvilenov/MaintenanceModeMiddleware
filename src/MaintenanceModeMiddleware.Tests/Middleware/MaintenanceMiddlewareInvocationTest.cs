@@ -641,8 +641,11 @@ namespace MaintenanceModeMiddleware.Tests
             }
 
             IDirectoryMapperService dirMapperSvc = FakeDirectoryMapperService.Create(tempDir);
-
-            OptionCollection middlewareOptions = null;
+            
+            MiddlewareOptionsBuilder optionBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);
+            optionsSetup.Invoke(optionBuilder);
+            OptionCollection middlewareOptions = optionBuilder.GetOptions();
+            
             if (optionsOverrideSetup != null)
             {
                 MiddlewareOptionsBuilder optionOverrideBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);

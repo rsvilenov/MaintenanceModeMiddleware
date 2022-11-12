@@ -3,18 +3,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    internal class PathRedirectOptionsBulder : StatusCodeOptionsBulder, IPathRedirectOptionsBulder
+    internal class PathRedirectOptionsBuilder : StatusCodeOptionsBuilder, IPathRedirectOptionsBuilder
     {
         private readonly ReturnUrlData _data;
 
-        public PathRedirectOptionsBulder()
+        public PathRedirectOptionsBuilder()
         {
             _data = new ReturnUrlData();
         }
+
         public void PassReturnPathAsParameter(string parameterName = "maintenanceReturnPath")
         {
             _data.SetReturnUrlInUrlParameter = true;
-            _data.ReturnUrlUrlParameterName = parameterName;
+            _data.ReturnUrlParameterName = parameterName;
         }
 
         public void SetReturnPathInCookie(string cookiePrefix = "maintenanceReturnPath", CookieOptions cookieOptions = null)

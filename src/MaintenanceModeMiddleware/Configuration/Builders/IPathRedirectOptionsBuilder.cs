@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    public interface IPathRedirectOptionsBulder : IStatusCodeOptionsBuilder
+    public interface IPathRedirectOptionsBuilder : IStatusCodeOptionsBuilder
     {
         void PassReturnPathAsParameter(string parameterName = "maintenanceReturnPath");
         void SetReturnPathInCookie(string cookiePrefix = "maintenanceReturnPath", CookieOptions cookieOptions = null);

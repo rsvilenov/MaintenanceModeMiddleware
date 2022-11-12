@@ -91,7 +91,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
 
         public IMiddlewareOptionsBuilder UseDefaultResponse()
         {
-            _options.Add(new DefaultResponseOption(_dirMapperSvc)
+            _options.Add(new DefaultResponseOption
             {
                 Value = true
             });
@@ -100,14 +100,14 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         }
 
 
-        public IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBulder> options = null)
+        public IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBuilder> options = null)
         {
             if (!path.HasValue)
             {
                 throw new ArgumentNullException($"{nameof(path)} is empty.");
             }
 
-            PathRedirectOptionsBulder builder = new PathRedirectOptionsBulder();
+            PathRedirectOptionsBuilder builder = new PathRedirectOptionsBuilder();
             options?.Invoke(builder);
 
             PathRedirectData data = new PathRedirectData
@@ -170,7 +170,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 areaName = ((AreaAttribute)areaAttribute).RouteValue;
             }
 
-            StatusCodeOptionsBulder builder = new StatusCodeOptionsBulder();
+            StatusCodeOptionsBuilder builder = new StatusCodeOptionsBuilder();
             options?.Invoke(builder);
 
             _options.Add(new ControllerActionOption

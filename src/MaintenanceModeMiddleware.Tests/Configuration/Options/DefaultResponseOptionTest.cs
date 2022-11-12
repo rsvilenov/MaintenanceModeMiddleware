@@ -15,7 +15,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("False", false)]
         public void LoadFromString_WithValidInput_ValueShouldEqualInput(string str, bool isSet)
         {
-            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
+            var option = new DefaultResponseOption();
 
             option.LoadFromString(str);
 
@@ -27,7 +27,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData("False")]
         public void LoadFromString_WithValidInput_StringValueShouldEqualInput(string str)
         {
-            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
+            var option = new DefaultResponseOption();
 
             option.LoadFromString(str);
 
@@ -39,7 +39,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
         [InlineData(null, typeof(ArgumentNullException))]
         public void LoadFromString_WithInvalidInput_ShouldThrow(string str, Type expectedException)
         {
-            var option = new DefaultResponseOption(Substitute.For<IDirectoryMapperService>());
+            var option = new DefaultResponseOption();
             Action testAction = () => option.LoadFromString(str);
 
             testAction.ShouldThrow(expectedException);
