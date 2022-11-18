@@ -3,36 +3,48 @@ using Microsoft.AspNetCore.Http;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    internal class PathRedirectOptionsBuilder : StatusCodeOptionsBuilder, IPathRedirectOptionsBuilder
+    public class PathRedirectOptionsBuilder<TBuilder> : 
+        StatusCodeOptionsBuilder<TBuilder>
+        where TBuilder : PathRedirectOptionsBuilder<TBuilder>
     {
         private readonly ReturnUrlData _data;
 
-        public PathRedirectOptionsBuilder()
+        internal PathRedirectOptionsBuilder()
         {
             _data = new ReturnUrlData();
         }
 
-        public void PassReturnPathAsParameter(string parameterName = "maintenanceReturnPath")
+        public TBuilder PassReturnPathAsParameter(string parameterName = "maintenanceReturnPath")
         {
             _data.SetReturnUrlInUrlParameter = true;
             _data.ReturnUrlParameterName = parameterName;
+            return (TBuilder)this;
         }
 
-        public void SetReturnPathInCookie(string cookiePrefix = "maintenanceReturnPath", CookieOptions cookieOptions = null)
+        public TBuilder SetReturnPathInCookie(string cookiePrefix = "maintenanceReturnPath", CookieOptions cookieOptions = null)
         {
             _data.SetReturnUrlInCookie = true;
             _data.ReturnUrlCookiePrefix = cookiePrefix;
             _data.ReturnUrlCookieOptions = cookieOptions;
+            return (TBuilder)this;
         }
 
-        public void SetCustomReturnPath(PathString returnPath)
+        public TBuilder SetCustomReturnPath(PathString returnPath)
         {
             _data.CustomReturnPath = returnPath;
+            return (TBuilder)this;
         }
 
-        public ReturnUrlData GetReturnUrlData()
+        internal ReturnUrlData GetReturnUrlData()
         {
             return _data;
+        }
+    }
+
+    public class PathRedirectOptionsBuilder : PathRedirectOptionsBuilder<PathRedirectOptionsBuilder>
+    {
+        internal PathRedirectOptionsBuilder()
+        {
         }
     }
 }

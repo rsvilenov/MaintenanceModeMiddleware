@@ -6,7 +6,7 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
 {
-    public class PathRedirectOptionsBuilderTest : StatusCodeOptionsBuilderTestBase
+    public class PathRedirectOptionsBuilderTest : StatusCodeOptionsBuilderTestBase<PathRedirectOptionsBuilder>
     {
         public PathRedirectOptionsBuilderTest()
             : base(new PathRedirectOptionsBuilder())

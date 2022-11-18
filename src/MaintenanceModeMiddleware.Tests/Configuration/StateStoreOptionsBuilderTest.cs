@@ -10,28 +10,37 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 {
     public class StateStoreOptionsBuilderTest
     {
+        private readonly StateStoreOptionsBuilder _builder;
+
+        public StateStoreOptionsBuilderTest()
+        {
+            _builder = new StateStoreOptionsBuilder();
+        }
+
         [Fact]
         public void UseNoStateStore_WhenCalled_GetStateStoreShouldReturnNull()
         {
-            StateStoreOptionsBuilder builder = new StateStoreOptionsBuilder();
+            // Act
+            _builder.UseNoStateStore();
 
-            builder.UseNoStateStore();
-
-            builder.GetStateStoreInstance()
+            // Assert
+            _builder.GetStateStoreInstance()
                 .ShouldBeNull();
-            builder.GetStateStoreType()
+            _builder.GetStateStoreType()
                 .ShouldBeNull();
         }
 
         [Fact]
         public void CustomStateStore_WithStateStoreInstance_GetStateStoreShouldEqualPassed()
         {
-            StateStoreOptionsBuilder builder = new StateStoreOptionsBuilder();
+            // Arrange
             IStateStore storeSubstitute = Substitute.For<IStateStore>();
 
-            builder.UseStateStore(storeSubstitute);
+            // Act
+            _builder.UseStateStore(storeSubstitute);
 
-            builder.GetStateStoreInstance()
+            // Assert
+            _builder.GetStateStoreInstance()
                 .ShouldNotBeNull()
                 .ShouldBeOfType(storeSubstitute.GetType());
         }
@@ -39,11 +48,11 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void CustomStateStore_WithStateStoreType_GetStateStoreShouldEqualPassed()
         {
-            StateStoreOptionsBuilder builder = new StateStoreOptionsBuilder();
-            
-            builder.UseStateStore<InMemoryStateStore>();
+            // Act
+            _builder.UseStateStore<InMemoryStateStore>();
 
-            builder.GetStateStoreType()
+            // Assert
+            _builder.GetStateStoreType()
                 .ShouldNotBeNull()
                 .ShouldBe(typeof(InMemoryStateStore));
         }
@@ -51,14 +60,15 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         [Fact]
         public void CustomStateStore_WithNull_ShouldThrowArgumentNullException()
         {
-            StateStoreOptionsBuilder builder = new StateStoreOptionsBuilder();
+            // Arrange
             IStateStore stateStore = null;
 
             Action testAction = () =>
             {
-                builder.UseStateStore(stateStore);
+                _builder.UseStateStore(stateStore);
             };
 
+            // Act & Assert
             testAction.ShouldThrow<ArgumentNullException>();
         }
     }

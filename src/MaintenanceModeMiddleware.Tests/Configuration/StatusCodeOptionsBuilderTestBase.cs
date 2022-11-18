@@ -6,10 +6,11 @@ using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests.Configuration
 {
-    public abstract class StatusCodeOptionsBuilderTestBase : IClassFixture<IStatusCodeOptionsBuilder>
+    public abstract class StatusCodeOptionsBuilderTestBase<TBuilder> : IClassFixture<StatusCodeOptionsBuilder>
+        where TBuilder : StatusCodeOptionsBuilder<TBuilder>
     {
-        private readonly IStatusCodeOptionsBuilder _builder;
-        public StatusCodeOptionsBuilderTestBase(IStatusCodeOptionsBuilder builder)
+        private readonly TBuilder _builder;
+        public StatusCodeOptionsBuilderTestBase(TBuilder builder)
         {
             _builder = builder;
         }
@@ -67,7 +68,7 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
 
         private ResponseStatusCodeData GetResponseStatusCodeData()
         {
-            return ((StatusCodeOptionsBuilder)_builder).GetStatusCodeData();
+            return _builder.GetStatusCodeData();
         }
     }
 }

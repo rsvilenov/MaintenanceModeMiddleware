@@ -100,7 +100,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         }
 
 
-        public IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBuilder> options = null)
+        public IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<PathRedirectOptionsBuilder> options = null)
         {
             if (!path.HasValue)
             {
@@ -146,7 +146,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         }
 
 
-        public IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<ICustomActionOptionsBuilder> options = null)
+        public IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<CustomActionOptionsBuilder> options = null)
             where TController : ControllerBase
         {
             if (string.IsNullOrEmpty(actionName))
@@ -170,7 +170,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
                 areaName = ((AreaAttribute)areaAttribute).RouteValue;
             }
 
-            StatusCodeOptionsBuilder builder = new StatusCodeOptionsBuilder();
+            CustomActionOptionsBuilder builder = new CustomActionOptionsBuilder();
             options?.Invoke(builder);
 
             _options.Add(new ControllerActionOption

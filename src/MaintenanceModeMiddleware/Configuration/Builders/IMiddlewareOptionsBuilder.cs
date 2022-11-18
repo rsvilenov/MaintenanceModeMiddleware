@@ -68,7 +68,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="path">The relative URI path to the razor page</param>
         /// <param name="options">An option builder for configuring the redirect behavior.</param>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
-        IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<IPathRedirectOptionsBuilder> options = null);
+        IMiddlewareOptionsBuilder UsePathRedirect(PathString path, Action<PathRedirectOptionsBuilder> options = null);
 
         /// <summary>
         /// Redirect to a URL when the application is in maintenance mode.
@@ -89,7 +89,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
         /// <param name="actionName">The action name within the controller.</param>
         /// <param name="options">Additional options for the response.</param>
         /// <returns>The same <see cref="IMiddlewareOptionsBuilder"/> instance so that multiple calls can be chained.</returns>
-        IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<ICustomActionOptionsBuilder> options = null)
+        IMiddlewareOptionsBuilder UseControllerAction<TController>(string actionName, Action<CustomActionOptionsBuilder> options = null)
             where TController : ControllerBase;
 
         /// <summary>

@@ -3,14 +3,13 @@ using System;
 
 namespace MaintenanceModeMiddleware.Configuration.Builders
 {
-    internal class StatusCodeOptionsBuilder : 
-        ICustomActionOptionsBuilder,
-        IStatusCodeOptionsBuilder
+    public class StatusCodeOptionsBuilder<TBuilder>
+        where TBuilder : StatusCodeOptionsBuilder<TBuilder>
     {
         private readonly ResponseStatusCodeData _data;
         private bool _isCustomRetryIntervalSpecified;
 
-        public StatusCodeOptionsBuilder()
+        internal StatusCodeOptionsBuilder()
         {
             _data = new ResponseStatusCodeData
             {
@@ -19,18 +18,20 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             };
         }
 
-        public void Use503CodeRetryInterval(uint retryInterval)
+        public TBuilder Use503CodeRetryInterval(uint retryInterval)
         {
             _data.Code503RetryInterval = retryInterval;
             _isCustomRetryIntervalSpecified = true;
+            return (TBuilder)this;
         }
 
-        public void PreserveStatusCode()
+        public TBuilder PreserveStatusCode()
         {
             _data.Set503StatusCode = false;
+            return (TBuilder)this;
         }
 
-        public ResponseStatusCodeData GetStatusCodeData()
+        internal ResponseStatusCodeData GetStatusCodeData()
         {
             if (!_data.Set503StatusCode
                 && _isCustomRetryIntervalSpecified)
@@ -39,6 +40,13 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             }
 
             return _data;
+        }
+    }
+
+    public class StatusCodeOptionsBuilder : StatusCodeOptionsBuilder<StatusCodeOptionsBuilder>
+    {
+        internal StatusCodeOptionsBuilder()
+        {
         }
     }
 }
