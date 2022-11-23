@@ -1,6 +1,7 @@
 ﻿using MaintenanceModeMiddleware.Configuration.Builders;
 using MaintenanceModeMiddleware.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace MaintenanceModeMiddleware.Extensions
@@ -15,27 +16,15 @@ namespace MaintenanceModeMiddleware.Extensions
         public static IApplicationBuilder UseMaintenance(this IApplicationBuilder builder, 
             Action<IMiddlewareOptionsBuilder> options = null)
         {
-            var maintenanceSvc = builder.ApplicationServices
-                .GetService(typeof(IMaintenanceControlService));
-            if (maintenanceSvc == null)
-            {
-                throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceControlService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
-            }
-
-            IDirectoryMapperService dirMapperSvc = builder.ApplicationServices
-                .GetService(typeof(IDirectoryMapperService)) as IDirectoryMapperService;
-            if (maintenanceSvc == null)
-            {
-                throw new InvalidOperationException($"Unable to find {nameof(IDirectoryMapperService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
-            }
-
-            IMaintenanceOptionsService optionsService = builder.ApplicationServices
-               .GetService(typeof(IMaintenanceOptionsService)) as IMaintenanceOptionsService;
-            if (maintenanceSvc == null)
-            {
-                throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceOptionsService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
-            }
-
+            var maintenanceSvc = builder.ApplicationServices.GetService<IMaintenanceControlService>()
+                ?? throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceControlService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+            
+            IDirectoryMapperService dirMapperSvc = builder.ApplicationServices.GetService<IDirectoryMapperService>()
+                ?? throw new InvalidOperationException($"Unable to find {nameof(IDirectoryMapperService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+            
+            IMaintenanceOptionsService optionsService = builder.ApplicationServices.GetService<IMaintenanceOptionsService>()
+                ?? throw new InvalidOperationException($"Unable to find {nameof(IMaintenanceOptionsService)}. You should call {nameof(DependencyInjection.AddMaintenance)} in Startup's Configure method.");
+            
             var optionsBuilder = new MiddlewareOptionsBuilder(dirMapperSvc);
             options?.Invoke(optionsBuilder);
 

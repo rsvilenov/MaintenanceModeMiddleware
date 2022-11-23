@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Configuration.Enums;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
@@ -149,6 +150,15 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
             opt.Value.File.Path.ShouldBe(filePath);
             opt.Value.File.BaseDir.ShouldBe(baseDir);
             opt.Value.Code503RetryInterval.ShouldBe(code503RetryInterval);
+        }
+
+        [Fact]
+        public void Postprocess_ShouldNotThrow()
+        {
+            IRequestHandler option = new ResponseFromFileOption();
+            Action testAction = async () => await option.Postprocess(null);
+
+            testAction.ShouldNotThrow();
         }
     }
 }

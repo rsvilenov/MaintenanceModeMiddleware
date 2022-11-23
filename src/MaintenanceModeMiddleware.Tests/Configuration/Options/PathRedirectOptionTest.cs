@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Configuration.Options;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Options;
 using Shouldly;
 using System;
 using Xunit;

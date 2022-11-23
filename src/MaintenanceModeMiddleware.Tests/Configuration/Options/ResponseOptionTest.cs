@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Configuration.Enums;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Enums;
 using MaintenanceModeMiddleware.Configuration.Options;
 using Shouldly;
 using System;
@@ -113,6 +114,15 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
             Action testAction = () => option.LoadFromString(input);
 
             testAction.ShouldThrow<ArgumentException>();
+        }
+
+        [Fact]
+        public void Postprocess_ShouldNotThrow()
+        {
+            IRequestHandler option = new ResponseOption();
+            Action testAction = async () => await option.Postprocess(null);
+
+            testAction.ShouldNotThrow();
         }
     }
 }

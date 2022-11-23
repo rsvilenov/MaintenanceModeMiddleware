@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MaintenanceModeMiddleware.Configuration.Options
@@ -16,10 +15,14 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         public Dictionary<string, string> GetDataTokens()
         {
-            return new Dictionary<string, string>
+            var tokens = new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(Value.AreaName))
             {
-                { "area", Value.AreaName }
-            };
+                tokens.Add("area", Value.AreaName);
+            }
+
+            return tokens;
         }
 
         public Dictionary<string, string> GetRouteValues()
@@ -52,8 +55,6 @@ namespace MaintenanceModeMiddleware.Configuration.Options
             };
         }
 
-        public ResponseStatusCodeData StatusCodeData => Value.StatusCodeData;
-
         Task IRequestHandler.Postprocess(HttpContext context)
         {
             if (Value.StatusCodeData.Set503StatusCode)
@@ -72,23 +73,42 @@ namespace MaintenanceModeMiddleware.Configuration.Options
         Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
         {
             var routeData = context.GetRouteData();
-
-            var newRouteValues = GetRouteValues();
-            foreach (string routeValueKey in routeData.Values.Keys
-                .Where(key => newRouteValues.ContainsKey(key)))
-            {
-                routeData.Values[routeValueKey] = newRouteValues[routeValueKey];
-            }
-
-
-            var newDataTokens = GetDataTokens();
-            foreach (string dataTokenKey in routeData.DataTokens.Keys
-                .Where(key => newRouteValues.ContainsKey(key)))
-            {
-                routeData.DataTokens[dataTokenKey] = newRouteValues[dataTokenKey];
-            }
+            ProcessRouteValues(routeData);
+            ProcessDataTokens(routeData);
 
             return Task.FromResult(new PreprocessResult { CallNext = true });
+        }
+
+        private void ProcessDataTokens(RouteData routeData)
+        {
+            var newDataTokens = GetDataTokens();
+            foreach (string newDataTokenKey in newDataTokens.Keys)
+            {
+                if (routeData.Values.ContainsKey(newDataTokenKey))
+                {
+                    routeData.Values[newDataTokenKey] = newDataTokens[newDataTokenKey];
+                }
+                else
+                {
+                    routeData.Values.Add(newDataTokenKey, newDataTokens[newDataTokenKey]);
+                }
+            }
+        }
+
+        private void ProcessRouteValues(RouteData routeData)
+        {
+            var newRouteValues = GetRouteValues();
+            foreach (string newRouteValueKey in newRouteValues.Keys)
+            {
+                if (routeData.Values.ContainsKey(newRouteValueKey))
+                {
+                    routeData.Values[newRouteValueKey] = newRouteValues[newRouteValueKey];
+                }
+                else
+                {
+                    routeData.Values.Add(newRouteValueKey, newRouteValues[newRouteValueKey]);
+                }
+            }
         }
     }
 }

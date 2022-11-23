@@ -67,6 +67,10 @@ namespace MaintenanceModeMiddleware.Configuration.Options
 
         Task<PreprocessResult> IRequestHandler.Preprocess(HttpContext context)
         {
+            string returnUrlPath = Value.ReturnUrlData.CustomReturnPath.HasValue
+                   ? Value.ReturnUrlData.CustomReturnPath.Value.ToUriComponent()
+                   : context.Request.Path.ToUriComponent();
+
             if (Value.ReturnUrlData.SetReturnUrlInCookie)
             {
                 _cookieName ??= $"{Value.ReturnUrlData.ReturnUrlCookiePrefix}_{Guid.NewGuid()}";
@@ -76,14 +80,10 @@ namespace MaintenanceModeMiddleware.Configuration.Options
                     context
                         .Response
                         .Cookies
-                        .Append(_cookieName, context.Request.Path,
+                        .Append(_cookieName, returnUrlPath,
                             Value.ReturnUrlData.ReturnUrlCookieOptions ?? new CookieOptions { IsEssential = true });
                 }
             }
-
-            string returnUrlPath = Value.ReturnUrlData.CustomReturnPath.HasValue
-                ? Value.ReturnUrlData.CustomReturnPath.Value.ToUriComponent()
-                : Value.Path.ToUriComponent();
 
             string fullRedirectPath = Value.ReturnUrlData.SetReturnUrlInUrlParameter
                 ? $"{Value.Path.ToUriComponent()}?{Uri.EscapeDataString(Value.ReturnUrlData.ReturnUrlParameterName)}={returnUrlPath}"

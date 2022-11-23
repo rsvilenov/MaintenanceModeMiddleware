@@ -157,7 +157,7 @@ namespace MaintenanceModeMiddleware.Configuration.Builders
             Type controllerType = typeof(TController);
 
             string controllerName = controllerType.Name;
-            string controllerSuffix = "Controller";
+            const string controllerSuffix = "Controller";
             if (controllerName.EndsWith(controllerSuffix))
             {
                 controllerName = controllerName.Remove(controllerName.Length - controllerSuffix.Length);

@@ -51,9 +51,14 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
         }
 
         [Theory]
+        /* null filename */
         [InlineData(null, default(EnvDirectory), false, typeof(ArgumentNullException))]
+        /* empty filename */
         [InlineData("", default(EnvDirectory), false, typeof(ArgumentNullException))]
-        [InlineData("test" /* file name without an extension */, default(EnvDirectory), true, typeof(ArgumentException))]
+        /* non-existent file */
+        [InlineData("test.html", default(EnvDirectory), false, typeof(FileNotFoundException))]
+        /* file name without an extension */
+        [InlineData("test", default(EnvDirectory), true, typeof(ArgumentException))]
         public void UseResponseFile_WithInvalidData_ShouldThrow(string relativePath,
             EnvDirectory baseDir,
             bool createFile,
@@ -207,21 +212,24 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             testAction.ShouldThrow(expectedException);
         }
 
-        //[Fact]
-        //public void UsePathRedirect_WithValidUriPath_ValueShouldEqualInput()
-        //{
-        //    string uriPath = "/test";
-        //    var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+        [Fact]
+        public void UsePathRedirect_WithValidUriPath_ValueShouldEqualInput()
+        {
+            PathString uriPath = "/test";
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
 
 
-        //    builder.UsePathRedirect(uriPath);
+            builder.UsePathRedirect(uriPath);
 
 
-        //    var option = builder
-        //        .GetOptions()
-        //        .GetSingleOrDefault<IRedirectInitializer>();
-        //    option.RedirectLocation.ShouldBe(uriPath);
-        //}
+            var option = builder
+                .GetOptions()
+                .GetSingleOrDefault<PathRedirectOption>();
+            option.Value
+                .ShouldNotBeNull()
+                .Path
+                .ShouldBe(uriPath);
+        }
 
         [Theory]
         [InlineData(null, typeof(ArgumentNullException))]
@@ -237,6 +245,102 @@ namespace MaintenanceModeMiddleware.Tests.Configuration
             };
 
             testAction.ShouldThrow(expectedException);
+        }
+
+        [Theory]
+        [InlineData("")]
+        public void UseControllerAction_WithInvalidActionName_ShouldThrow(string actionName)
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+
+            Action testAction = () =>
+            {
+                builder.UseControllerAction<TestController>(actionName);
+            };
+
+            testAction.ShouldThrow<ArgumentNullException>();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void UseControllerAction_WithValidActionName_ControllerNameAndActionNameShouldMatch(bool useControllerWithArea)
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+            string actionName = Guid.NewGuid().ToString();
+
+            if (useControllerWithArea)
+            {
+                builder.UseControllerAction<TestControllerWithAreaAttribute>(actionName);
+            }
+            else
+            {
+                builder.UseControllerAction<TestController>(actionName);
+            }
+
+            var option = builder.GetOptions()
+                .GetSingleOrDefault<ControllerActionOption>();
+
+            option.ShouldNotBeNull()
+                .Value
+                .ShouldNotBeNull();
+
+            string expectedControllerName = useControllerWithArea
+                ? nameof(TestControllerWithAreaAttribute)
+                : nameof(TestController).Replace("Controller", "");
+            
+            option.Value.ControllerName
+                .ShouldBe(expectedControllerName);
+
+            option.Value.ActionName
+                .ShouldBe(actionName);
+        }
+
+        [Fact]
+        public void UseControllerAction_WithArea_AreaNameShouldMatch()
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+            string actionName = Guid.NewGuid().ToString();
+
+            builder.UseControllerAction<TestControllerWithAreaAttribute>(actionName);
+
+            var option = builder.GetOptions()
+                .GetSingleOrDefault<ControllerActionOption>();
+
+            option.ShouldNotBeNull()
+                .Value
+                .ShouldNotBeNull();
+
+            option.Value
+                .AreaName
+                .ShouldBe(TestControllerWithAreaAttribute.AreaName);
+        }
+
+        [Fact]
+        public void UseControllerAction_WithRetryInterval_RetryIntervalShouldMatch()
+        {
+            var builder = new MiddlewareOptionsBuilder(_dirMapperSvc);
+            string actionName = Guid.NewGuid().ToString();
+            uint retryInterval = (uint)(new Random().Next(1, 100));
+
+            builder.UseControllerAction<TestController>(actionName, options =>
+            {
+                options.Use503CodeRetryInterval(retryInterval);
+            });
+
+            var option = builder.GetOptions()
+                .GetSingleOrDefault<ControllerActionOption>();
+
+            option.ShouldNotBeNull()
+                .Value
+                .ShouldNotBeNull()
+                .StatusCodeData
+                .ShouldNotBeNull();
+
+            option.Value
+                .StatusCodeData
+                .Code503RetryInterval
+                .ShouldBe(retryInterval);
         }
 
         [Fact]

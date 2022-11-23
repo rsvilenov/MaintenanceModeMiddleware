@@ -7,6 +7,5 @@ namespace MaintenanceModeMiddleware.Configuration
     {
         Dictionary<string, string> GetRouteValues();
         Dictionary<string, string> GetDataTokens();
-        ResponseStatusCodeData StatusCodeData { get; }
     }
 }

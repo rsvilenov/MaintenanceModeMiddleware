@@ -5,14 +5,17 @@ using MaintenanceModeMiddleware.Configuration.State;
 using MaintenanceModeMiddleware.Services;
 using MaintenanceModeMiddleware.Tests.HelperTypes;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using NSubstitute;
 using Shouldly;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Xunit;
 
 namespace MaintenanceModeMiddleware.Tests
@@ -467,6 +470,237 @@ namespace MaintenanceModeMiddleware.Tests
         }
 
         [Fact]
+        public async void Invoke_WithUsePathRedirect_WithPreserveStatusCode_ResponseStatusCodeShouldBeDefault()
+        {
+            const string testUriPath = "/test";
+            const int defaultStatusCode = 200;
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath, 
+                        redirectOptions => redirectOptions.PreserveStatusCode());
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Request.Path = testUriPath;
+            desk.CurrentHttpContext.Response.StatusCode = defaultStatusCode;
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(defaultStatusCode);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldNotContain(h => h.Key == "Retry-After");
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WhenPathDoesNotMatchRedirectLocation_ShouldRedirect()
+        {
+            const string testUriPath = "/test";
+            const int defaultStatusCode = 200;
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath);
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Request.Path = "/";
+            desk.CurrentHttpContext.Response.StatusCode = defaultStatusCode;
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.StatusCode
+                .ShouldBe(302);
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Location"); 
+            desk.CurrentHttpContext.Response.Headers["Location"].ToString()
+                 .ShouldBe(testUriPath);
+        }
+        
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_SetReturnUrlInCookie_ShouldSetReturnUrlInCookie()
+        {
+            const string testUriPath = "/test";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath, 
+                        redirectOptions => redirectOptions.SetReturnPathInCookie());
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Set-Cookie");
+            desk.CurrentHttpContext.Response.Headers["Set-Cookie"]
+                .ShouldContain(cookie => cookie.Contains("%2FreturnPath"));
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WithNoCookieOption_ShouldNotSetCookie()
+        {
+            const string testUriPath = "/test";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath);
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldNotContainKey("Set-Cookie");
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WithCustomCookieOptions_ShouldNotSetCookieOptins()
+        {
+            const string testUriPath = "/test";
+            string customCookieDomain = "mytestdomain.com";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    var cookieOptions = new CookieOptions
+                    {
+                        Domain = customCookieDomain
+                    };
+
+                    optionBuilder.UsePathRedirect(testUriPath, 
+                        redirectOptions => redirectOptions.SetReturnPathInCookie(cookieOptions: cookieOptions));
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Set-Cookie");
+            desk.CurrentHttpContext.Response.Headers["Set-Cookie"]
+                .ShouldContain(cookie => cookie.Contains($"domain={customCookieDomain}"));
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WithPassReturnPathAsParameter_ShouldPassReurnPath()
+        {
+            const string testUriPath = "/test";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath,
+                        redirectOptions => redirectOptions.PassReturnPathAsParameter());
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Location");
+            desk.CurrentHttpContext.Response.Headers["Location"]
+                .ToString()
+                .ShouldEndWith("maintenanceReturnPath=/returnPath");
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WithCustomReturnPath_ShouldSetCustomReurnPath()
+        {
+            const string testUriPath = "/test";
+            const string customReturnPath = "/testCustomReturnPath";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath,
+                        redirectOptions => redirectOptions
+                            .PassReturnPathAsParameter()
+                            .SetReturnPathInCookie()
+                            .SetCustomReturnPath(customReturnPath));
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Location");
+            desk.CurrentHttpContext.Response.Headers["Location"]
+                .ToString()
+                .ShouldEndWith($"maintenanceReturnPath={customReturnPath}");
+
+            string encodedPath = $"%2F{customReturnPath.TrimStart('/')}";
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Set-Cookie");
+            desk.CurrentHttpContext.Response.Headers["Set-Cookie"]
+                .ShouldContain(cookie => cookie.Contains(encodedPath));
+        }
+
+        [Fact]
+        public async void Invoke_WithUsePathRedirect_WithCustomReturnPathParameterName_ShouldSetCustoParameterName()
+        {
+            const string testUriPath = "/test";
+            const string customReturnPathParameterName = "myReturnPath";
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                    httpContext.Request.Path = "/returnPath";
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UsePathRedirect(testUriPath,
+                        redirectOptions => redirectOptions
+                            .PassReturnPathAsParameter(customReturnPathParameterName)
+                            .SetReturnPathInCookie(customReturnPathParameterName));
+                });
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Location");
+            desk.CurrentHttpContext.Response.Headers["Location"]
+                .ToString()
+                .ShouldEndWith($"{customReturnPathParameterName}=/returnPath");
+
+            string encodedPath = $"%2FreturnPath";
+            desk.CurrentHttpContext.Response.Headers
+                .ShouldContainKey("Set-Cookie");
+            desk.CurrentHttpContext.Response.Headers["Set-Cookie"]
+                .ShouldContain(cookie => cookie.Contains(customReturnPathParameterName)
+                    && cookie.Contains(encodedPath));
+        }
+
+        [Fact]
         public async void Invoke_WithUsePathRedirect_And_PreserveStatusCode_ResponseShouldBeAppropriate()
         {
             const string testUriPath = "/test";
@@ -534,64 +768,133 @@ namespace MaintenanceModeMiddleware.Tests
                 .ShouldBe(retryInterval.ToString());
         }
 
-        //[Fact]
-        //public void Invoke_WhenMaintenanceModeIsOn_ShouldNotThrow()
-        //{
-        //    DefaultHttpContext httpContext = new DefaultHttpContext();
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void Invoke_WithUseControllerAction_ControllerAndActionNamesShouldBeSet(bool isRouteDataPrefilled)
+        {
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UseControllerAction<TestController>(nameof(TestController.Get));
+                });
 
-        //    IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
-        //    svc.GetState().Returns(new MaintenanceState
-        //    {
-        //        IsMaintenanceOn = true
-        //    });
+            if (isRouteDataPrefilled)
+            {
+                var preMiddlewareRouteData = desk.CurrentHttpContext.GetRouteData();
+                preMiddlewareRouteData.Values.Add("controller", "someController");
+                preMiddlewareRouteData.Values.Add("action", "someAction");
+            }
 
-        //    MaintenanceMiddleware middleware = new MaintenanceMiddleware(
-        //        (hc) =>
-        //        {
-        //            return Task.CompletedTask;
-        //        },
-        //        svc,
-        //        null,
-        //        new OptionCollection());
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            var routeData = desk.CurrentHttpContext.GetRouteData();
+            routeData.Values.Keys.ShouldContain(k => k == "controller");
+            routeData.Values.Keys.ShouldContain(k => k == "action");
+            routeData.Values.Keys.ShouldNotContain(k => k == "area");
+            routeData.Values["Controller"].ShouldBe(nameof(TestController).Replace("Controller", ""));
+            routeData.Values["Action"].ShouldBe(nameof(TestController.Get));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void Invoke_WithUseControllerAction_WithControllerWithArea_ControllerAndActionAndAreaNamesShouldBeSet(bool isRouteDataPrefilled)
+        {
+            MiddlewareTestDesk desk = GetTestDesk(
+                (httpContext) =>
+                {
+                },
+                (optionBuilder) =>
+                {
+                    optionBuilder.UseControllerAction<TestControllerWithAreaAttribute>(nameof(TestController.Get));
+                });
+
+            if (isRouteDataPrefilled)
+            {
+                var preMiddlewareRouteData = desk.CurrentHttpContext.GetRouteData();
+                preMiddlewareRouteData.Values.Add("controller", "someController");
+                preMiddlewareRouteData.Values.Add("action", "someAction");
+                preMiddlewareRouteData.Values.Add("area", "someArea");
+            }
+
+            await desk.MiddlewareInstance
+                .Invoke(desk.CurrentHttpContext);
+
+            var routeData = desk.CurrentHttpContext.GetRouteData();
+            routeData.Values.Keys.ShouldContain(k => k == "controller");
+            routeData.Values.Keys.ShouldContain(k => k == "action");
+            routeData.Values.Keys.ShouldContain(k => k == "area");
+            routeData.Values["controller"].ShouldBe(nameof(TestControllerWithAreaAttribute));
+            routeData.Values["action"].ShouldBe(nameof(TestControllerWithAreaAttribute.Get));
+            routeData.Values["area"].ShouldBe(TestControllerWithAreaAttribute.AreaName);
+        }
+
+        [Fact]
+        public void Invoke_WhenMaintenanceModeIsOn_ShouldNotThrow()
+        {
+            DefaultHttpContext httpContext = new DefaultHttpContext();
+
+            IMaintenanceControlService controlSvc = Substitute.For<IMaintenanceControlService>();
+            IMaintenanceOptionsService optionsSvc = Substitute.For<IMaintenanceOptionsService>();
+            IDirectoryMapperService dirMapperSvc = Substitute.For<IDirectoryMapperService>();
+            controlSvc.GetState().Returns(new MaintenanceState
+            {
+                IsMaintenanceOn = true
+            });
+            optionsSvc.GetOptions().Returns(new MiddlewareOptionsBuilder(dirMapperSvc).GetOptions());
+
+            MaintenanceMiddleware middleware = new MaintenanceMiddleware(
+                (hc) =>
+                {
+                    return Task.CompletedTask;
+                },
+                controlSvc,
+                optionsSvc);
 
 
-        //    Action testAction = async ()
-        //        => await middleware.Invoke(httpContext);
+            Action testAction = async ()
+                => await middleware.Invoke(httpContext);
 
 
-        //    testAction.ShouldNotThrow();
-        //}
+            testAction.ShouldNotThrow();
+        }
 
-        //[Theory]
-        //[InlineData(true)]
-        //[InlineData(false)]
-        //public async void Invoke_WithMaintenanceStateSet_NextDelegateShouldBeCalledOnlyWhenMaintenanceIsOn(bool isOn)
-        //{
-        //    DefaultHttpContext httpContext = new DefaultHttpContext();
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void Invoke_WithMaintenanceStateSet_NextDelegateShouldBeCalledOnlyWhenMaintenanceIsOn(bool isOn)
+        {
+            DefaultHttpContext httpContext = new DefaultHttpContext();
+            bool isNextDelegateCalled = false;
 
-        //    IMaintenanceControlService svc = Substitute.For<IMaintenanceControlService>();
-        //    svc.GetState().Returns(new MaintenanceState
-        //    {
-        //        IsMaintenanceOn = isOn
-        //    });
+            IMaintenanceControlService controlSvc = Substitute.For<IMaintenanceControlService>();
+            IMaintenanceOptionsService optionsSvc = Substitute.For<IMaintenanceOptionsService>();
+            IDirectoryMapperService dirMapperSvc = Substitute.For<IDirectoryMapperService>();
+            controlSvc.GetState().Returns(new MaintenanceState
+            {
+                IsMaintenanceOn = isOn
+            });
+            optionsSvc.GetOptions().Returns(new MiddlewareOptionsBuilder(dirMapperSvc).GetOptions());
 
-        //    bool isNextDelegateCalled = false;
-
-        //    MaintenanceMiddleware middleware = new MaintenanceMiddleware(
-        //        (hc) =>
-        //        {
-        //            isNextDelegateCalled = true;
-        //            return Task.CompletedTask;
-        //        },
-        //        svc,
-        //        null,
-        //        new OptionCollection());
+            MaintenanceMiddleware middleware = new MaintenanceMiddleware(
+                (hc) =>
+                {
+                    isNextDelegateCalled = true;
+                    return Task.CompletedTask;
+                },
+                controlSvc,
+                optionsSvc);
 
 
-        //    await middleware.Invoke(httpContext);
+            await middleware.Invoke(httpContext);
 
-        //    isNextDelegateCalled.ShouldBe(!isOn);
-        //}
+            isNextDelegateCalled.ShouldBe(!isOn);
+        }
 
 
         private string GetResponseString(HttpContext context)

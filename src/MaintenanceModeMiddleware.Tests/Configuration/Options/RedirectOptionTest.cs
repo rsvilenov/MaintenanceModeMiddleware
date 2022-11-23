@@ -1,4 +1,5 @@
-﻿using MaintenanceModeMiddleware.Configuration.Options;
+﻿using MaintenanceModeMiddleware.Configuration;
+using MaintenanceModeMiddleware.Configuration.Options;
 using Shouldly;
 using System;
 using Xunit;
@@ -39,6 +40,15 @@ namespace MaintenanceModeMiddleware.Tests.Configuration.Options
             Action testAction = () => option.LoadFromString(str);
 
             testAction.ShouldThrow(expectedException);
+        }
+
+        [Fact]
+        public void Postprocess_ShouldNotThrow()
+        {
+            IRequestHandler option = new RedirectOption();
+            Action testAction = async () => await option.Postprocess(null);
+
+            testAction.ShouldNotThrow();
         }
     }
 }
